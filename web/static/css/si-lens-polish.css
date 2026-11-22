@@ -872,6 +872,12 @@ html body .chat-composer-surface.chat-input-primary-row:focus-within {
 }
 
 html body .message.user .message-content {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+html body .message.user .message-bubble {
     background: var(--sl-surface-elevated);
     border: 1px solid var(--sl-border);
     border-radius: 14px;
@@ -951,6 +957,34 @@ html body .swarm-agent-card {
 html body .swarm-agent-card:hover {
     border-color: var(--sl-accent);
     box-shadow: var(--sl-shadow-md);
+}
+
+html body .swarm-topo-node-wrap .swarm-agent-card {
+    height: 100%;
+}
+
+html body .swarm-topo-node-wrap .swarm-card-brief {
+    -webkit-line-clamp: 1;
+}
+
+html body .swarm-inspector-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    padding: 3px;
+    border-radius: 10px;
+    background: var(--sl-surface-muted);
+    border: 1px solid var(--sl-border);
+}
+
+html body .swarm-itab {
+    padding: 5px 6px;
+    font-size: 11.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    border-radius: 7px;
 }
 
 /* ----------------------------------------------------------------------------

@@ -13,7 +13,7 @@
     'use strict';
 
     const NODE_W = 248;
-    const NODE_H = 122;
+    const NODE_H = 144;
     const GAP_X = 34;
     const GAP_Y = 72;
     const PAD_X = 28;

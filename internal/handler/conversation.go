@@ -525,8 +525,11 @@ func summarizeProcessDetailData(eventType string, data interface{}) interface{} 
 		"arguments": true, "argumentsObj": true,
 		"success": true, "isError": true, "executionId": true,
 		"agentName": true, "agentRole": true, "agentScope": true, "orchestration": true,
+		"runId": true, "parentRunId": true, "parentToolCallId": true,
+		"agentDisplayName": true, "childRunId": true, "delegationTool": true,
+		"taskBrief": true, "resultPreview": true, "durationMs": true, "iteration": true,
 		"agentFacing": true,
-		"status":      true, "modelFacingIsError": true, "resultPreview": true,
+		"status":      true, "modelFacingIsError": true,
 	}
 	out := make(map[string]interface{}, len(allow)+1)
 	for k, v := range m {

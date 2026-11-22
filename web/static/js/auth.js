@@ -442,6 +442,7 @@ const PAGE_PERMISSION_MAP = {
     'skills-management': 'skills:read',
     agents: 'agents:read',
     'agents-management': 'agents:read',
+    'agents-swarm': 'agents:read',
     roles: 'roles:read',
     'roles-management': 'roles:read',
     'platform-rbac': 'rbac:read',

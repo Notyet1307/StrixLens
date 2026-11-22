@@ -50,6 +50,7 @@
     <link rel="stylesheet" href="/static/css/mobile.css?v=20261015-project-table-3">
     <link rel="stylesheet" href="/static/css/vulnerability-workspace.css?v=20261113-aligned-overview">
     <link rel="stylesheet" href="/static/css/vulnerability-list.css?v=20261115-timestamps">
+    <link rel="stylesheet" href="/static/css/swarm-dashboard.css?v=20261122-swarm-1">
     <link rel="stylesheet" href="/static/css/design-system.css?v=20261115-extra-drawers">
     <script src="/static/js/router.js?v=20261011-token-settings"></script>
 </head>
@@ -429,6 +430,9 @@
                         <div class="nav-submenu">
                             <div class="nav-submenu-item" data-page="agents-management" onclick="switchPage('agents-management')">
                                 <span data-i18n="nav.agentsManagement">智能体管理</span>
+                            </div>
+                            <div class="nav-submenu-item" data-page="agents-swarm" onclick="switchPage('agents-swarm')">
+                                <span data-i18n="nav.agentsSwarm">蜂群看板</span>
                             </div>
                         </div>
                     </div>
@@ -1131,6 +1135,7 @@
                                 </div>
                             </div>
                             <div id="active-tasks-bar" class="active-tasks-bar"></div>
+                            <div id="chat-swarm-strip" class="chat-swarm-strip" hidden></div>
                             <div id="chat-messages" class="chat-messages"></div>
                             <nav id="chat-turn-rail" class="chat-turn-rail" aria-label="对话轮次导航" hidden>
                                 <div id="chat-turn-rail-markers" class="chat-turn-rail-markers"></div>
@@ -3566,6 +3571,21 @@
                     </div>
                 </div>
 
+                <!-- 多代理蜂群（Swarm）可视化看板页面 -->
+                <div id="page-agents-swarm" class="page">
+                    <div class="page-header">
+                        <h2 data-i18n="swarm.pageTitle">多代理蜂群看板</h2>
+                        <div class="page-header-actions swarm-page-toolbar">
+                            <select id="swarm-page-conversation-select" class="swarm-conversation-select"></select>
+                            <button type="button" class="btn-secondary" onclick="refreshAgentsSwarmPage()" data-i18n="common.refresh">刷新</button>
+                            <button type="button" id="swarm-page-back-chat-btn" class="btn-primary" data-i18n="swarm.backToChat">返回对话</button>
+                        </div>
+                    </div>
+                    <div class="page-content">
+                        <div id="swarm-page-root"></div>
+                    </div>
+                </div>
+
                 <!-- Agent Markdown 编辑弹窗 -->
                 <div id="agent-md-modal" class="modal" style="display: none;">
                     <div class="modal-content" style="max-width: 720px; max-height: 92vh;">
@@ -5807,6 +5827,19 @@
         </div>
     </div>
 
+    <!-- 多代理蜂群可视化看板抽屉 -->
+    <div id="swarm-dashboard-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="swarm-drawer-title" data-i18n="swarm.drawerTitle">多代理蜂群看板</h2>
+                <button type="button" class="modal-close" onclick="closeSwarmDashboardModal()" data-i18n="common.close" data-i18n-attr="aria-label" data-i18n-skip-text="true" aria-label="关闭">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="swarm-drawer-root"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="chat-files-edit-modal" class="modal">
         <div class="modal-content" style="max-width: 720px;">
             <div class="modal-header">
@@ -6233,6 +6266,15 @@
                 <path d="M10.5 13.5l3-3M8 8H5a4 4 0 1 0 0 8h3m8-8h3a4 4 0 0 1 0 8h-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span data-i18n="contextMenu.viewAttackChain">查看攻击链</span>
+        </div>
+        <div id="swarm-dashboard-menu-item" class="context-menu-item" onclick="showSwarmFromContext()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="5" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+                <circle cx="6" cy="18" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+                <circle cx="18" cy="18" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M12 7.5v3.5m0 0l-5 4.5m5-4.5l5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span data-i18n="contextMenu.viewSwarm">查看蜂群看板</span>
         </div>
         <div class="context-menu-item context-menu-item-has-submenu" onmouseenter="handleDownloadMarkdownSubmenuEnter()" onmouseleave="handleDownloadMarkdownSubmenuLeave(event)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -7092,6 +7134,7 @@
     <script src="/static/js/attack-chain-context.js?v=20261012-summary-2"></script>
     <script src="/static/js/chat.js?v=20261118-pi-usage-summary"></script>
     <script src="/static/js/chat-plan-progress.js?v=20260815-1"></script>
+    <script src="/static/js/swarm-dashboard.js?v=20261122-swarm-1"></script>
     <script src="/static/js/hitl.js?v=20260819-1-pagination-20261027"></script>
     <script src="/static/js/tool-guard.js?v=20261010-conflict"></script>
     <script src="/static/js/token-usage.js?v=20261012-token-analytics"></script>

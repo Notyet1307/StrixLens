@@ -2943,6 +2943,18 @@ function handleStreamEvent(event, progressElement, progressId,
         }
     }
     dispatchAgentPlanTaskEvent(event, expectedConversationId || eventConversationId);
+    if (typeof window !== 'undefined' && typeof CustomEvent === 'function') {
+        try {
+            window.dispatchEvent(new CustomEvent('si-lens-swarm-event', {
+                detail: {
+                    event: event,
+                    conversationId: expectedConversationId || eventConversationId || '',
+                },
+            }));
+        } catch (err) {
+            // ignore
+        }
+    }
     const streamScrollWasPinned = typeof window.captureScrollPinState === 'function'
         ? window.captureScrollPinState()
         : (typeof window.isChatMessagesPinnedToBottom === 'function' ? window.isChatMessagesPinnedToBottom() : true);
@@ -3797,6 +3809,10 @@ function handleStreamEvent(event, progressElement, progressId,
             }
             break;
         }
+
+        case 'swarm_agent_start':
+        case 'swarm_agent_end':
+            break;
 
         case 'agent_reply': {
             const replyData = event.data || {};

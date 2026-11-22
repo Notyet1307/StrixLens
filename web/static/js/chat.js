@@ -3963,7 +3963,7 @@ function filterNoiseProcessDetails(details) {
         if (isModelOutputRecoveryToolCallDetail(d)) return false;
         if (isAnonymousTaskFragmentToolCallDetail(d)) return false;
         if (isInternalPiDiagnosticDetail(d)) return false;
-        return !(d && d.eventType === 'tool_calls_detected');
+        return !(d && (d.eventType === 'tool_calls_detected' || d.eventType === 'swarm_agent_start' || d.eventType === 'swarm_agent_end'));
     });
 }
 
@@ -10382,6 +10382,21 @@ async function showConversationContextMenu(event) {
         }
     }
 
+    // 更新蜂群看板菜单项的启用状态
+    const swarmMenuItem = document.getElementById('swarm-dashboard-menu-item');
+    if (swarmMenuItem) {
+        if (convId) {
+            swarmMenuItem.style.opacity = '1';
+            swarmMenuItem.style.cursor = 'pointer';
+            swarmMenuItem.onclick = showSwarmFromContext;
+            swarmMenuItem.title = (typeof window.t === 'function' ? window.t('contextMenu.viewSwarm', '查看蜂群看板') : '查看蜂群看板');
+        } else {
+            swarmMenuItem.style.opacity = '0.5';
+            swarmMenuItem.style.cursor = 'not-allowed';
+            swarmMenuItem.onclick = null;
+        }
+    }
+
     // 先显示菜单，置顶状态随后异步刷新，避免接口慢时点击没有任何反馈。
     menu.style.display = 'block';
     menu.style.visibility = 'visible';
@@ -10651,6 +10666,17 @@ function showAttackChainFromContext() {
 
     closeContextMenu();
     showAttackChain(convId);
+}
+
+// 从上下文菜单打开多代理蜂群看板
+function showSwarmFromContext() {
+    const convId = contextMenuConversationId;
+    if (!convId) return;
+
+    closeContextMenu();
+    if (typeof window.openSwarmDashboard === 'function') {
+        window.openSwarmDashboard(convId, '');
+    }
 }
 
 function formatConversationDateForMarkdown(value) {
@@ -11331,4 +11357,5 @@ if (typeof window !== 'undefined') {
     window.refreshConversationProjectFilter = refreshConversationProjectFilter;
     window.refreshAllProjectFilterSelects = refreshAllProjectFilterSelects;
     window.onConversationProjectFilterChange = onConversationProjectFilterChange;
+    window.showSwarmFromContext = showSwarmFromContext;
 }

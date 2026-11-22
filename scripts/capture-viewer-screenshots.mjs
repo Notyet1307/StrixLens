@@ -651,7 +651,7 @@ async function main() {
       return evalJs(cdp, `(() => {
         const aside = document.getElementById("viewer-sidebar");
         const style = aside ? getComputedStyle(aside) : null;
-        return window.innerWidth === 390 && (!style || style.display === "none");
+        return document.documentElement.clientWidth <= 420 && (!style || style.display === "none");
       })()`);
     }, "mobile layout");
     await new Promise((r) => setTimeout(r, 400));

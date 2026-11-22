@@ -61,9 +61,9 @@ Target-specific workflows built on the same engine:
 
 ## Contributing to this repo
 
-- Python 3.12+, managed with `uv`. Install dev deps: `make dev-install`.
-- Lint/format/type-check/security, all in one: `make check-all` (ruff, mypy, bandit).
-- Tests: `uv run pytest`.
+- Python 3.12（CI 固定 Python 3.12，与 `scripts/wt-bootstrap.sh` 一致），managed with `uv`. Install dev deps: `bash scripts/wt-bootstrap.sh` (or `uv sync --frozen --python 3.12`).
+- Lint/format/type-check/security（与 CI `lint` 完全对齐）：`bash scripts/verify-strixlens.sh --lint`（依次运行 `uv lock --check`、`ruff check .`、`ruff format --check .`、`mypy strix/`、`bandit -r strix/ -c pyproject.toml`；**严禁运行 `pyright` 或 `make check-all`**，上游基线存在 ~945 条历史 Pyright 报错且 CI 不使用 Pyright）。
+- Tests（与 CI `pytest (3.12)` 对齐，忽略 11 个上游历史坏测试）：`bash scripts/verify-strixlens.sh --pytest`（全套可加 `--ci`）。
 - Run from source: `uv run strix --target <target>`.
 - Layout: `strix/agents` (agent graph + prompts), `strix/tools` (proxy, browser, terminal, scanners), `strix/runtime` (Docker sandbox), `strix/report` (findings, SARIF), `strix/skills` (internal knowledge packs the pentest agents load — different from the consumer skills in `skills/`), `strix/interface` (CLI/TUI), `containers/` (sandbox image).
 - Pre-commit hooks: `make pre-commit` (or `uv run pre-commit install`).
@@ -80,11 +80,11 @@ Target-specific workflows built on the same engine:
 - 任务从 Cindy 已登记的项目创建，显式传 `project_path`、`agent_kind="pi"`、`use_worktree=true`，标题带 `[#<Issue号>]`（探索/原型单用 `[Explore]`）。
 - **探索/原型轨（`[Explore]`）**：用于需求模糊、UI 或架构取舍，无需先建 Issue；先复述问题，用 `/how` + `/why` + `/prototype` 或 `/architect` 产出可运行实证对比；严禁 `push`、开 PR、合并或修改共享 `main`。
 - **交付轨（`[#<Issue号>]`）**：一个已确认的 GitHub Issue 对应一个托管 Pi 任务闭环，同一候选同一时间仅一个源码写入者。
-  1. **门禁 1（开工授权）**：确认 Issue 与固定 Spec，授权隔离任务分支本地 commit、验证、push、开附验证摘要卡 PR 及 `cindy-github` 后台只读跟进。
-  2. **门禁 2（落地授权）**：必需 CI 全绿且无未决评论后停在 `[ready]` 等人工审验证据批准 merge/关单（仅派单显式预授权时可锁头 `squash` 合入，不删远端分支）。
+  1. **门禁 1（开工授权）**：确认 Issue 与固定 Spec（Spec 放 GitHub Issue 或 `docs/specs/`，不把临时 Spec 写进源码目录），授权隔离任务分支本地 commit、验证、push、开附验证摘要卡 PR 及 `cindy-github` 后台只读跟进。
+  2. **门禁 2（落地授权）**：必需 CI 全绿且无未决评论后停在 `[ready]`，仅回传唯一一次等人工审验证据批准 merge/关单（禁止 CI 运行中提前半成品通知；仅派单显式预授权时可锁头 `squash` 合入，不删远端分支）。多图回传须按 `文件名 = cindy-media://...` 逐行写明映射；PR 合入后及时清理/归档该任务的 `.cindy-worktrees/<name>`（保留分支）。
 
 ### 开 PR 前归 `pstack`，开 PR 后归 Cindy `cindy-github`
-- 交付工序统一由宿主机 `~/.agents/playbooks/cindy-delivery.md` 声明：先 `/deslop` + `/no-comments` → 本地候选 commit → 对 `HEAD` 运行验证并产出 `status=PASS` 的 `product_head` 回执 → 非作者异构 fresh 只读审阅。
+- 交付工序统一由宿主机 `~/.agents/playbooks/cindy-delivery.md` 声明：先 `/deslop` + `/no-comments` → 本地候选 commit → 对 `HEAD` 运行验证并产出 `status=PASS` 的 `product_head` 回执 → 非作者异构 fresh 只读审阅（L1/L2 小改仅做 1 次异构只读终审并将注释卫生合并在内，不叠跑重复审阅代理）。
 - 涉及数据库 Schema/迁移、鉴权/密钥/沙盒权限边界、核心状态机或跨层契约（或标有 `L3`）时，自动触发 L3 深度审阅（`/blast-radius` + `/show-me-your-work` 账本 + 状态机加 `/statechart`），由异构模型审计账本并在 `[ready]` 附 `Attention` 块。
 - 验证后任何改写 `HEAD` 的操作均使旧验证作废，须按最新 `HEAD` 重验。
 - 开 PR 前运行 `python3 scripts/check-pr-delivery.py --pr-body <file> --frozen-manifest <receipt.json> --head <sha> --require-manifest --require-pass`（纯文档免验单可省去 `--require-manifest --require-pass`），GitHub Actions 同步执行 PR 正文防泄露检查。
@@ -97,9 +97,9 @@ Target-specific workflows built on the same engine:
 - 未运行或失败的检查必须如实标记 `PASS / FAIL / BLOCKED / NOT_RUN`。
 
 ### 本地初始化与常用验证
-- Worktree 初始化：`bash scripts/wt-bootstrap.sh`
-- 全套静态检查：`make check-all`（ruff、mypy、pyright、bandit）
-- 单元测试：`uv run pytest`
+- Worktree 初始化：`bash scripts/wt-bootstrap.sh`（固定 Python 3.12，与 CI 对齐）
+- 专属验收技能：`.pi/skills/verify-strixlens/SKILL.md`
+- 一键 CI 对齐验证：`bash scripts/verify-strixlens.sh --ci --require-clean --receipt <tmp>/receipt.json`（**严禁运行 `pyright` 或 `make check-all`**）
+- Viewer 合成报告 4 视图截图：`node scripts/capture-viewer-screenshots.mjs --out-dir .audit/viewer-screenshots`（零 Playwright 依赖，复用 `strix.interface.viewer.server.serve()`）
 - PR 交付护栏：`python3 scripts/check-pr-delivery.py --self-test`
 - 验证地图卫生检查：`python3 scripts/check-verify-map.py`
-- 验证入口：`.pi/skills/verify/SKILL.md`（首个可运行切片落地后用 `/create-verification-skill` 生成）

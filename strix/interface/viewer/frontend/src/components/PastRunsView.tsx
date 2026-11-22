@@ -101,7 +101,7 @@ export default function PastRunsView({
         {showVerify ? (
           <>
             <p className="mx-auto mt-3 max-w-sm text-xs text-[#666]">
-              Verify your email with a one-time code to unlock the full history.
+              A one-time code from the configured email service unlocks the full history.
             </p>
             <EmailVerifyInline onVerified={onVerified} />
           </>

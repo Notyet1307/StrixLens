@@ -12,11 +12,6 @@ const ERROR_COPY: Record<string, string> = {
   unavailable: "Couldn't send that just now. Try again.",
 };
 
-/**
- * Feedback & support form. Collects a message plus a work email (no
- * verification — the email is taken as-is) and relays it to Strix via the local
- * server. Mirrors EmailReportView's centered-card styling and palette.
- */
 export default function FeedbackView({
   defaultEmail,
   onExit,
@@ -69,7 +64,7 @@ export default function FeedbackView({
             <div className="min-w-0">
               <p className="text-sm font-semibold text-white">Thanks, we got it.</p>
               <p className="mt-1 text-xs text-[#888]">
-                We read every message. If it needs a reply, we&apos;ll reach out to the email you gave.
+                Your message and email went to the viewer&apos;s configured feedback service.
               </p>
               <button
                 onClick={() => {
@@ -85,7 +80,8 @@ export default function FeedbackView({
         ) : (
           <>
             <p className="mb-4 text-xs text-[#666]">
-              Bugs, feature requests, or anything else. Tell us what&apos;s on your mind.
+              Bugs, feature requests, or anything else. The message and email go to the viewer&apos;s
+              configured feedback service.
             </p>
 
             {error && (

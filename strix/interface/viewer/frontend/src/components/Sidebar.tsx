@@ -1,28 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  AlertTriangle,
-  Bot,
-  Users,
-  History,
-  Mail,
-  LogOut,
-  ChevronsUpDown,
-} from "lucide-react";
-import { LuGitPullRequestArrow } from "react-icons/lu";
-import { VscExtensions } from "react-icons/vsc";
+import { AlertTriangle, Bot, History, Mail, LogOut, PanelLeftClose } from "lucide-react";
 import { IoChatbubblesOutline } from "react-icons/io5";
 import { cn } from "@/lib/utils";
-import { ctaUrl, trackCta } from "@/lib/cta";
-import { UpgradeModal } from "@/components/UpgradeModal";
+import { SMark } from "@/components/BrandMark";
 import type { McpConnectionStatus } from "@/data/serverSource";
 import type { View } from "@/App";
 
 /**
- * Persistent left rail: a black rail with a right hairline border, an
- * account-switcher-style header, a single ungrouped list of h-9 nav rows (36px
- * icon slot, 14px label, rgba(255,255,255,0.12) active fill), a hairline
- * separator, and a user footer. Drag the right edge to resize; drag past the
- * collapse threshold to hide it, then click the left pull-zone to bring it back.
+ * Persistent left rail: a black rail with a right hairline border, a SIlens
+ * header, a single ungrouped list of h-9 nav rows (36px icon slot, 14px label,
+ * rgba(255,255,255,0.12) active fill), a hairline separator, and a user footer.
  */
 
 const MIN_WIDTH = 160;
@@ -87,15 +74,17 @@ export default function Sidebar({
   });
   const [isResizing, setIsResizing] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const collapseRef = useRef<HTMLButtonElement>(null);
+  const expandRef = useRef<HTMLButtonElement>(null);
+  const wasCollapsedRef = useRef(collapsed);
 
-  // Open the upgrade dialog for a platform feature, recording which feature
-  // drove the open (the dialog's own CTAs track the deeper conversion).
-  const openUpgrade = (slug: string, description: string) => {
-    trackCta(slug, "sidebar");
-    setUpgradeFeature(description);
-  };
+  // Move focus with the toggle; mount never moves it.
+  useEffect(() => {
+    if (collapsed === wasCollapsedRef.current) return;
+    (collapsed ? expandRef : collapseRef).current?.focus();
+    wasCollapsedRef.current = collapsed;
+  }, [collapsed]);
 
   const persistWidth = useCallback((w: number) => {
     setWidth(w);
@@ -171,57 +160,60 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Left-edge pull zone: click to bring the rail back when collapsed. */}
+      {/* Collapsed rail. */}
       {collapsed && (
-        <div
-          className="fixed left-0 top-0 z-40 hidden h-full w-4 cursor-pointer transition-colors hover:bg-[rgba(255,255,255,0.08)] lg:block"
-          onClick={expandSidebar}
-          title="Expand sidebar"
-        />
+        <div className="sticky top-0 hidden h-screen w-12 flex-shrink-0 flex-col items-center border-r border-[rgba(255,255,255,0.08)] bg-black pt-2 lg:flex">
+          <button
+            ref={expandRef}
+            type="button"
+            onClick={expandSidebar}
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
+            aria-expanded={false}
+            aria-controls="viewer-sidebar"
+            className="cursor-pointer rounded-md p-1.5 transition-colors hover:bg-[rgba(255,255,255,0.08)]"
+          >
+            <SMark size={22} />
+          </button>
+        </div>
       )}
 
       <aside
+        id="viewer-sidebar"
+        aria-label="SIlens"
+        inert={collapsed}
         className={cn(
-          "sticky top-0 z-20 hidden h-screen flex-shrink-0 flex-col overflow-hidden border-r border-[rgba(255,255,255,0.08)] bg-black lg:flex",
+          "sticky top-0 z-20 hidden h-screen flex-shrink-0 flex-col overflow-hidden border-r bg-black lg:flex",
+          collapsed ? "border-transparent" : "border-[rgba(255,255,255,0.08)]",
           !isResizing && "transition-[width] duration-200 ease-out"
         )}
         style={{ width: collapsed ? 0 : width }}
       >
-        {/* Header — account-switcher stand-in (links out to Strix Cloud). */}
+        {/* Header. */}
         <header className="relative flex flex-col gap-1 pt-1 min-w-[160px]">
           <div className="flex flex-row py-1 px-2">
-            <div className="flex h-10 w-full flex-row items-center">
-              <a
-                href={ctaUrl("https://app.strix.ai", "logo")}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackCta("logo", "sidebar")}
-                className="flex flex-1 flex-row items-center gap-2 rounded-md py-2 pl-2.5 pr-1 min-w-0 transition-colors hover:bg-[rgba(255,255,255,0.06)]"
-                title="Open Strix Cloud"
-              >
-                <span
-                  className="flex flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500"
-                  style={{ width: 20, height: 20 }}
-                >
-                  <span className="text-[10px] font-semibold text-white">S</span>
-                </span>
+            <div className="flex h-10 w-full flex-row items-center gap-1">
+              <div className="flex flex-1 flex-row items-center gap-2 py-2 pl-2.5 pr-1 min-w-0">
+                <SMark size={20} />
                 <span className="flex flex-1 flex-row items-center gap-2 min-w-0">
-                  <span className="truncate min-w-0 text-[14px] font-medium text-[#ededed]">Strix</span>
+                  <span className="truncate min-w-0 text-[14px] font-medium text-[#ededed]">SIlens</span>
                   <span className="flex h-5 flex-shrink-0 items-center rounded px-2 text-[11px] font-medium text-[#888] bg-[rgba(255,255,255,0.08)]">
                     Local
                   </span>
                 </span>
-              </a>
-              <a
-                href={ctaUrl("https://app.strix.ai", "logo")}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackCta("logo", "sidebar")}
-                className="flex flex-none items-center rounded-md px-1.5 py-2 transition-colors hover:bg-[rgba(255,255,255,0.06)]"
-                aria-label="Open Strix Cloud"
+              </div>
+              <button
+                ref={collapseRef}
+                type="button"
+                onClick={() => persistCollapsed(true)}
+                title="Collapse sidebar"
+                aria-label="Collapse sidebar"
+                aria-expanded={true}
+                aria-controls="viewer-sidebar"
+                className="flex flex-none cursor-pointer items-center rounded-md px-1.5 py-2 text-[#666] transition-colors hover:bg-[rgba(255,255,255,0.06)] hover:text-[#ededed]"
               >
-                <ChevronsUpDown className="h-4 w-4 text-[#666]" />
-              </a>
+                <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+              </button>
             </div>
           </div>
         </header>
@@ -275,42 +267,6 @@ export default function Sidebar({
               active={view === "feedback"}
               onClick={() => onSelectView("feedback")}
             />
-
-            <hr className="mx-0 my-1 h-px w-full border-0 bg-[rgba(255,255,255,0.08)]" />
-
-            <NavItem
-              icon={<LuGitPullRequestArrow className="h-4 w-4" />}
-              label="PR Security Reviews"
-              active={false}
-              onClick={() =>
-                openUpgrade(
-                  "pr_reviews",
-                  "Strix reviews every pull request and flags exploitable changes before they merge."
-                )
-              }
-            />
-            <NavItem
-              icon={<VscExtensions className="h-4 w-4" />}
-              label="Integrations"
-              active={false}
-              onClick={() =>
-                openUpgrade(
-                  "integrations",
-                  "Sync findings to Jira, Linear, and Slack so fixes happen where your team already works."
-                )
-              }
-            />
-            <NavItem
-              icon={<Users className="h-4 w-4" />}
-              label="Members"
-              active={false}
-              onClick={() =>
-                openUpgrade(
-                  "members",
-                  "Invite your team, set roles, and share findings and run history across your org."
-                )
-              }
-            />
           </div>
         </nav>
 
@@ -337,12 +293,7 @@ export default function Sidebar({
               </button>
             ) : (
               <div className="flex items-center gap-2 rounded-md px-2.5 py-2">
-                <span
-                  className="flex flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500"
-                  style={{ width: 20, height: 20 }}
-                >
-                  <span className="text-[9px] font-semibold text-white">S</span>
-                </span>
+                <SMark size={20} />
                 <span className="flex min-w-0 flex-1 flex-col text-left">
                   <span className="truncate text-[13px] font-medium text-[#ededed]">Local viewer</span>
                 </span>
@@ -386,13 +337,6 @@ export default function Sidebar({
 
       {/* Overlay during resize to prevent text selection. */}
       {isResizing && <div className="fixed inset-0 z-10 cursor-col-resize" />}
-
-      <UpgradeModal
-        open={upgradeFeature !== null}
-        description={upgradeFeature ?? ""}
-        source="sidebar"
-        onClose={() => setUpgradeFeature(null)}
-      />
     </>
   );
 }

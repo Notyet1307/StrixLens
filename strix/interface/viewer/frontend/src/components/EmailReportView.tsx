@@ -42,7 +42,7 @@ const OTP_START_ERRORS: Record<string, string> = {
 };
 
 const SEND_ERRORS: Record<string, string> = {
-  forbidden: "This email was unsubscribed from Strix, so we cannot send to it.",
+  forbidden: "This address is unsubscribed, so the email service will not send to it.",
   too_large: "This report is too large to email. Try a smaller run.",
   unavailable: "The email service is unavailable right now. Try again shortly.",
 };
@@ -138,7 +138,7 @@ export default function EmailReportView({
     setBusy(false);
     if (result.ok) {
       track("email_submitted", { purpose });
-      setNotice(`We sent a 6-digit code to ${value}.`);
+      setNotice(`A 6-digit code went to ${value}.`);
       setStep("code");
     } else {
       if (result.error === "work_email_required") track("work_email_required");
@@ -202,8 +202,8 @@ export default function EmailReportView({
       >
         <p className="mb-4 text-xs text-[#666]">
           {verifyOnly
-            ? "We send a one-time code to confirm it is you."
-            : "Verified by a one-time code sent to your email"}
+            ? "Confirms your email address with a one-time code from the configured email service."
+            : "Confirms your email address with a one-time code from the configured email service, then sends."}
         </p>
 
         {error && (
@@ -225,13 +225,14 @@ export default function EmailReportView({
               <div className="flex items-start gap-2.5">
                 <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400" aria-hidden="true" />
                 <p className="text-xs leading-relaxed text-[#aaa]">
-                  We email an <span className="text-white">encrypted PDF</span>. Nothing else leaves your machine.
+                  The encrypted PDF, the run name and target, and your email address go to the
+                  viewer&apos;s configured email service.
                 </p>
               </div>
               <div className="flex items-start gap-2.5">
                 <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#888]" aria-hidden="true" />
                 <p className="text-xs leading-relaxed text-[#aaa]">
-                  Only you hold the password; Strix can&apos;t read it.
+                  The password is generated here and shown once on this page. Keep it to open the PDF.
                 </p>
               </div>
             </div>
@@ -352,7 +353,7 @@ export default function EmailReportView({
                 </button>
               </div>
               <p className="mt-2 text-xs text-[#666]">
-                Save this now. Strix never stores it, so we cannot show it again. File:{" "}
+                Save this now. Leaving this page discards it. File:{" "}
                 <span className="font-mono text-[#888]">{filename}</span>
               </p>
             </div>

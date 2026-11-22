@@ -9,8 +9,10 @@ repos:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
         name: ruff-lint
+        exclude: ^scripts/(check-pr-delivery|check-verify-map)\.py$
       - id: ruff-format
         name: ruff-format
+        exclude: ^scripts/(check-pr-delivery|check-verify-map)\.py$
 
   # MyPy for static type checking. Runs the project's own mypy from the uv
   # environment (`make dev-install`) so it sees the same dependencies and
@@ -19,11 +21,17 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: uv run mypy
+        entry: bash scripts/with-tool-path.sh uv run mypy
         language: system
         types_or: [python, pyi]
         files: ^(strix|tests)/
         require_serial: true
+      - id: verify-map-hygiene
+        name: verify map hygiene
+        entry: bash scripts/with-tool-path.sh python3 scripts/check-verify-map.py
+        language: system
+        pass_filenames: false
+        files: ^(\.pi/skills/verify|\.claude/skills/verify)
 
   # Built-in hooks for basic file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -45,3 +53,4 @@ repos:
     hooks:
       - id: bandit
         args: [-c, pyproject.toml]
+        exclude: ^scripts/(check-pr-delivery|check-verify-map)\.py$

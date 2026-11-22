@@ -35,7 +35,7 @@ from strix.telemetry._common import get_version
 
 logger = logging.getLogger(__name__)
 
-GITHUB_REPO = "usestrix/strix"
+GITHUB_REPO = "Notyet1307/StrixLens"
 PYPI_PACKAGE = "strix-agent"
 CHECK_INTERVAL_SECONDS = 24 * 60 * 60
 REQUEST_TIMEOUT_SECONDS = 5
@@ -46,6 +46,8 @@ _background_thread: threading.Thread | None = None
 
 
 def _is_disabled() -> bool:
+    if os.environ.get("STRIX_ENABLE_UPDATE_CHECK") != "1":
+        return True
     return bool(os.environ.get("STRIX_NO_UPDATE_CHECK")) or any(
         os.environ.get(key)
         for key in ("CI", "GITHUB_ACTIONS", "GITLAB_CI", "JENKINS_URL", "BUILDKITE", "CIRCLECI")
@@ -376,6 +378,23 @@ def _download_and_replace(version: str, target: str, console: Console) -> bool:
     return True
 
 
+def _self_update_blocked(console: Console) -> bool:
+    if _is_disabled():
+        console.print(
+            "[dim]Upstream self-update is disabled in StrixLens (independent fork). "
+            "Update via git pull / uv sync from your repository.[/]"
+        )
+        return True
+    if not is_binary_install():
+        method = get_install_method()
+        console.print(
+            f"[#eab308]This strix was installed via {method};[/] "
+            f"upgrade it with: [#60a5fa]{get_upgrade_command(method)}[/]"
+        )
+        return True
+    return False
+
+
 def self_update(console: Console | None = None, version: str | None = None) -> bool:
     """Replace the running standalone binary with the latest release.
 
@@ -384,12 +403,7 @@ def self_update(console: Console | None = None, version: str | None = None) -> b
     """
     console = console or Console()
 
-    if not is_binary_install():
-        method = get_install_method()
-        console.print(
-            f"[#eab308]This strix was installed via {method};[/] "
-            f"upgrade it with: [#60a5fa]{get_upgrade_command(method)}[/]"
-        )
+    if _self_update_blocked(console):
         return False
 
     latest = version or _fetch_latest_version()
@@ -416,8 +430,7 @@ def self_update(console: Console | None = None, version: str | None = None) -> b
         logger.debug("self-update failed", exc_info=True)
         console.print(f"[bold red]Update failed:[/] {e}")
         console.print(
-            "[dim]You can reinstall manually with:[/] "
-            "[#60a5fa]curl -sSL https://strix.ai/install | bash[/]"
+            "[dim]Reinstall or update from your StrixLens repository (git pull && uv sync).[/]"
         )
         return False
 

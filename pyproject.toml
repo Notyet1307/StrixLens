@@ -164,6 +164,9 @@ extend-exclude = [
     "build",
     "dist",
     "migrations",
+    # Vendored byte-identical guardrails managed by cindy-pstack-kit
+    "scripts/check-pr-delivery.py",
+    "scripts/check-verify-map.py",
 ]
 
 [tool.ruff.lint]

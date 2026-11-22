@@ -15,6 +15,7 @@ from strix.interface import update_check
 def _isolated_cache(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(update_check, "_CACHE_PATH", tmp_path / "update-check.json")
     monkeypatch.setattr(update_check, "_background_thread", None)
+    monkeypatch.delenv("STRIX_ENABLE_UPDATE_CHECK", raising=False)
     monkeypatch.delenv("STRIX_NO_UPDATE_CHECK", raising=False)
     for key in ("CI", "GITHUB_ACTIONS", "GITLAB_CI", "JENKINS_URL", "BUILDKITE", "CIRCLECI"):
         monkeypatch.delenv(key, raising=False)
@@ -37,7 +38,42 @@ def test_is_newer(latest: str, current: str, expected: bool) -> None:
     assert update_check._is_newer(latest, current) is expected
 
 
+def test_github_repo_points_to_strixlens() -> None:
+    assert update_check.GITHUB_REPO == "Notyet1307/StrixLens"
+
+
+def test_update_check_disabled_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    update_check._CACHE_PATH.write_text(
+        json.dumps({"latest_version": "9.9.9", "checked_at": time.time()})
+    )
+    monkeypatch.setattr(update_check, "get_version", lambda: "1.0.0")
+    assert update_check.get_available_update() is None
+
+
+def test_background_check_disabled_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    update_check._CACHE_PATH.write_text(
+        json.dumps({"latest_version": "1.0.0", "checked_at": time.time() - 2 * 24 * 60 * 60})
+    )
+    called = False
+
+    def fake_refresh() -> None:
+        nonlocal called
+        called = True
+
+    monkeypatch.setattr(update_check, "_refresh_cache", fake_refresh)
+    update_check.start_background_check()
+    assert update_check._background_thread is None
+    assert called is False
+
+
+def test_self_update_disabled_by_default() -> None:
+    buffer = io.StringIO()
+    assert update_check.self_update(Console(file=buffer)) is False
+    assert "disabled" in buffer.getvalue().lower()
+
+
 def test_get_available_update_from_cache(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     update_check._CACHE_PATH.write_text(
         json.dumps({"latest_version": "9.9.9", "checked_at": time.time()})
     )
@@ -46,6 +82,7 @@ def test_get_available_update_from_cache(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_get_available_update_up_to_date(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     update_check._CACHE_PATH.write_text(
         json.dumps({"latest_version": "1.0.0", "checked_at": time.time()})
     )
@@ -54,6 +91,7 @@ def test_get_available_update_up_to_date(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_get_available_update_disabled_by_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     update_check._CACHE_PATH.write_text(
         json.dumps({"latest_version": "9.9.9", "checked_at": time.time()})
     )
@@ -63,6 +101,7 @@ def test_get_available_update_disabled_by_env(monkeypatch: pytest.MonkeyPatch) -
 
 
 def test_get_available_update_disabled_in_ci(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     update_check._CACHE_PATH.write_text(
         json.dumps({"latest_version": "9.9.9", "checked_at": time.time()})
     )
@@ -72,12 +111,14 @@ def test_get_available_update_disabled_in_ci(monkeypatch: pytest.MonkeyPatch) ->
 
 
 def test_get_available_update_corrupt_cache(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     update_check._CACHE_PATH.write_text("{not json")
     monkeypatch.setattr(update_check, "get_version", lambda: "1.0.0")
     assert update_check.get_available_update() is None
 
 
 def test_background_check_skipped_when_fresh(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     update_check._CACHE_PATH.write_text(
         json.dumps({"latest_version": "1.0.0", "checked_at": time.time()})
     )
@@ -94,6 +135,7 @@ def test_background_check_skipped_when_fresh(monkeypatch: pytest.MonkeyPatch) ->
 
 
 def test_background_check_runs_when_stale(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     update_check._CACHE_PATH.write_text(
         json.dumps({"latest_version": "1.0.0", "checked_at": time.time() - 2 * 24 * 60 * 60})
     )
@@ -106,6 +148,7 @@ def test_background_check_runs_when_stale(monkeypatch: pytest.MonkeyPatch) -> No
 
 
 def test_skipped_version_suppresses_update(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     update_check._CACHE_PATH.write_text(
         json.dumps({"latest_version": "9.9.9", "checked_at": time.time()})
     )
@@ -116,6 +159,7 @@ def test_skipped_version_suppresses_update(monkeypatch: pytest.MonkeyPatch) -> N
 
 
 def test_newer_release_overrides_skipped_version(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     update_check._CACHE_PATH.write_text(
         json.dumps(
             {"latest_version": "9.9.10", "checked_at": time.time(), "skipped_version": "9.9.9"}
@@ -140,6 +184,7 @@ def test_get_upgrade_command_all_methods() -> None:
 
 
 def test_self_update_non_binary_prints_command(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     monkeypatch.setattr(update_check, "is_binary_install", lambda: False)
     buffer = io.StringIO()
     assert update_check.self_update(Console(file=buffer)) is False
@@ -147,6 +192,7 @@ def test_self_update_non_binary_prints_command(monkeypatch: pytest.MonkeyPatch) 
 
 
 def test_self_update_already_latest(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     monkeypatch.setattr(update_check, "is_binary_install", lambda: True)
     monkeypatch.setattr(update_check, "_fetch_latest_version", lambda: "1.0.0")
     monkeypatch.setattr(update_check, "get_version", lambda: "1.0.0")
@@ -209,6 +255,7 @@ def test_release_target(
 
 
 def test_self_update_uses_linux_arm64_release(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("STRIX_ENABLE_UPDATE_CHECK", "1")
     requested_update: list[tuple[str, str]] = []
 
     def record_download(version: str, target: str, _console: Console) -> bool:

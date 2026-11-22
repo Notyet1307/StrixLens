@@ -98,3 +98,8 @@ schema.graphql
 /.benchmarks/
 /references/
 /strix_runs_main/
+# Cindy managed worktrees and injected skill symlinks
+/.cindy-worktrees/
+/.claude/worktrees/
+/.agents/skills/
+/.audit/

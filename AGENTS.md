@@ -67,3 +67,39 @@ Target-specific workflows built on the same engine:
 - Run from source: `uv run strix --target <target>`.
 - Layout: `strix/agents` (agent graph + prompts), `strix/tools` (proxy, browser, terminal, scanners), `strix/runtime` (Docker sandbox), `strix/report` (findings, SARIF), `strix/skills` (internal knowledge packs the pentest agents load — different from the consumer skills in `skills/`), `strix/interface` (CLI/TUI), `containers/` (sandbox image).
 - Pre-commit hooks: `make pre-commit` (or `uv run pre-commit install`).
+
+## Cindy + Pi + pstack 协作契约（StrixLens）
+
+### 默认读取路由
+规划、实现或审阅前，按当前任务需要读取：
+1. 本文件；
+2. 当前 GitHub Issue 与其引用的批准固定 Spec（路径 + commit SHA）；
+3. 与任务相邻的代码、测试及已接受 ADR。
+
+### 双轨派单与两道人工门禁
+- 任务从 Cindy 已登记的项目创建，显式传 `project_path`、`agent_kind="pi"`、`use_worktree=true`，标题带 `[#<Issue号>]`（探索/原型单用 `[Explore]`）。
+- **探索/原型轨（`[Explore]`）**：用于需求模糊、UI 或架构取舍，无需先建 Issue；先复述问题，用 `/how` + `/why` + `/prototype` 或 `/architect` 产出可运行实证对比；严禁 `push`、开 PR、合并或修改共享 `main`。
+- **交付轨（`[#<Issue号>]`）**：一个已确认的 GitHub Issue 对应一个托管 Pi 任务闭环，同一候选同一时间仅一个源码写入者。
+  1. **门禁 1（开工授权）**：确认 Issue 与固定 Spec，授权隔离任务分支本地 commit、验证、push、开附验证摘要卡 PR 及 `cindy-github` 后台只读跟进。
+  2. **门禁 2（落地授权）**：必需 CI 全绿且无未决评论后停在 `[ready]` 等人工审验证据批准 merge/关单（仅派单显式预授权时可锁头 `squash` 合入，不删远端分支）。
+
+### 开 PR 前归 `pstack`，开 PR 后归 Cindy `cindy-github`
+- 交付工序统一由宿主机 `~/.agents/playbooks/cindy-delivery.md` 声明：先 `/deslop` + `/no-comments` → 本地候选 commit → 对 `HEAD` 运行验证并产出 `status=PASS` 的 `product_head` 回执 → 非作者异构 fresh 只读审阅。
+- 涉及数据库 Schema/迁移、鉴权/密钥/沙盒权限边界、核心状态机或跨层契约（或标有 `L3`）时，自动触发 L3 深度审阅（`/blast-radius` + `/show-me-your-work` 账本 + 状态机加 `/statechart`），由异构模型审计账本并在 `[ready]` 附 `Attention` 块。
+- 验证后任何改写 `HEAD` 的操作均使旧验证作废，须按最新 `HEAD` 重验。
+- 开 PR 前运行 `python3 scripts/check-pr-delivery.py --pr-body <file> --frozen-manifest <receipt.json> --head <sha> --require-manifest --require-pass`（纯文档免验单可省去 `--require-manifest --require-pass`），GitHub Actions 同步执行 PR 正文防泄露检查。
+- 开 PR 后立即挂载 `cindy-github`（`pr_card` + `pr-heartbeat-gate.mjs`）后台零空闲 token 跟进，禁止前台阻塞 `gh pr checks --watch` 与 `pstack` `babysit`；同因连修 2 轮无新证据即停转诊断。
+
+### 安全与二次开发红线
+- **安全边界**：所有渗透扫描、PoC 攻击验证与自动化测试仅允许在本地隔离 Docker 靶机或授权测试目标内运行，严禁扫描未授权公网目标；验证过程中不输出或保存明文凭据。
+- **二开边界**：定制能力优先放在独立模块/扩展层，尽量减少对上游核心引擎的无谓侵入，方便维护与审阅。
+- **保密与分支纪律**：PR 正文、评论与验证摘要卡严禁写入本机路径、云账号/IP 或宿主环境标识；严禁 `git reset --hard`，仅放行 `pstack` `settleWorktree` 自动回收干净且无提交的空子 worktree，其余目录与旧分支遵守“归档不删除”。
+- 未运行或失败的检查必须如实标记 `PASS / FAIL / BLOCKED / NOT_RUN`。
+
+### 本地初始化与常用验证
+- Worktree 初始化：`bash scripts/wt-bootstrap.sh`
+- 全套静态检查：`make check-all`（ruff、mypy、pyright、bandit）
+- 单元测试：`uv run pytest`
+- PR 交付护栏：`python3 scripts/check-pr-delivery.py --self-test`
+- 验证地图卫生检查：`python3 scripts/check-verify-map.py`
+- 验证入口：`.pi/skills/verify/SKILL.md`（首个可运行切片落地后用 `/create-verification-skill` 生成）

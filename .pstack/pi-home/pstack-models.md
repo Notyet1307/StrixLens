@@ -1,0 +1,27 @@
+# pstack model configuration
+
+This project's sheet. In this repository it replaces the user's pstack-models.md; ignore that sheet's lines.
+
+feature, refactoring: backup/deepseek-flash @max
+bug-fix: backup/deepseek-flash @max
+perf-issue: openai-codex/gpt-6.2-sol @high
+hillclimb: backup/deepseek-flash @max
+judgment and prose: openai-codex/gpt-6.2-astra @high
+strongest judgment: openai-codex/gpt-6.2-astra @high
+arena runners: backup/deepseek-flash @max, backup/grok-4.7 @high
+arena cross-judge pool: backup/grok-4.7 @high, openai-codex/gpt-6.2-sol @high
+swarm workers: backup/deepseek-flash @max
+interrogate reviewers: openai-codex/gpt-6.2-sol @high, backup/grok-4.7 @high
+thermos reviewers: openai-codex/gpt-6.2-sol @high
+no-comments reviewer: backup/grok-4.7 @high
+
+default effort: high
+session hook: on
+pi ask tool: off
+pi models: opus=openai-codex/gpt-6.2-sol, sonnet=backup/deepseek-flash, haiku=backup/grok-4.7
+
+## Project constraints
+- GPT models use the owner's openai-codex subscription only, never backup.
+- When two strong Architect/Arena candidates are explicitly needed, use `openai-codex/gpt-6.2-sol @high, backup/grok-4.7 @high`.
+- Disclose reduced panel diversity when running `interrogate` or cross-family judging if additional model families are unbound.
+- Use native pstack `agent` (not Cindy `subagent`); one writer per candidate worktree; fresh readonly reviewer context for substantive review, using a model distinct from the main session (`gpt-6.2-astra`) whenever available.

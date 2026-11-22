@@ -1,0 +1,1070 @@
+/* ============================================
+ * SI-Lens 多代理蜂群（Swarm）可视化看板样式
+ * 完全基于主题变量（支持浅色/暗色主题与响应式断点）
+ * ============================================ */
+
+/* 对话顶部的轻量蜂群协作条 */
+.chat-swarm-strip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    margin: 0;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 12.5px;
+    color: var(--text-primary);
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    z-index: 6;
+}
+
+.chat-swarm-strip[hidden] {
+    display: none !important;
+}
+
+.chat-swarm-strip__lead {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.chat-swarm-strip__chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1 1 240px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 2px 0;
+}
+
+.chat-swarm-strip__chips::-webkit-scrollbar {
+    display: none;
+}
+
+.chat-swarm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.chat-swarm-chip:hover {
+    border-color: var(--accent-color);
+    background: var(--bg-tertiary);
+}
+
+.chat-swarm-chip__count {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.chat-swarm-strip__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.chat-swarm-strip__meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.chat-swarm-open-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--ui-radius-control, 10px);
+    border: 1px solid var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 10%, var(--bg-primary));
+    color: var(--accent-color);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.chat-swarm-open-btn:hover {
+    background: var(--accent-color);
+    color: #ffffff;
+}
+
+/* 蜂群看板通用页头（独立页面使用） */
+.swarm-page-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.swarm-conversation-select {
+    min-width: 240px;
+    max-width: 380px;
+    padding: 7px 12px;
+    border-radius: var(--ui-radius-control, 10px);
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+/* 蜂群状态点与动画 */
+.swarm-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.swarm-dot--running {
+    background: var(--accent-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 24%, transparent);
+    animation: swarm-pulse 1.8s ease-in-out infinite;
+}
+
+.swarm-dot--completed {
+    background: var(--success-color);
+}
+
+.swarm-dot--failed,
+.swarm-dot--error {
+    background: var(--error-color);
+}
+
+.swarm-dot--cancelled,
+.swarm-dot--blocked {
+    background: var(--warning-color);
+}
+
+@keyframes swarm-pulse {
+    0%, 100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 25%, transparent); }
+    50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent-color) 10%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .swarm-dot--running { animation: none; }
+    .swarm-edge-flow { animation: none !important; }
+}
+
+/* 徽标胶囊 */
+.swarm-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.swarm-pill--running {
+    color: var(--accent-color);
+    border-color: color-mix(in srgb, var(--accent-color) 35%, transparent);
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+}
+
+.swarm-pill--completed {
+    color: var(--success-color);
+    border-color: color-mix(in srgb, var(--success-color) 35%, transparent);
+    background: color-mix(in srgb, var(--success-color) 10%, transparent);
+}
+
+.swarm-pill--failed {
+    color: var(--error-color);
+    border-color: color-mix(in srgb, var(--error-color) 35%, transparent);
+    background: color-mix(in srgb, var(--error-color) 10%, transparent);
+}
+
+.swarm-pill--cancelled,
+.swarm-pill--blocked {
+    color: #b45309;
+    border-color: color-mix(in srgb, var(--warning-color) 45%, transparent);
+    background: color-mix(in srgb, var(--warning-color) 15%, transparent);
+}
+
+html[data-theme="dark"] .swarm-pill--cancelled,
+html[data-theme="dark"] .swarm-pill--blocked {
+    color: var(--warning-color);
+}
+
+/* 主面板容器 */
+.swarm-board {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+.swarm-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 48px 24px;
+    border-radius: var(--ui-radius-card, 16px);
+    border: 1px dashed var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.swarm-empty-state h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.swarm-empty-state p {
+    max-width: 460px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* 1. KPI 概览条 */
+.swarm-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.swarm-kpi-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--ui-radius-card, 16px);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: var(--ui-shadow);
+    min-width: 0;
+}
+
+.swarm-kpi-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.swarm-kpi-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+}
+
+.swarm-kpi-value small {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+.swarm-kpi-sub {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 2. 工具栏 */
+.swarm-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--ui-radius-card, 16px);
+    box-shadow: var(--ui-shadow);
+}
+
+.swarm-toolbar-left,
+.swarm-toolbar-right {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.swarm-segmented {
+    display: inline-flex;
+    padding: 3px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--ui-radius-control, 10px);
+    gap: 2px;
+}
+
+.swarm-seg-btn {
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.swarm-seg-btn:hover {
+    color: var(--text-primary);
+}
+
+.swarm-seg-btn.is-active {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.swarm-filter-pills {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.swarm-filter-btn {
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.swarm-filter-btn.is-active {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 10%, var(--bg-primary));
+    font-weight: 600;
+}
+
+.swarm-search-input {
+    width: 190px;
+    max-width: 100%;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    border-radius: var(--ui-radius-control, 10px);
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-primary);
+}
+
+.swarm-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--ui-radius-control, 10px);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.swarm-icon-btn:hover {
+    border-color: var(--accent-color);
+    background: var(--bg-tertiary);
+}
+
+/* 3. 分栏主工作区：左侧视图画布 + 右侧固定检查器 */
+.swarm-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 390px;
+    gap: 14px;
+    align-items: stretch;
+    min-height: 460px;
+}
+
+.swarm-canvas-panel {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--ui-radius-card, 16px);
+    box-shadow: var(--ui-shadow);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 460px;
+    overflow: hidden;
+}
+
+.swarm-canvas-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.swarm-canvas-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.swarm-canvas-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.swarm-zoom-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.swarm-zoom-readout {
+    min-width: 42px;
+    text-align: center;
+    font-size: 11.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--text-secondary);
+}
+
+/* 拓扑画布（支持平移缩放） */
+.swarm-topo-viewport {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 410px;
+    overflow: auto;
+    cursor: grab;
+    background-color: var(--bg-secondary);
+    background-image: radial-gradient(color-mix(in srgb, var(--text-muted) 42%, transparent) 1px, transparent 1px);
+    background-size: 18px 18px;
+}
+
+.swarm-topo-viewport.is-panning {
+    cursor: grabbing;
+    user-select: none;
+}
+
+.swarm-topo-stage {
+    position: relative;
+    transform-origin: 0 0;
+    transition: transform 0.12s ease-out;
+}
+
+.swarm-topo-viewport.is-panning .swarm-topo-stage {
+    transition: none;
+}
+
+.swarm-topo-edges {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.swarm-edge-path {
+    fill: none;
+    stroke: var(--border-color);
+    stroke-width: 2;
+}
+
+.swarm-edge-path--running {
+    stroke: var(--accent-color);
+    stroke-dasharray: 6 4;
+    animation: swarm-edge-dash 1.2s linear infinite;
+}
+
+.swarm-edge-path--completed {
+    stroke: color-mix(in srgb, var(--success-color) 65%, var(--border-color));
+}
+
+.swarm-edge-path--failed {
+    stroke: var(--error-color);
+}
+
+.swarm-edge-path--cancelled,
+.swarm-edge-path--blocked {
+    stroke: var(--warning-color);
+    stroke-dasharray: 4 3;
+}
+
+@keyframes swarm-edge-dash {
+    to { stroke-dashoffset: -20; }
+}
+
+.swarm-edge-badge {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 600;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: var(--shadow-sm);
+}
+
+/* 蜂群 Agent 卡片（用于拓扑节点与并行网格） */
+.swarm-agent-card {
+    position: relative;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-left: 3.5px solid var(--accent-color);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: left;
+    color: var(--text-primary);
+    cursor: pointer;
+    box-shadow: var(--ui-shadow);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+    width: 100%;
+    overflow: hidden;
+}
+
+.swarm-topo-node-wrap {
+    position: absolute;
+}
+
+.swarm-agent-card:hover {
+    border-color: var(--accent-color);
+    box-shadow: var(--shadow-md);
+}
+
+.swarm-agent-card.is-selected {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 25%, transparent), var(--shadow-md);
+}
+
+.swarm-agent-card--orchestrator {
+    border-left-color: #7c3aed;
+}
+
+.swarm-agent-card--completed {
+    border-left-color: var(--success-color);
+}
+
+.swarm-agent-card--failed {
+    border-left-color: var(--error-color);
+}
+
+.swarm-agent-card--cancelled,
+.swarm-agent-card--blocked {
+    border-left-color: var(--warning-color);
+}
+
+.swarm-card-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.swarm-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.swarm-card-duration {
+    font-size: 11px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.swarm-card-subrow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.swarm-card-ticker {
+    padding: 4px 8px;
+    border-radius: 7px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.swarm-card-brief {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.swarm-card-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    margin-top: auto;
+    padding-top: 2px;
+}
+
+.swarm-card-stats-right {
+    margin-left: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* 并行卡片视图 */
+.swarm-grid-view {
+    padding: 14px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+    gap: 12px;
+    align-content: start;
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
+
+/* 协作时间轴视图 */
+.swarm-timeline-view {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
+
+.swarm-tl-axis {
+    display: grid;
+    grid-template-columns: 165px 1fr;
+    gap: 10px;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    padding: 0 8px;
+}
+
+.swarm-tl-ticks {
+    display: flex;
+    justify-content: space-between;
+}
+
+.swarm-tl-row {
+    display: grid;
+    grid-template-columns: 165px 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-primary);
+    width: 100%;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.swarm-tl-row:hover {
+    background: var(--bg-secondary);
+}
+
+.swarm-tl-row.is-selected {
+    border-color: var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 7%, var(--bg-primary));
+}
+
+.swarm-tl-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.swarm-tl-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.swarm-tl-track {
+    position: relative;
+    height: 26px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.swarm-tl-bar {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    min-width: 8px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.swarm-tl-bar--running { background: var(--accent-color); }
+.swarm-tl-bar--completed { background: var(--success-color); }
+.swarm-tl-bar--failed { background: var(--error-color); }
+.swarm-tl-bar--cancelled,
+.swarm-tl-bar--blocked { background: #d97706; }
+
+/* 右侧固定检查器 */
+.swarm-inspector {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--ui-radius-card, 16px);
+    box-shadow: var(--ui-shadow);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-height: 620px;
+    overflow: hidden;
+}
+
+.swarm-inspector-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.swarm-inspector-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.swarm-inspector-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.swarm-inspector-sub {
+    font-size: 11.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.swarm-inspector-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.swarm-itab {
+    padding: 4px 10px;
+    border-radius: 7px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.swarm-itab.is-active {
+    background: var(--bg-primary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.swarm-inspector-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.swarm-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.swarm-mini-stat {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    padding: 8px 10px;
+}
+
+.swarm-mini-stat-k {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.swarm-mini-stat-v {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.swarm-trace-filters {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.swarm-ev-card {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.swarm-ev-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.swarm-ev-time {
+    margin-left: auto;
+    font-size: 10.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--text-muted);
+}
+
+.swarm-ev-summary {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.45;
+}
+
+.swarm-ev-payload-btn {
+    align-self: flex-start;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--accent-color);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.swarm-ev-payload-pre {
+    margin: 2px 0 0;
+    padding: 8px;
+    border-radius: 8px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 220px;
+    overflow: auto;
+}
+
+.swarm-brief-box {
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-color);
+    background: var(--bg-secondary);
+    border-radius: 0 10px 10px 0;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.5;
+}
+
+.swarm-usage-bar {
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    display: flex;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+}
+
+.swarm-usage-seg-cached { background: var(--success-color); }
+.swarm-usage-seg-prompt { background: var(--accent-color); }
+.swarm-usage-seg-completion { background: #7c3aed; }
+.swarm-usage-seg-reasoning { background: #f59e0b; }
+
+/* 4. 底部全球脉冲流 */
+.swarm-feed-panel {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--ui-radius-card, 16px);
+    box-shadow: var(--ui-shadow);
+    overflow: hidden;
+}
+
+.swarm-feed-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.swarm-feed-body {
+    max-height: 190px;
+    overflow-y: auto;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.swarm-feed-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.12s ease;
+}
+
+.swarm-feed-row:hover {
+    background: var(--bg-secondary);
+}
+
+.swarm-feed-ts {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.swarm-feed-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 响应式断点 */
+@media (max-width: 1080px) {
+    .swarm-workspace {
+        grid-template-columns: 1fr;
+    }
+    .swarm-inspector {
+        max-height: 480px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .swarm-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .swarm-tl-axis,
+    .swarm-tl-row {
+        grid-template-columns: 115px 1fr;
+    }
+    .swarm-search-input {
+        width: 100%;
+    }
+}

@@ -30,10 +30,12 @@
         'workflow-package-import-modal', 'workflow-ai-modal', 'robot-commands-modal',
         'robot-account-binding-modal', 'c2-modal',
         'info-collect-cell-modal', 'fofa-parse-modal', 'webshell-db-profile-modal',
+        'swarm-dashboard-modal',
     ]);
     const WIDE_IDS = new Set([
         'skill-modal', 'skill-view-modal', 'agent-md-modal', 'role-modal', 'fact-modal', 'vulnerability-modal',
         'chat-files-edit-modal', 'batch-queue-detail-modal', 'mcp-detail-modal', 'attack-chain-modal',
+        'swarm-dashboard-modal',
     ]);
     const returnFocus = new WeakMap();
     const surfaceObservers = new WeakMap();

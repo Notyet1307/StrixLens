@@ -32,6 +32,11 @@ type piRun struct {
 	db                                                *database.DB
 	projectID                                         string
 	conversationID, agentID, systemPrompt, sessionKey string
+	runID                                             string
+	parentRunID                                       string
+	parentToolCallID                                  string
+	agentDisplayName                                  string
+	orchestration                                     string
 	history                                           []agent.ChatMessage
 	roleTools                                         []string
 	catalogAllow                                      map[string]bool
@@ -44,6 +49,18 @@ type piRun struct {
 	extraExecute                                      agentruntime.ToolExecutor
 }
 
+func truncateSwarmPreview(s string, maxRunes int) string {
+	s = strings.TrimSpace(s)
+	if maxRunes <= 0 || s == "" {
+		return s
+	}
+	runes := []rune(s)
+	if len(runes) <= maxRunes {
+		return s
+	}
+	return string(runes[:maxRunes]) + "…"
+}
+
 func runPiSingle(ctx context.Context, cfg *config.Config, ag *agent.Agent, db *database.DB, logger *zap.Logger,
 	conversationID, projectID, message string, history []agent.ChatMessage, roleTools []string,
 	progress func(string, string, interface{}), intent *reasoning.ClientIntent, extra string) (*RunResult, error) {
@@ -52,7 +69,7 @@ func runPiSingle(ctx context.Context, cfg *config.Config, ag *agent.Agent, db *d
 	}
 	prompt := project.AppendSystemPromptBlock(ag.SystemInstruction(), extra)
 	prompt = project.AppendVisionImageAnalysisIfReady(prompt, cfg.Vision.Ready())
-	return (&piRun{cfg: cfg, ag: ag, db: db, projectID: projectID, conversationID: conversationID, agentID: "main", systemPrompt: prompt,
+	return (&piRun{cfg: cfg, ag: ag, db: db, projectID: projectID, conversationID: conversationID, agentID: "main", agentDisplayName: "SI-Lens", orchestration: "single", systemPrompt: prompt,
 		history: history, roleTools: roleTools, progress: progress, reasoning: intent}).run(ctx, message)
 }
 
@@ -110,13 +127,18 @@ func runPiMulti(ctx context.Context, cfg *config.Config, ma *config.MultiAgentCo
 		registry[id] = sub
 		catalog = append(catalog, id+": "+sub.Description)
 	}
-	prompt, _ := resolveMainOrchestratorInstruction(mode, ma, loaded)
+	prompt, meta := resolveMainOrchestratorInstruction(mode, ma, loaded)
+	orchDisplay := "协调主代理"
+	if meta != nil && strings.TrimSpace(meta.DisplayName) != "" {
+		orchDisplay = strings.TrimSpace(meta.DisplayName)
+	}
+	mainRunID := uuid.NewString()
 	prompt = project.AppendSystemPromptBlock(prompt, extra)
 	prompt += "\n\nAvailable specialists:\n" + strings.Join(catalog, "\n") + "\nUse task to delegate a concrete objective. Each child receives only the tools permitted for it and this conversation. Verify evidence before reporting completion."
 	if mode == "plan_execute" {
 		prompt += "\nCreate a concrete plan using the available task-board tools or a concise plan in text. Delegate one step at a time to executor using task, examine the result, update the plan, and replan when evidence requires it. Finish with the verified deliverable."
 	}
-	main := &piRun{cfg: cfg, ag: ag, db: db, projectID: projectID, conversationID: conversationID, agentID: "main", systemPrompt: prompt, history: history, roleTools: roleTools, progress: progress, reasoning: intent, sessionKey: mode}
+	main := &piRun{cfg: cfg, ag: ag, db: db, projectID: projectID, conversationID: conversationID, agentID: "main", runID: mainRunID, agentDisplayName: orchDisplay, orchestration: mode, systemPrompt: prompt, history: history, roleTools: roleTools, progress: progress, reasoning: intent, sessionKey: mode}
 	str := map[string]any{"type": "string"}
 	main.extraTools = []agentruntime.Tool{
 		{Name: "task", Description: "Delegate a concrete task to a named specialist and return its evidence-backed result", Parameters: piToolSchema(map[string]any{"subagent_type": str, "description": str}, "subagent_type", "description")},
@@ -196,9 +218,63 @@ func runPiMulti(ctx context.Context, cfg *config.Config, ma *config.MultiAgentCo
 		}
 		// A child may narrow its parent's catalog, never expand it.
 		parentNames := main.availableCatalog
+		subDisplay := strings.TrimSpace(sub.Name)
+		if subDisplay == "" {
+			subDisplay = id
+		}
+		childRunID := uuid.NewString()
+		childStart := time.Now()
+		if progress != nil {
+			progress("swarm_agent_start", subDisplay, map[string]any{
+				"source":           "pi",
+				"conversationId":   conversationID,
+				"runId":            childRunID,
+				"childRunId":       childRunID,
+				"parentRunId":      mainRunID,
+				"parentToolCallId": call.ID,
+				"agentName":        id,
+				"agentDisplayName": subDisplay,
+				"agentRole":        "subagent",
+				"orchestration":    mode,
+				"delegationTool":   call.Name,
+				"taskBrief":        truncateSwarmPreview(task, 600),
+			})
+		}
 		childPrompt := project.AppendSystemPromptBlock(sub.Instruction, extra) + "\n\nOriginal user task:\n" + message
-		child := &piRun{cfg: cfg, ag: ag, db: db, projectID: projectID, conversationID: conversationID, agentID: id, systemPrompt: childPrompt, roleTools: tools, catalogAllow: parentNames, progress: progress, reasoning: intent, child: true, sessionKey: call.ID, maxTurns: sub.MaxIterations}
+		child := &piRun{cfg: cfg, ag: ag, db: db, projectID: projectID, conversationID: conversationID, agentID: id, runID: childRunID, parentRunID: mainRunID, parentToolCallID: call.ID, agentDisplayName: subDisplay, orchestration: mode, systemPrompt: childPrompt, roleTools: tools, catalogAllow: parentNames, progress: progress, reasoning: intent, child: true, sessionKey: call.ID, maxTurns: sub.MaxIterations}
 		res, err := child.run(callCtx, task)
+		respText := ""
+		if res != nil {
+			respText = res.Response
+		}
+		endStatus := "completed"
+		if err != nil {
+			endStatus = "failed"
+		} else if res != nil && strings.TrimSpace(res.RuntimeStatus) != "" {
+			endStatus = strings.TrimSpace(res.RuntimeStatus)
+		}
+		if progress != nil {
+			endData := map[string]any{
+				"source":           "pi",
+				"conversationId":   conversationID,
+				"runId":            childRunID,
+				"childRunId":       childRunID,
+				"parentRunId":      mainRunID,
+				"parentToolCallId": call.ID,
+				"agentName":        id,
+				"agentDisplayName": subDisplay,
+				"agentRole":        "subagent",
+				"orchestration":    mode,
+				"delegationTool":   call.Name,
+				"status":           endStatus,
+				"durationMs":       time.Since(childStart).Milliseconds(),
+				"resultPreview":    truncateSwarmPreview(respText, 600),
+			}
+			if err != nil {
+				endData["error"] = truncateSwarmPreview(err.Error(), 300)
+			}
+			progress("swarm_agent_end", subDisplay, endData)
+		}
 		if res == nil {
 			return agentruntime.ToolResult{}, err
 		}
@@ -206,6 +282,19 @@ func runPiMulti(ctx context.Context, cfg *config.Config, ma *config.MultiAgentCo
 		childIDs = append(childIDs, res.MCPExecutionIDs...)
 		idsMu.Unlock()
 		return agentruntime.ToolResult{Content: res.Response, IsError: err != nil}, err
+	}
+	mainStart := time.Now()
+	if progress != nil {
+		progress("swarm_agent_start", orchDisplay, map[string]any{
+			"source":           "pi",
+			"conversationId":   conversationID,
+			"runId":            mainRunID,
+			"agentName":        "main",
+			"agentDisplayName": orchDisplay,
+			"agentRole":        "orchestrator",
+			"orchestration":    mode,
+			"taskBrief":        truncateSwarmPreview(message, 600),
+		})
 	}
 	res, err := main.run(ctx, message)
 	if res != nil {
@@ -220,6 +309,35 @@ func runPiMulti(ctx context.Context, cfg *config.Config, ma *config.MultiAgentCo
 		}
 		res.MCPExecutionIDs = append(res.MCPExecutionIDs, childIDs...)
 		idsMu.Unlock()
+	}
+	if progress != nil {
+		mainResp := ""
+		mainStatus := "completed"
+		if err != nil {
+			mainStatus = "failed"
+		}
+		if res != nil {
+			mainResp = res.Response
+			if err == nil && strings.TrimSpace(res.RuntimeStatus) != "" {
+				mainStatus = strings.TrimSpace(res.RuntimeStatus)
+			}
+		}
+		mainEndData := map[string]any{
+			"source":           "pi",
+			"conversationId":   conversationID,
+			"runId":            mainRunID,
+			"agentName":        "main",
+			"agentDisplayName": orchDisplay,
+			"agentRole":        "orchestrator",
+			"orchestration":    mode,
+			"status":           mainStatus,
+			"durationMs":       time.Since(mainStart).Milliseconds(),
+			"resultPreview":    truncateSwarmPreview(mainResp, 600),
+		}
+		if err != nil {
+			mainEndData["error"] = truncateSwarmPreview(err.Error(), 300)
+		}
+		progress("swarm_agent_end", orchDisplay, mainEndData)
 	}
 	return res, err
 }
@@ -291,7 +409,10 @@ func (r *piRun) run(ctx context.Context, message string) (*RunResult, error) {
 	if max <= 0 {
 		max = agentMaxIterations(r.cfg)
 	}
-	runID := uuid.NewString()
+	runID := strings.TrimSpace(r.runID)
+	if runID == "" {
+		runID = uuid.NewString()
+	}
 	req := agentruntime.Request{RunID: runID, ConversationID: r.conversationID, SystemPrompt: r.systemPrompt, Message: message, History: history,
 		Model: piModelConfig(oa, r.reasoning, r.conversationID),
 		Tools: tools, SessionDir: filepath.Join(root, agentruntime.ConversationStorageKey(r.conversationID), key), MaxTurns: max}
@@ -359,6 +480,23 @@ func (r *piRun) run(ctx context.Context, message string) (*RunResult, error) {
 		data["agentRole"] = "orchestrator"
 		if r.child {
 			data["agentRole"] = "subagent"
+		}
+		if strings.TrimSpace(r.agentDisplayName) != "" {
+			data["agentDisplayName"] = strings.TrimSpace(r.agentDisplayName)
+		}
+		if strings.TrimSpace(r.parentRunID) != "" {
+			data["parentRunId"] = strings.TrimSpace(r.parentRunID)
+		}
+		if strings.TrimSpace(r.parentToolCallID) != "" {
+			data["parentToolCallId"] = strings.TrimSpace(r.parentToolCallID)
+		}
+		if strings.TrimSpace(r.orchestration) != "" {
+			data["orchestration"] = strings.TrimSpace(r.orchestration)
+		}
+		if it := iteration.Load(); it > 0 {
+			if _, exists := data["iteration"]; !exists {
+				data["iteration"] = it
+			}
 		}
 		r.progress(kind, text, data)
 	}

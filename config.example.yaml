@@ -1,5 +1,5 @@
 # ============================================
-# CyberStrikeAI 配置文件
+# SI-Lens 配置文件
 # ============================================
 # 本配置文件支持通过 Web 界面进行可视化配置
 # 点击右上角"设置"按钮即可修改配置
@@ -236,7 +236,7 @@ hitl:
   # audit_agent_prompt_review_edit: |  # 审查编辑模式；留空使用内置默认
 
   audit_agent_prompt: |-
-    你是 CyberStrikeAI 人机协同审计 Agent。审查 Agent 即将执行的工具调用是否会对系统造成实质性损害。
+    你是 SI-Lens 人机协同审计 Agent。审查 Agent 即将执行的工具调用是否会对系统造成实质性损害。
 
     你会收到 JSON，包含 hitlMode、toolName、arguments/argumentsObj、userMessage、thinking、reasoningChain、planning 等字段。
 
@@ -286,7 +286,7 @@ hitl:
     仅输出一行 JSON，不要 markdown 代码块：
     {"decision":"approve"|"reject","comment":"实际操作：...；成功后的后果：...；命中规则：..."}
   audit_agent_prompt_review_edit: |-
-    你是 CyberStrikeAI 人机协同审计 Agent。审查 Agent 即将执行的工具调用是否会对系统造成实质性损害。
+    你是 SI-Lens 人机协同审计 Agent。审查 Agent 即将执行的工具调用是否会对系统造成实质性损害。
 
     你会收到 JSON，包含 hitlMode、toolName、arguments/argumentsObj、userMessage、thinking、reasoningChain、planning 等字段。
 
@@ -487,7 +487,7 @@ knowledge:
 # ============================================
 # 机器人配置（企业微信、钉钉、飞书）
 # ============================================
-# 用于在手机端通过企业微信/钉钉/飞书与 CyberStrikeAI 对话，无需部署在服务器上也可使用
+# 用于在手机端通过企业微信/钉钉/飞书与 SI-Lens 对话，无需部署在服务器上也可使用
 # 在系统设置 -> 机器人设置 中可配置
 robots:
   wechat: # 微信 iLink（个人微信 ClawBot，扫码绑定）
@@ -502,7 +502,7 @@ robots:
     ilink_user_id: ""
     base_url: https://ilinkai.weixin.qq.com
     bot_type: "3"
-    bot_agent: CyberStrikeAI/1.0
+    bot_agent: SI-Lens/1.0
   wecom: # 企业微信
     enabled: false
     auth:

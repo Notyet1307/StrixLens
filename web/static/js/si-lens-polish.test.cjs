@@ -326,3 +326,134 @@ test('语言包：各语言文案互不相同（确实完成本地化而非占�
     }
     assert.equal(new Set(LOCALES.map(locale => headerSearch[locale])).size, LOCALES.length, 'header.commandSearch 需四语言各不相同');
 });
+
+/* ------------------------------------------------------------------ */
+/* 8. 阶段四：品牌、图标管线与移动端几何契约                          */
+/* ------------------------------------------------------------------ */
+
+const LOGO_SOURCE = fs.readFileSync(path.join(WEB_DIR, 'static', 'si-lens-logo.svg'), 'utf8');
+const ROLES_SOURCE = fs.readFileSync(path.join(JS_DIR, 'roles.js'), 'utf8');
+
+/** 从 source 中截取 [needle, 其后首个 endNeedle] 片段，缺失即失败 */
+function sliceThrough(source, needle, endNeedle) {
+    const start = source.indexOf(needle);
+    assert.ok(start !== -1, `源码中缺少 ${needle}`);
+    const end = source.indexOf(endNeedle, start);
+    assert.ok(end !== -1, `${needle} 缺少结束标记 ${endNeedle}`);
+    return source.slice(start, end + endNeedle.length);
+}
+
+/** 返回 CSS 中首个匹配选择器之后的花括号规则体 */
+function cssRuleBody(selector) {
+    const start = CSS.indexOf(selector);
+    assert.ok(start !== -1, `CSS 缺少选择器 ${selector}`);
+    const open = CSS.indexOf('{', start);
+    const close = CSS.indexOf('}', open);
+    assert.ok(open !== -1 && close !== -1, `${selector} 规则体不完整`);
+    return CSS.slice(open + 1, close);
+}
+
+/** 返回 roles.js 中具名函数的完整函数体 */
+function rolesFunctionBody(name) {
+    const start = ROLES_SOURCE.indexOf(`function ${name}(`);
+    assert.ok(start !== -1, `roles.js 缺少函数 ${name}`);
+    const end = ROLES_SOURCE.indexOf('\nfunction ', start);
+    return ROLES_SOURCE.slice(start, end === -1 ? undefined : end);
+}
+
+test('阶段四：品牌图标使用光学钴蓝，不再使用紫色', () => {
+    assert.match(LOGO_SOURCE, /#2563EB/i, '品牌图标需包含光学钴蓝 #2563EB');
+    assert.doesNotMatch(LOGO_SOURCE, /#7C3AED/i, '品牌图标不应保留紫色 #7C3AED');
+});
+
+test('模板：语言切换与角色图标为线性 SVG，不含表情符号', () => {
+    const langBtn = sliceThrough(TEMPLATE, 'class="btn-secondary lang-switcher-btn"', '</button>');
+    assert.match(langBtn, /<svg class="lang-switcher-svg"/, '语言切换按钮需内联 SVG 图标');
+
+    const langIcon = sliceThrough(TEMPLATE, 'class="lang-switcher-icon"', '</span>');
+    assert.doesNotMatch(langIcon, /🌐/, '语言切换图标不应再使用 🌐 表情');
+
+    const roleIcon = sliceThrough(TEMPLATE, 'id="role-selector-icon"', '</span>');
+    assert.match(roleIcon, /<svg class="sl-role-default-svg"/, '角色选择器需内联默认角色 SVG');
+    assert.doesNotMatch(roleIcon, /🔵/, '角色选择器不应再使用 🔵 表情');
+});
+
+test('模板：搜索按钮与攻击链导出按钮使用 SVG 图标', () => {
+    for (const handler of ['searchTools()', 'searchKnowledgeItems()']) {
+        const btn = sliceThrough(TEMPLATE, `onclick="${handler}"`, '</button>');
+        assert.match(btn, /<svg/, `${handler} 搜索按钮需内联 SVG 图标`);
+        assert.doesNotMatch(btn, />🔍</, `${handler} 搜索按钮不应使用 🔍 表情`);
+    }
+    for (const format of ['png', 'svg']) {
+        const btn = sliceThrough(TEMPLATE, `exportAttackChain('${format}')`, '</button>');
+        assert.match(btn, /<svg/, `导出 ${format.toUpperCase()} 按钮需内联 SVG 图标`);
+        assert.doesNotMatch(btn, /📥/, `导出 ${format.toUpperCase()} 按钮不应使用 📥 表情`);
+    }
+});
+
+test('roles.js：默认角色图标走统一 SVG 渲染管线', () => {
+    assert.match(ROLES_SOURCE, /const DEFAULT_ROLE_ICON_SVG\s*=/, '缺少 DEFAULT_ROLE_ICON_SVG 常量');
+    assert.match(ROLES_SOURCE, /function isDefaultSymbolRoleIcon\(/, '缺少 isDefaultSymbolRoleIcon');
+    assert.match(ROLES_SOURCE, /function renderRoleIconMarkup\(/, '缺少 renderRoleIconMarkup');
+
+    const renderBody = rolesFunctionBody('renderRoleIconMarkup');
+    assert.match(renderBody, /return DEFAULT_ROLE_ICON_SVG/, 'renderRoleIconMarkup 应对默认图标返回 SVG');
+
+    const updateBody = rolesFunctionBody('updateRoleSelectorDisplay');
+    assert.match(updateBody, /innerHTML\s*=\s*DEFAULT_ROLE_ICON_SVG/, 'updateRoleSelectorDisplay 应赋值 DEFAULT_ROLE_ICON_SVG');
+    assert.doesNotMatch(updateBody, /'🔵'/, 'updateRoleSelectorDisplay 不应再赋值 🔵 表情');
+});
+
+test('CSS：图标色板令牌在浅色与暗色主题齐备', () => {
+    for (const [label, selector] of [['浅色', ':root'], ['暗色', 'html[data-theme="dark"] {']]) {
+        const block = cssRuleBody(selector);
+        for (const token of ['--sl-icon-fg:', '--sl-icon-bg:']) {
+            assert.ok(block.includes(token), `${label}主题缺少图标令牌 ${token}`);
+        }
+    }
+});
+
+test('CSS：仪表盘 KPI / 资源 / 严重度图标统一为光学图标底色', () => {
+    for (const selector of ['.dashboard-kpi-icon-tasks', '.dashboard-resource-icon-mcp']) {
+        assert.match(cssRuleBody(selector), /background:\s*var\(--sl-icon-bg\)/, `${selector} 应使用 --sl-icon-bg`);
+    }
+    assert.match(
+        cssRuleBody('.dashboard-severity-status-cell'),
+        /background:\s*var\(--sl-surface-muted\)/,
+        '.dashboard-severity-status-cell 应使用 --sl-surface-muted'
+    );
+});
+
+test('CSS：C2 模块令牌在浅色与暗色下均重映射到光学变量', () => {
+    for (const [label, selector] of [['浅色', ':root'], ['暗色', 'html[data-theme="dark"] {']]) {
+        const block = cssRuleBody(selector);
+        assert.match(block, /--c2-surface:\s*var\(--sl-[\w-]+\)/, `${label}主题 --c2-surface 未重映射`);
+        assert.match(block, /--c2-accent:\s*var\(--sl-accent\)/, `${label}主题 --c2-accent 未重映射`);
+    }
+});
+
+test('CSS：设置导航与项目列表去除左侧竖条', () => {
+    assert.match(cssRuleBody('html body .settings-nav-item'), /border-left:\s*0/, '.settings-nav-item 需清除左边框');
+    assert.match(
+        cssRuleBody('html body #page-projects .projects-list-item::before'),
+        /display:\s*none/,
+        '#page-projects .projects-list-item::before 需隐藏'
+    );
+});
+
+test('CSS：移动端几何令牌、抽屉与标签栏统一为光学样式', () => {
+    const mobileStart = CSS.indexOf('@media (max-width: 767.98px)');
+    assert.ok(mobileStart !== -1, '缺少移动端媒体查询');
+    const mobileEnd = CSS.indexOf('@media', mobileStart + 10);
+    const mobileBlock = CSS.slice(mobileStart, mobileEnd === -1 ? undefined : mobileEnd);
+
+    assert.match(mobileBlock, /--m-r-btn:\s*10px/, '移动端按钮圆角应覆盖为 10px');
+    assert.match(mobileBlock, /#m-tabbar[\s\S]{0,120}?background:\s*var\(--sl-surface\)/, '#m-tabbar 需使用光学表面色');
+    assert.match(mobileBlock, /\.main-sidebar,[\s\S]{0,240}?backdrop-filter:\s*none\s*!important/, '.main-sidebar 需不透明');
+    assert.match(mobileBlock, /#m-sheet[\s\S]{0,160}?border-top:\s*1px solid var\(--sl-border-strong\)/, '#m-sheet 需统一顶部描边');
+    assert.match(
+        mobileBlock,
+        /\.m-tab\.m-active svg\s*\{[^}]*background:\s*transparent\s*!important[^}]*border-radius:\s*0\s*!important/,
+        '.m-tab.m-active svg 需移除圆形底面'
+    );
+});

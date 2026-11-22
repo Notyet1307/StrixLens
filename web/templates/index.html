@@ -52,7 +52,7 @@
     <link rel="stylesheet" href="/static/css/vulnerability-list.css?v=20261115-timestamps">
     <link rel="stylesheet" href="/static/css/swarm-dashboard.css?v=20261122-swarm-1">
     <link rel="stylesheet" href="/static/css/design-system.css?v=20261115-extra-drawers">
-    <link rel="stylesheet" href="/static/css/si-lens-polish.css?v=20261122-polish-2">
+    <link rel="stylesheet" href="/static/css/si-lens-polish.css?v=20261122-polish-4">
     <script src="/static/js/router.js?v=20261122-polish-1"></script>
 </head>
 <body>
@@ -150,7 +150,13 @@
                         </button>
                         <div class="lang-switcher">
                             <button class="btn-secondary lang-switcher-btn" onclick="toggleLangDropdown()" data-i18n="header.language" data-i18n-attr="title" data-i18n-skip-text="true" title="界面语言">
-                                <span class="lang-switcher-icon">🌐</span>
+                                <span class="lang-switcher-icon" aria-hidden="true">
+                                    <svg class="lang-switcher-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M2 12h20"/>
+                                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                    </svg>
+                                </span>
                                 <span id="current-lang-label">中文</span>
                             </button>
                             <div id="lang-dropdown" class="lang-dropdown" style="display: none;">
@@ -1208,7 +1214,12 @@
                                 </div>
                                 <div id="role-selector-wrapper" class="role-selector-wrapper">
                                     <button type="button" id="role-selector-btn" class="role-selector-btn" onclick="toggleRoleSelectionPanel()" data-i18n="chat.selectRole" data-i18n-attr="title" title="选择角色">
-                                        <span id="role-selector-icon" class="role-selector-icon">🔵</span>
+                                        <span id="role-selector-icon" class="role-selector-icon is-svg-icon" aria-hidden="true">
+                                            <svg class="sl-role-default-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <circle cx="12" cy="8" r="4"/>
+                                                <path d="M5 20a7 7 0 0 1 14 0"/>
+                                            </svg>
+                                        </span>
                                         <span id="role-selector-text" class="role-selector-text" data-i18n="chat.defaultRole">默认</span>
                                         <svg class="role-selector-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1766,7 +1777,9 @@
                                     </div>
                                     <div class="search-box">
                                         <input type="text" id="tools-search" data-i18n="mcp.toolSearchPlaceholder" data-i18n-attr="placeholder" placeholder="搜索工具..." onkeypress="handleSearchKeyPress(event)" oninput="if(this.value.trim() === '') clearSearch()" />
-                                        <button class="btn-search" onclick="searchTools()" data-i18n="common.search" data-i18n-attr="title" title="搜索">🔍</button>
+                                        <button class="btn-search" onclick="searchTools()" data-i18n="common.search" data-i18n-attr="title" data-i18n-skip-text="true" title="搜索" aria-label="Search">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                                        </button>
                                     </div>
                                     <div class="tools-stats" id="tools-stats"></div>
                                 </div>
@@ -1840,7 +1853,9 @@
                                     <span data-i18n="common.search">搜索</span>
                                     <div class="search-box">
                                         <input type="text" id="knowledge-search" data-i18n="knowledgePage.searchPlaceholder" data-i18n-attr="placeholder" placeholder="搜索知识..." oninput="handleKnowledgeSearchInput()" onkeydown="if(event.key==='Enter') searchKnowledgeItems()" />
-                                        <button class="btn-search" onclick="searchKnowledgeItems()" data-i18n="common.search" data-i18n-attr="title" title="搜索">🔍</button>
+                                        <button class="btn-search" onclick="searchKnowledgeItems()" data-i18n="common.search" data-i18n-attr="title" data-i18n-skip-text="true" title="搜索" aria-label="Search">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                                        </button>
                                     </div>
                                 </label>
                             </div>
@@ -5734,11 +5749,13 @@
                     <button class="btn-primary attack-chain-action-btn" data-require-permission="attackchain:write" onclick="regenerateAttackChain()" data-i18n="attackChainModal.regenerateTitle" data-i18n-attr="title" data-i18n-skip-text="true" title="重新生成攻击链（包含最新对话内容）">
                         <span data-i18n="attackChainModal.regenerate">重新生成</span>
                     </button>
-                    <button class="btn-secondary attack-chain-action-btn" onclick="exportAttackChain('png')" data-i18n="attackChainModal.exportPng" data-i18n-attr="title" title="导出为PNG">
-                        📥 PNG
+                    <button class="btn-secondary attack-chain-action-btn" onclick="exportAttackChain('png')" data-i18n="attackChainModal.exportPng" data-i18n-attr="title" data-i18n-skip-text="true" title="导出为PNG">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>PNG</span>
                     </button>
-                    <button class="btn-secondary attack-chain-action-btn" onclick="exportAttackChain('svg')" data-i18n="attackChainModal.exportSvg" data-i18n-attr="title" title="导出为SVG">
-                        📥 SVG
+                    <button class="btn-secondary attack-chain-action-btn" onclick="exportAttackChain('svg')" data-i18n="attackChainModal.exportSvg" data-i18n-attr="title" data-i18n-skip-text="true" title="导出为SVG">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>SVG</span>
                     </button>
                     <button class="btn-secondary attack-chain-action-btn" onclick="refreshAttackChain()" data-i18n="attackChainModal.refreshTitle" data-i18n-attr="title" title="刷新当前攻击链（不重新生成）">
                         <span data-i18n="common.refresh">刷新</span>
@@ -7196,7 +7213,7 @@
     <script src="/static/js/workflow-package-client.js"></script>
     <script src="/static/js/workflows.js"></script>
     <script src="/static/js/update.js?v={{.Version}}-activation"></script>
-    <script src="/static/js/roles.js?v=20261115-ui-drawers"></script>
+    <script src="/static/js/roles.js?v=20261122-polish-3"></script>
     <script src="/static/js/rbac.js"></script>
     <script src="/static/js/c2.js?v=20261027-pagination-custom-select"></script>
     <script src="/static/js/rbac-guards.js?v=20260907-1"></script>

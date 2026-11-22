@@ -76,7 +76,45 @@
     --primary-color: var(--sl-ink);
     --brand-core: #0f172a;
     --brand-ai-start: #2563eb;
-    --brand-ai-end: #7c3aed;
+    --brand-ai-end: #1e40af;
+
+    /* Precision Optical Icon Palette (Monochrome neutral by default) */
+    --sl-icon-fg: #475569;
+    --sl-icon-muted: #94a3b8;
+    --sl-icon-bg: #f1f5f9;
+    --sl-icon-border: rgba(15, 23, 42, 0.08);
+    --sl-icon-active-bg: rgba(37, 99, 235, 0.10);
+    --sl-icon-active-fg: #2563eb;
+    --sl-icon-active-border: rgba(37, 99, 235, 0.24);
+
+    /* Remap C2 & Vulnerabilities module tokens */
+    --c2-accent: var(--sl-accent);
+    --c2-accent-hover: var(--sl-accent-hover);
+    --c2-accent-dim: var(--sl-accent-soft);
+    --c2-accent-glow: var(--sl-accent-ring);
+    --c2-green: var(--sl-tone-success-fg);
+    --c2-green-dim: var(--sl-tone-success-bg);
+    --c2-red: var(--sl-tone-danger-fg);
+    --c2-red-dim: var(--sl-tone-danger-bg);
+    --c2-amber: var(--sl-tone-warning-fg);
+    --c2-amber-dim: var(--sl-tone-warning-bg);
+    --c2-purple: #475569;
+    --c2-purple-dim: var(--sl-surface-muted);
+    --c2-surface: var(--sl-surface-elevated);
+    --c2-surface-alt: var(--sl-surface-muted);
+    --c2-border: var(--sl-border);
+    --c2-border-hover: var(--sl-border-strong);
+    --c2-text: var(--sl-ink);
+    --c2-text-dim: var(--sl-ink-secondary);
+    --c2-text-muted: var(--sl-ink-muted);
+    --c2-radius: var(--sl-radius-card);
+    --c2-radius-sm: var(--sl-radius-control);
+    --c2-radius-xs: var(--sl-radius-chip);
+    --c2-shadow-sm: var(--sl-shadow-xs);
+    --c2-shadow-md: var(--sl-shadow-sm);
+    --c2-shadow-lg: var(--sl-shadow-lg);
+    --vuln-panel: var(--sl-surface-elevated);
+
     --ui-radius-card: var(--sl-radius-card);
     --ui-radius-control: var(--sl-radius-control);
     --ui-surface: var(--sl-surface);
@@ -144,7 +182,39 @@ html[data-theme="dark"] {
     --accent-hover: var(--sl-accent-hover);
     --brand-core: #f8fafc;
     --brand-ai-start: #60a5fa;
-    --brand-ai-end: #a78bfa;
+    --brand-ai-end: #93c5fd;
+
+    --sl-icon-fg: #cbd5e1;
+    --sl-icon-muted: #64748b;
+    --sl-icon-bg: rgba(148, 163, 184, 0.10);
+    --sl-icon-border: rgba(255, 255, 255, 0.085);
+    --sl-icon-active-bg: rgba(96, 165, 250, 0.15);
+    --sl-icon-active-fg: #60a5fa;
+    --sl-icon-active-border: rgba(96, 165, 250, 0.30);
+
+    --c2-accent: var(--sl-accent);
+    --c2-accent-hover: var(--sl-accent-hover);
+    --c2-accent-dim: var(--sl-accent-soft);
+    --c2-accent-glow: var(--sl-accent-ring);
+    --c2-green: var(--sl-tone-success-fg);
+    --c2-green-dim: var(--sl-tone-success-bg);
+    --c2-red: var(--sl-tone-danger-fg);
+    --c2-red-dim: var(--sl-tone-danger-bg);
+    --c2-amber: var(--sl-tone-warning-fg);
+    --c2-amber-dim: var(--sl-tone-warning-bg);
+    --c2-purple: #94a3b8;
+    --c2-purple-dim: var(--sl-surface-muted);
+    --c2-surface: var(--sl-surface-elevated);
+    --c2-surface-alt: var(--sl-surface-muted);
+    --c2-border: var(--sl-border);
+    --c2-border-hover: var(--sl-border-strong);
+    --c2-text: var(--sl-ink);
+    --c2-text-dim: var(--sl-ink-secondary);
+    --c2-text-muted: var(--sl-ink-muted);
+    --c2-shadow-sm: var(--sl-shadow-xs);
+    --c2-shadow-md: var(--sl-shadow-sm);
+    --c2-shadow-lg: var(--sl-shadow-lg);
+    --vuln-panel: var(--sl-surface-elevated);
 }
 
 html body {
@@ -259,7 +329,12 @@ html body .brand-logo {
     width: 30px;
     height: 30px;
     border-radius: 8px;
+    box-shadow: var(--sl-shadow-xs);
     flex-shrink: 0;
+}
+
+html body .header-logo-link:hover .brand-logo {
+    box-shadow: var(--sl-shadow-sm);
 }
 
 html body .version-badge {
@@ -390,6 +465,15 @@ html body .header-actions :is(.openapi-doc-btn, .theme-toggle-btn, .lang-switche
     color: var(--sl-ink);
     transform: none;
     box-shadow: none;
+}
+
+html body .header-actions :is(.openapi-doc-btn, .theme-toggle-btn, .lang-switcher-btn, .notification-btn, .user-avatar-btn) svg {
+    color: var(--sl-icon-fg);
+    flex-shrink: 0;
+}
+
+html body .header-actions :is(.openapi-doc-btn, .theme-toggle-btn, .lang-switcher-btn, .notification-btn, .user-avatar-btn):hover svg {
+    color: var(--sl-ink);
 }
 
 html body :is(.lang-dropdown, .notification-dropdown, .user-menu-dropdown, .context-menu, .submenu-popup, .conversation-sort-menu) {
@@ -706,11 +790,47 @@ html body :is(.page, [data-ui-surface]) :is(
 }
 
 /* ----------------------------------------------------------------------------
- * 4. Dashboard Precision Polish (Remove Rainbow Gradients, Calm Hierarchy)
+ * 4. Dashboard & Global Iconography Precision Polish
  * ---------------------------------------------------------------------------- */
+html body .dashboard-page,
+html[data-theme="dark"] body .dashboard-page {
+    background: var(--sl-canvas);
+}
+
+html body .dashboard-page::before {
+    content: none;
+}
+
 html body #page-dashboard .dashboard-content {
     padding: 20px 24px 28px;
     gap: 18px;
+}
+
+html body .dashboard-last-updated,
+html body .dashboard-last-updated.is-flash,
+html[data-theme="dark"] body .dashboard-last-updated,
+html[data-theme="dark"] body .dashboard-last-updated.is-flash {
+    background: var(--sl-surface-muted);
+    border: 1px solid var(--sl-border);
+    color: var(--sl-ink-secondary);
+    border-radius: var(--sl-radius-pill);
+    padding: 5px 11px;
+    animation: none;
+}
+
+html body .dashboard-last-updated-icon {
+    color: var(--sl-tone-success-fg);
+}
+
+html body .dashboard-last-updated-time {
+    color: var(--sl-ink);
+}
+
+html body .dashboard-last-updated.is-stale,
+html[data-theme="dark"] body .dashboard-last-updated.is-stale {
+    background: var(--sl-tone-warning-bg);
+    border-color: var(--sl-tone-warning-border);
+    color: var(--sl-tone-warning-fg);
 }
 
 html body .dashboard-kpi-card,
@@ -733,10 +853,166 @@ html[data-theme="dark"] body .dashboard-kpi-card:hover {
     box-shadow: var(--sl-shadow-md);
 }
 
+/* Monochrome Optical Icon Wells across Dashboard & Modules */
+html body :is(
+    .dashboard-kpi-icon,
+    .dashboard-kpi-icon-tasks,
+    .dashboard-kpi-icon-vuln,
+    .dashboard-kpi-icon-calls,
+    .dashboard-kpi-icon-rate,
+    .dashboard-kpi-icon-tokens,
+    .dashboard-resource-icon,
+    .dashboard-resource-icon-external,
+    .dashboard-resource-icon-mcp,
+    .dashboard-resource-icon-skills,
+    .dashboard-resource-icon-knowledge,
+    .dashboard-resource-icon-roles,
+    .dashboard-resource-icon-agents,
+    .dashboard-resource-icon-webshell,
+    .dashboard-overview-icon,
+    .dashboard-overview-icon-batch,
+    .dashboard-overview-icon-tools,
+    .dashboard-overview-icon-knowledge,
+    .dashboard-overview-icon-skills,
+    .dashboard-quick-icon,
+    .dashboard-cta-icon,
+    .asset-overview-icon,
+    .asset-overview-icon--blue,
+    .asset-overview-icon--violet,
+    .projects-settings-icon--blue,
+    .projects-settings-icon--violet,
+    .projects-placeholder-icon,
+    .conversation-reasoning-icon,
+    .hitl-sidebar-icon,
+    .tool-guard-policy-icon,
+    .tool-guard-test-icon,
+    .robot-binding-heading-icon,
+    .robot-binding-platform-icon,
+    .robot-binding-empty-icon,
+    .robot-binding-service-hint-icon,
+    .vulnerability-alert-icon,
+    .c2-session-main-empty__icon,
+    .c2-empty-inline__icon,
+    .c2-sleep-modal__icon,
+    .c2-file-icon--dir,
+    .c2-file-icon--file,
+    .c2-ltype-mark,
+    .role-selection-item-icon-main,
+    .role-select-item-icon,
+    .role-card-icon
+),
+html[data-theme="dark"] body :is(
+    .dashboard-kpi-icon,
+    .dashboard-kpi-icon-tasks,
+    .dashboard-kpi-icon-vuln,
+    .dashboard-kpi-icon-calls,
+    .dashboard-kpi-icon-rate,
+    .dashboard-kpi-icon-tokens,
+    .dashboard-resource-icon,
+    .dashboard-resource-icon-external,
+    .dashboard-resource-icon-mcp,
+    .dashboard-resource-icon-skills,
+    .dashboard-resource-icon-knowledge,
+    .dashboard-resource-icon-roles,
+    .dashboard-resource-icon-agents,
+    .dashboard-resource-icon-webshell,
+    .dashboard-overview-icon,
+    .dashboard-overview-icon-batch,
+    .dashboard-overview-icon-tools,
+    .dashboard-overview-icon-knowledge,
+    .dashboard-overview-icon-skills,
+    .dashboard-quick-icon,
+    .dashboard-cta-icon,
+    .asset-overview-icon,
+    .asset-overview-icon--blue,
+    .asset-overview-icon--violet,
+    .projects-settings-icon--blue,
+    .projects-settings-icon--violet,
+    .projects-placeholder-icon,
+    .conversation-reasoning-icon,
+    .hitl-sidebar-icon,
+    .tool-guard-policy-icon,
+    .tool-guard-test-icon,
+    .robot-binding-heading-icon,
+    .robot-binding-platform-icon,
+    .robot-binding-empty-icon,
+    .robot-binding-service-hint-icon,
+    .vulnerability-alert-icon,
+    .c2-session-main-empty__icon,
+    .c2-empty-inline__icon,
+    .c2-sleep-modal__icon,
+    .c2-file-icon--dir,
+    .c2-file-icon--file,
+    .c2-ltype-mark,
+    .role-selection-item-icon-main,
+    .role-select-item-icon,
+    .role-card-icon
+) {
+    background: var(--sl-icon-bg) !important;
+    color: var(--sl-icon-fg) !important;
+    border: 1px solid var(--sl-icon-border);
+    box-shadow: none;
+}
+
 html body .dashboard-kpi-icon {
     width: 30px;
     height: 30px;
     border-radius: 8px;
+}
+
+html body :is(
+    .dashboard-kpi-card:hover .dashboard-kpi-icon,
+    .dashboard-resource-item:hover .dashboard-resource-icon,
+    .dashboard-overview-item:hover .dashboard-overview-icon,
+    .dashboard-quick-link:hover .dashboard-quick-icon,
+    .role-selection-item-main:hover .role-selection-item-icon-main,
+    .role-selection-item-main.selected .role-selection-item-icon-main,
+    .role-select-item:hover .role-select-item-icon,
+    .role-select-item.selected .role-select-item-icon
+) {
+    background: var(--sl-icon-active-bg) !important;
+    color: var(--sl-icon-active-fg) !important;
+    border-color: var(--sl-icon-active-border);
+    transform: none;
+}
+
+/* Preserve strict semantic danger/warning icons without decorative rainbow */
+html body :is(.projects-settings-icon--red, .projects-settings-card--danger .projects-settings-icon--red) {
+    background: var(--sl-tone-danger-bg) !important;
+    color: var(--sl-tone-danger-fg) !important;
+    border: 1px solid var(--sl-tone-danger-border);
+}
+
+html body .hitl-inline-icon,
+html[data-theme="dark"] body .hitl-inline-icon {
+    background: var(--sl-tone-warning-bg);
+    color: var(--sl-tone-warning-fg);
+    border: 1px solid var(--sl-tone-warning-border);
+}
+
+html body .dashboard-recommend-item.lvl-urgent .dashboard-recommend-icon {
+    background: var(--sl-tone-danger-bg);
+    color: var(--sl-tone-danger-fg);
+}
+
+html body .dashboard-recommend-item.lvl-warning .dashboard-recommend-icon {
+    background: var(--sl-tone-warning-bg);
+    color: var(--sl-tone-warning-fg);
+}
+
+html body .dashboard-recommend-item.lvl-setup .dashboard-recommend-icon {
+    background: var(--sl-accent-soft);
+    color: var(--sl-accent);
+}
+
+html body .projects-fact-toolbar-hint-icon {
+    color: var(--sl-accent);
+}
+
+html body .asset-type-dot {
+    width: 6px;
+    height: 6px;
+    box-shadow: none;
 }
 
 html body .dashboard-kpi-value {
@@ -757,6 +1033,108 @@ html body .dashboard-alert-banner {
 
 html body .dashboard-alert-banner {
     border-left: 3px solid var(--sl-tone-warning-fg);
+}
+
+/* Calm Batch Queue Tiles & Vulnerability Status Cells */
+html body .dashboard-batch-side-stat,
+html body .dashboard-batch-side-stat:is(.dashboard-batch-side-stat--pending, .dashboard-batch-side-stat--running, .dashboard-batch-side-stat--done),
+html[data-theme="dark"] body .dashboard-batch-side-stat,
+html[data-theme="dark"] body .dashboard-batch-side-stat:is(.dashboard-batch-side-stat--pending, .dashboard-batch-side-stat--running, .dashboard-batch-side-stat--done) {
+    background: var(--sl-surface-muted) !important;
+    border: 1px solid var(--sl-border) !important;
+    border-top: 1px solid var(--sl-border) !important;
+    border-radius: var(--sl-radius-control);
+    box-shadow: none;
+}
+
+html body .dashboard-batch-side-stat-value,
+html[data-theme="dark"] body .dashboard-batch-side-stat-value {
+    color: var(--sl-ink);
+}
+html body .dashboard-batch-side-stat--running .dashboard-batch-side-stat-value,
+html[data-theme="dark"] body .dashboard-batch-side-stat--running .dashboard-batch-side-stat-value { color: var(--sl-accent); }
+html body .dashboard-batch-side-stat--pending .dashboard-batch-side-stat-value,
+html[data-theme="dark"] body .dashboard-batch-side-stat--pending .dashboard-batch-side-stat-value { color: var(--sl-tone-warning-fg); }
+html body .dashboard-batch-side-stat--done .dashboard-batch-side-stat-value,
+html[data-theme="dark"] body .dashboard-batch-side-stat--done .dashboard-batch-side-stat-value { color: var(--sl-tone-success-fg); }
+
+html body .dashboard-batch-side-progress-pending { background: var(--sl-tone-warning-fg); }
+html body .dashboard-batch-side-progress-running { background: var(--sl-accent); }
+html body .dashboard-batch-side-progress-done { background: var(--sl-tone-success-fg); }
+
+html body .dashboard-severity-status-cell,
+html body .dashboard-severity-status-cell:is(.s-open, .s-confirmed, .s-fixed, .s-ignored, .s-fp),
+html[data-theme="dark"] body .dashboard-severity-status-cell,
+html[data-theme="dark"] body .dashboard-severity-status-cell:is(.s-open, .s-confirmed, .s-fixed, .s-ignored, .s-fp) {
+    background: var(--sl-surface-muted) !important;
+    border: 1px solid var(--sl-border) !important;
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+html body .dashboard-severity-status-cell:hover {
+    background: var(--sl-surface-hover) !important;
+    border-color: var(--sl-border-strong) !important;
+    transform: none;
+    box-shadow: var(--sl-shadow-xs);
+}
+
+html body .dashboard-severity-status-cell .dashboard-severity-status-value,
+html body .dashboard-severity-status-cell:is(.s-open, .s-confirmed, .s-fixed, .s-ignored, .s-fp) .dashboard-severity-status-value,
+html[data-theme="dark"] body .dashboard-severity-status-cell:is(.s-open, .s-confirmed, .s-fixed, .s-ignored, .s-fp) .dashboard-severity-status-value {
+    color: var(--sl-ink);
+}
+
+html body .dashboard-severity-status-cell .dashboard-severity-status-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: var(--sl-ink-secondary);
+}
+
+html body .dashboard-severity-status-cell .dashboard-severity-status-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sl-ink-muted);
+    flex-shrink: 0;
+}
+
+html body .dashboard-severity-status-cell.s-open .dashboard-severity-status-label::before { background: var(--sl-tone-danger-fg); }
+html body .dashboard-severity-status-cell.s-confirmed .dashboard-severity-status-label::before { background: var(--sl-tone-warning-fg); }
+html body .dashboard-severity-status-cell.s-fixed .dashboard-severity-status-label::before { background: var(--sl-tone-success-fg); }
+html body .dashboard-severity-status-cell.s-ignored .dashboard-severity-status-label::before { background: var(--sl-ink-secondary); }
+html body .dashboard-severity-status-cell.s-fp .dashboard-severity-status-label::before { background: var(--sl-ink-muted); }
+
+html body .dashboard-severity-insight-risk,
+html body .dashboard-severity-insight-risk[data-level],
+html[data-theme="dark"] body .dashboard-severity-insight-risk,
+html[data-theme="dark"] body .dashboard-severity-insight-risk[data-level] {
+    background: var(--sl-surface-muted) !important;
+    border: 1px solid var(--sl-border) !important;
+    border-radius: 10px;
+}
+
+html body .dashboard-severity-insight-risk[data-level="safe"] .dashboard-severity-insight-risk-badge,
+html[data-theme="dark"] body .dashboard-severity-insight-risk[data-level="safe"] .dashboard-severity-insight-risk-badge {
+    background: var(--sl-tone-success-bg);
+    color: var(--sl-tone-success-fg);
+}
+
+html body .dashboard-overview-item,
+html[data-theme="dark"] body .dashboard-overview-item {
+    background: var(--sl-surface-muted);
+    border: 1px solid var(--sl-border);
+    border-radius: 10px;
+}
+
+html body .dashboard-overview-item:hover,
+html[data-theme="dark"] body .dashboard-overview-item:hover {
+    background: var(--sl-surface-hover);
+    border-color: var(--sl-border-strong);
+    transform: none;
 }
 
 /* ----------------------------------------------------------------------------
@@ -853,6 +1231,32 @@ html body .chat-composer-context .role-selector-btn.active {
     background: var(--sl-surface-hover);
 }
 
+html body .chat-composer-context .role-selector-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    color: var(--sl-icon-fg);
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+html body .sl-role-default-svg {
+    display: block;
+    width: 15px;
+    height: 15px;
+}
+
+html body .agent-mode-logo {
+    color: var(--sl-icon-fg);
+}
+
+html body .chat-composer-context .role-selector-btn:hover :is(.role-selector-icon, .agent-mode-logo),
+html body .chat-composer-context .role-selector-btn.active :is(.role-selector-icon, .agent-mode-logo) {
+    color: var(--sl-ink);
+}
+
 html body .chat-composer-context .chat-input-leading > *:not(:last-child)::after {
     background: var(--sl-border-strong);
 }
@@ -904,21 +1308,276 @@ html body .chat-swarm-chip {
 }
 
 /* ----------------------------------------------------------------------------
- * 6. High-Density Operations Workspaces & Swarm Surface Alignment
+ * 6. High-Density Operations Workspaces & Swarm Surface Alignment (All 30 Pages)
  * ---------------------------------------------------------------------------- */
 html body .page :is(
     .dashboard-section, .dashboard-card, .dashboard-kpi-card, .asset-total-card, .asset-recent-card,
     .asset-panel, .asset-list-card, .knowledge-item-card, .retrieval-log-card, .skill-card, .role-card,
     .batch-queue-item, .tool-guard-card, .mcp-management-panel, .projects-sidebar-card, .projects-panel,
     .projects-settings-card, .rbac-panel, .rbac-catalog-card, .robot-card, .workflow-panel,
-    .c2-listener-card, .c2-profile-card, .settings-subsection, .storage-overview-card, .skills-overview-card,
-    .swarm-kpi-card, .swarm-canvas-panel, .swarm-inspector, .swarm-feed-panel
+    .c2-listener-card, .c2-profile-card, .c2-payload-card, .c2-event-card, .c2-task-row,
+    .c2-session-detail, .c2-tab-panel--card, .settings-subsection, .settings-section,
+    .ai-channel-card, .storage-overview-card, .skills-overview-card, .mcp-stats-kpi__item,
+    .mcp-stats-combined, .mcp-stats-tools-panel, .vulnerability-filter-panel,
+    .vulnerability-host-sidebar, .vulnerability-record-row, .hitl-pending-item,
+    .hitl-log-readonly-section, .swarm-kpi-card, .swarm-canvas-panel, .swarm-inspector,
+    .swarm-feed-panel, .swarm-toolbar
+),
+html[data-theme="dark"] body .page :is(
+    .dashboard-section, .dashboard-card, .dashboard-kpi-card, .asset-total-card, .asset-recent-card,
+    .asset-panel, .asset-list-card, .knowledge-item-card, .retrieval-log-card, .skill-card, .role-card,
+    .batch-queue-item, .tool-guard-card, .mcp-management-panel, .projects-sidebar-card, .projects-panel,
+    .projects-settings-card, .rbac-panel, .rbac-catalog-card, .robot-card, .workflow-panel,
+    .c2-listener-card, .c2-profile-card, .c2-payload-card, .c2-event-card, .c2-task-row,
+    .c2-session-detail, .c2-tab-panel--card, .settings-subsection, .settings-section,
+    .ai-channel-card, .storage-overview-card, .skills-overview-card, .mcp-stats-kpi__item,
+    .mcp-stats-combined, .mcp-stats-tools-panel, .vulnerability-filter-panel,
+    .vulnerability-host-sidebar, .vulnerability-record-row, .hitl-pending-item,
+    .hitl-log-readonly-section, .swarm-kpi-card, .swarm-canvas-panel, .swarm-inspector,
+    .swarm-feed-panel, .swarm-toolbar
 ) {
     background: var(--sl-surface-elevated);
     border: 1px solid var(--sl-border);
     border-radius: var(--sl-radius-card);
     box-shadow: var(--sl-shadow-sm);
 }
+
+html body :is(.modal-content, .projects-modal-dialog, .c2-modal),
+html[data-theme="dark"] body :is(.modal-content, .projects-modal-dialog, .c2-modal) {
+    background: var(--sl-surface-elevated);
+    border: 1px solid var(--sl-border-strong);
+    border-radius: 16px;
+    box-shadow: var(--sl-shadow-lg);
+}
+
+html body .empty-state,
+html body .swarm-empty-state,
+html[data-theme="dark"] body .empty-state,
+html[data-theme="dark"] body .swarm-empty-state {
+    background: var(--sl-surface);
+    border: 1px dashed var(--sl-border-strong);
+    border-radius: var(--sl-radius-card);
+    color: var(--sl-ink-secondary);
+}
+
+html body .page :is(.pagination-btn, .pagination-controls button) {
+    border-radius: var(--sl-radius-chip);
+    border: 1px solid var(--sl-border-strong);
+    background: var(--sl-surface);
+    color: var(--sl-ink);
+    box-shadow: none;
+}
+
+html body .page :is(.pagination-btn, .pagination-controls button):hover:not(:disabled) {
+    background: var(--sl-surface-hover);
+    border-color: var(--sl-border-strong);
+}
+
+/* Settings Page Unification */
+html body #page-settings .settings-layout,
+html[data-theme="dark"] body #page-settings .settings-layout {
+    background: var(--sl-canvas);
+}
+
+html body #page-settings .settings-sidebar,
+html[data-theme="dark"] body #page-settings .settings-sidebar {
+    background: var(--sl-surface);
+    border-right: 1px solid var(--sl-border);
+    padding: 12px 0;
+}
+
+html body #page-settings .settings-content,
+html[data-theme="dark"] body #page-settings .settings-content {
+    background: var(--sl-canvas);
+    padding: 24px 28px;
+}
+
+html body .settings-nav-item,
+html[data-theme="dark"] body .settings-nav-item {
+    margin: 2px 10px;
+    padding: 9px 12px;
+    border-left: 0;
+    border-radius: var(--sl-radius-control);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--sl-ink-secondary);
+}
+
+html body .settings-nav-item:hover,
+html[data-theme="dark"] body .settings-nav-item:hover {
+    background: var(--sl-surface-hover);
+    color: var(--sl-ink);
+}
+
+html body .settings-nav-item.active,
+html[data-theme="dark"] body .settings-nav-item.active {
+    background: var(--sl-accent-soft);
+    color: var(--sl-accent);
+    font-weight: 600;
+    border-left-color: transparent;
+}
+
+/* Projects Page Unification (Strip Left Stripe & Pastel Confetti Badges) */
+html body #page-projects .projects-sidebar-head,
+html[data-theme="dark"] body #page-projects .projects-sidebar-head {
+    background: var(--sl-surface);
+    border-bottom: 1px solid var(--sl-border);
+}
+
+html body #page-projects .projects-sidebar-count {
+    background: var(--sl-accent-soft);
+    color: var(--sl-accent);
+}
+
+html body #page-projects .projects-sidebar-search {
+    border-bottom: 1px solid var(--sl-border);
+}
+
+html body #page-projects .projects-sidebar-pagination,
+html[data-theme="dark"] body #page-projects .projects-sidebar-pagination {
+    background: var(--sl-surface);
+    border-top: 1px solid var(--sl-border);
+}
+
+html body #page-projects .projects-list-item::before {
+    display: none;
+}
+
+html body #page-projects .projects-list-item {
+    padding: 10px 12px;
+    border-radius: var(--sl-radius-control);
+    border: 1px solid transparent;
+}
+
+html body #page-projects .projects-list-item:hover {
+    background: var(--sl-surface-hover);
+}
+
+html body #page-projects .projects-list-item.is-active,
+html[data-theme="dark"] body #page-projects .projects-list-item.is-active {
+    background: var(--sl-accent-soft);
+    border-color: var(--sl-tone-info-border);
+}
+
+html body #page-projects .projects-tabs,
+html[data-theme="dark"] body #page-projects .projects-tabs {
+    background: var(--sl-surface-muted);
+    border-bottom: 1px solid var(--sl-border);
+}
+
+html body #page-projects .projects-tab {
+    border-radius: 8px;
+    color: var(--sl-ink-secondary);
+}
+
+html body #page-projects .projects-tab.is-active,
+html[data-theme="dark"] body #page-projects .projects-tab.is-active {
+    background: var(--sl-surface);
+    color: var(--sl-ink);
+    box-shadow: var(--sl-shadow-xs);
+}
+
+html body :is(
+    .projects-stat-chip,
+    .projects-status-pill,
+    .projects-fact-badge,
+    .projects-confidence--confirmed,
+    .projects-confidence--tentative,
+    .projects-confidence--deprecated,
+    .projects-category--target,
+    .projects-category--auth,
+    .projects-category--infra,
+    .projects-category--business,
+    .projects-category--finding,
+    .projects-category--chain,
+    .projects-category--exploit,
+    .projects-category--poc,
+    .projects-category--note,
+    .projects-category--custom
+),
+html[data-theme="dark"] body :is(
+    .projects-stat-chip,
+    .projects-status-pill,
+    .projects-fact-badge,
+    .projects-confidence--confirmed,
+    .projects-confidence--tentative,
+    .projects-confidence--deprecated,
+    .projects-category--target,
+    .projects-category--auth,
+    .projects-category--infra,
+    .projects-category--business,
+    .projects-category--finding,
+    .projects-category--chain,
+    .projects-category--exploit,
+    .projects-category--poc,
+    .projects-category--note,
+    .projects-category--custom
+) {
+    background: var(--sl-surface-muted) !important;
+    color: var(--sl-ink-secondary) !important;
+    border: 1px solid var(--sl-border) !important;
+}
+
+html body :is(.projects-status-pill--active, .projects-fact-badge--ok, .projects-confidence--confirmed),
+html[data-theme="dark"] body :is(.projects-status-pill--active, .projects-fact-badge--ok, .projects-confidence--confirmed) {
+    background: var(--sl-tone-success-bg) !important;
+    color: var(--sl-tone-success-fg) !important;
+    border-color: var(--sl-tone-success-border) !important;
+}
+
+html body :is(.projects-stat-chip--warn, .projects-fact-badge--warn, .projects-confidence--tentative),
+html[data-theme="dark"] body :is(.projects-stat-chip--warn, .projects-fact-badge--warn, .projects-confidence--tentative) {
+    background: var(--sl-tone-warning-bg) !important;
+    color: var(--sl-tone-warning-fg) !important;
+    border-color: var(--sl-tone-warning-border) !important;
+}
+
+html body #project-panel-facts .data-table--projects th,
+html body #project-panel-facts .data-table--projects td {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+html body #project-panel-facts .projects-fact-badge,
+html body #project-panel-facts .projects-confidence--confirmed,
+html body #project-panel-facts .projects-confidence--tentative,
+html body #project-panel-facts .projects-confidence--deprecated {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 2px 6px;
+    font-size: 11px;
+    vertical-align: middle;
+}
+
+/* Vulnerabilities, MCP Stats, HITL & RBAC Unification */
+html body #page-vulnerabilities .vulnerability-view-switch,
+html[data-theme="dark"] body #page-vulnerabilities .vulnerability-view-switch {
+    background: var(--sl-surface-muted);
+    border: 1px solid var(--sl-border);
+    border-radius: 10px;
+}
+
+html body #page-vulnerabilities .stat-card,
+html[data-theme="dark"] body #page-vulnerabilities .stat-card {
+    background: var(--sl-surface-elevated) !important;
+    border: 1px solid var(--sl-border);
+    box-shadow: var(--sl-shadow-xs);
+}
+
+html body #page-vulnerabilities .stat-card.is-active,
+html[data-theme="dark"] body #page-vulnerabilities .stat-card.is-active {
+    border-color: var(--sl-accent);
+    box-shadow: 0 0 0 1px var(--sl-accent);
+}
+
+html body .mcp-stats-kpi__accent {
+    flex: 0 0 2px;
+    background: var(--sl-border-strong) !important;
+}
+html body .mcp-stats-kpi__item--calls .mcp-stats-kpi__accent { background: var(--sl-accent) !important; }
+html body .mcp-stats-kpi__item--rate .mcp-stats-kpi__accent { background: var(--sl-tone-success-fg) !important; }
+html body .mcp-stats-kpi__item--time .mcp-stats-kpi__accent { background: var(--sl-ink-muted) !important; }
 
 html body .page :is(.asset-table, .info-collect-table, .data-table, .chat-files-table, .audit-log-table, .monitor-table) {
     border-collapse: separate;
@@ -1200,6 +1859,267 @@ html[dir="rtl"] .sl-cmdk-item {
     html body .page-content,
     html body #page-dashboard .dashboard-content {
         padding: 14px 16px 20px;
+    }
+
+    /* Phase 3 — Mobile Precision Optical Geometry & Tokens (overrides mobile.css) */
+    :root {
+        --m-r-ctl: 10px;
+        --m-r-icon: 10px;
+        --m-r-btn: 10px;
+        --m-radius-card: 14px;
+        --m-radius-sheet: 18px;
+        --m-scrim: rgba(15, 23, 42, 0.44);
+        --m-hairline: var(--sl-border);
+    }
+
+    /* Clean optical canvas — strip purple/muddy mobile Section 28 radial blobs */
+    html body .container {
+        background: var(--sl-canvas);
+    }
+
+    html[data-theme="dark"] body .container {
+        background:
+            radial-gradient(ellipse 34rem 18rem at 50% 0%, rgba(96, 165, 250, 0.08), transparent 70%),
+            var(--sl-canvas);
+    }
+
+    html body .content-area,
+    html body .chat-messages {
+        background: var(--sl-canvas);
+    }
+
+    /* Crisp opaque drawers & bottom sheets so underlying page text never bleeds through */
+    html body .main-sidebar,
+    html body .conversation-sidebar,
+    html[data-theme] body .main-sidebar,
+    html[data-theme] body .conversation-sidebar,
+    html body #m-sheet,
+    html body .modal-content {
+        background: var(--sl-surface) !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        border-color: var(--sl-border-strong);
+    }
+
+    html body .main-sidebar.m-open,
+    html body .conversation-sidebar.m-open {
+        box-shadow: var(--sl-shadow-lg);
+    }
+
+    html body #m-sheet {
+        border-top: 1px solid var(--sl-border-strong);
+        box-shadow: 0 -14px 36px rgba(15, 23, 42, 0.14);
+    }
+
+    html[data-theme="dark"] body #m-sheet {
+        box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.56);
+    }
+
+    /* Unified Mobile Cards */
+    html body :is(
+        .card, .stat-card, .metric-card, .dashboard-card, .panel, .settings-section,
+        .info-card, .dashboard-kpi-card, .dashboard-section, .swarm-kpi-card,
+        .swarm-toolbar, .tool-guard-card, .skill-card, .role-card
+    ) {
+        background: var(--sl-surface-elevated);
+        border: 1px solid var(--sl-border);
+        border-radius: var(--sl-radius-card);
+        box-shadow: var(--sl-shadow-sm);
+    }
+
+    /* Mobile Appbar & Uniform Borderless Action Icons */
+    html body .container > header,
+    html[data-theme="dark"] body .container > header {
+        background: var(--sl-surface-backdrop);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--sl-border);
+        box-shadow: none;
+    }
+
+    html body .container > header :is(.m-menu-btn, .m-more-btn, #notification-bell-btn, #user-avatar-btn) {
+        width: var(--m-touch) !important;
+        height: var(--m-touch) !important;
+        min-width: var(--m-touch) !important;
+        min-height: var(--m-touch) !important;
+        border: 0 !important;
+        background: transparent !important;
+        color: var(--sl-icon-fg) !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+    }
+
+    html body .container > header :is(.m-menu-btn, .m-more-btn, #notification-bell-btn, #user-avatar-btn):active {
+        background: var(--sl-surface-hover) !important;
+        color: var(--sl-ink) !important;
+    }
+
+    /* Mobile Navigation Drawer — Eliminate legacy left border stripe */
+    html body .m-drawer-head,
+    html body .m-drawer-search {
+        border-bottom-color: var(--sl-border);
+    }
+
+    html body .m-drawer-search input {
+        background: var(--sl-surface-muted);
+        border: 1px solid var(--sl-border);
+        border-radius: 10px;
+        color: var(--sl-ink);
+    }
+
+    html body .main-sidebar .nav-section-label {
+        padding: 12px 14px 4px;
+        font-size: 11px;
+        font-weight: 650;
+        letter-spacing: 0.06em;
+        color: var(--sl-ink-muted);
+    }
+
+    html body .main-sidebar .nav-item-content {
+        margin: 1px 8px;
+        padding: 10px 12px;
+        border-left: 0 !important;
+        border-radius: 10px;
+        color: var(--sl-ink-secondary);
+    }
+
+    html body .main-sidebar .nav-item.active > .nav-item-content,
+    html body .main-sidebar .nav-item-content.active {
+        background: var(--sl-accent-soft);
+        color: var(--sl-accent);
+        font-weight: 600;
+        border-left-color: transparent !important;
+    }
+
+    html body .main-sidebar .nav-submenu {
+        margin: 2px 8px 4px 22px;
+        padding-left: 10px;
+        border-left: 1px solid var(--sl-border);
+        background: transparent;
+    }
+
+    html[dir="rtl"] body .main-sidebar .nav-submenu {
+        margin: 2px 22px 4px 8px;
+        padding-left: 0;
+        padding-right: 10px;
+        border-left: 0;
+        border-right: 1px solid var(--sl-border);
+    }
+
+    html body .main-sidebar .nav-submenu-item {
+        padding: 9px 12px;
+        border-left: 0 !important;
+        border-radius: 8px;
+        color: var(--sl-ink-secondary);
+    }
+
+    html body .main-sidebar .nav-submenu-item.active {
+        background: var(--sl-accent-soft);
+        color: var(--sl-accent);
+        font-weight: 600;
+    }
+
+    /* Mobile Bottom Tabbar — Crisp top cobalt indicator bar instead of circular halo */
+    html body #m-tabbar,
+    html[data-theme="dark"] body #m-tabbar {
+        background: var(--sl-surface);
+        border-top: 1px solid var(--sl-border);
+        box-shadow: none;
+    }
+
+    html body .m-tab {
+        color: var(--sl-ink-muted);
+        border-radius: 10px;
+        position: relative;
+    }
+
+    html body .m-tab.m-active {
+        color: var(--sl-accent);
+        font-weight: 600;
+        background: transparent;
+    }
+
+    html body .m-tab.m-active::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 24px;
+        height: 2.5px;
+        border-radius: 999px;
+        background: var(--sl-accent);
+    }
+
+    html body .m-tab.m-active svg {
+        background: transparent !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        transform: none !important;
+    }
+
+    /* Mobile Chat Toolbar, Composer, Settings Tabs & Swarm Filters */
+    html body #m-chat-bar {
+        background: var(--sl-surface);
+        border-bottom: 1px solid var(--sl-border);
+    }
+
+    html body #m-chat-bar :is(.m-chat-bar-btn, .new-chat-btn) {
+        border-radius: 10px !important;
+    }
+
+    html body .chat-input-container .send-btn {
+        background: var(--sl-accent) !important;
+        color: var(--sl-accent-contrast) !important;
+        border-radius: 10px !important;
+    }
+
+    html body .chat-composer-context {
+        padding: 4px 8px;
+    }
+
+    html body .chat-composer-context .role-selector-btn {
+        min-height: 36px !important;
+        height: 36px !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        border-radius: 8px !important;
+    }
+
+    html body #page-agents-swarm .swarm-filter-btn {
+        min-height: 34px !important;
+        padding: 0 11px !important;
+        border-radius: 9px !important;
+        font-size: 12.5px !important;
+    }
+
+    html body #page-settings .settings-nav-item {
+        border-radius: 9px !important;
+        min-height: 36px !important;
+        padding: 6px 13px !important;
+        background: transparent !important;
+        color: var(--sl-ink-secondary) !important;
+        border: 1px solid transparent !important;
+    }
+
+    html body #page-settings .settings-nav-item.active,
+    html[data-theme="dark"] body #page-settings .settings-nav-item.active {
+        background: var(--sl-accent-soft) !important;
+        color: var(--sl-accent) !important;
+        border-color: var(--sl-tone-info-border) !important;
+        font-weight: 600 !important;
+    }
+
+    html body :is(.page, [data-ui-surface]) .btn-primary {
+        background: var(--sl-accent);
+        border-color: var(--sl-accent);
+        color: var(--sl-accent-contrast);
+    }
+
+    html body :is(.page, [data-ui-surface]) .btn-secondary {
+        background: var(--sl-surface);
+        border-color: var(--sl-border-strong);
+        color: var(--sl-ink);
     }
 }
 

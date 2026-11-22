@@ -1,0 +1,15 @@
+[project]
+name = "strixlens"
+version = "0.0.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = ["prek", "ruff"]
+
+[tool.ruff]
+extend-exclude = [".audit"]
+
+# Keep the kit copies byte-identical; new project files use all default checks.
+[tool.ruff.lint.per-file-ignores]
+"scripts/check-verify-map.py" = ["BLE001", "SIM102"]

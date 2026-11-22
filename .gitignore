@@ -1,0 +1,8 @@
+# Cindy managed worktrees and injected skill symlinks
+/.cindy-worktrees/
+/.claude/worktrees/
+/.agents/skills/
+/.audit/
+/.venv/
+/.ruff_cache/
+__pycache__/

@@ -1,6 +1,6 @@
 {
-  "name": "CyberStrikeAI",
-  "short_name": "CyberStrikeAI",
+  "name": "SI-Lens",
+  "short_name": "SI-Lens",
   "description": "AI 安全测试平台 WebUI",
   "start_url": "/",
   "scope": "/",
@@ -9,6 +9,7 @@
   "background_color": "#f8fafc",
   "theme_color": "#f8fafc",
   "icons": [
+    { "src": "/static/si-lens-logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/static/logo.png", "sizes": "any", "type": "image/png", "purpose": "any" }
   ]
 }

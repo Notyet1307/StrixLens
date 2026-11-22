@@ -466,8 +466,8 @@
 
         var head = el('div', 'm-drawer-head m-mobile-only');
         var brand = el('div', 'm-drawer-brand',
-            '<img src="/static/logo.png" alt="CyberStrikeAI">' +
-            '<span class="brand-wordmark"><span class="brand-wordmark__core">CyberStrike</span><span class="brand-wordmark__ai">AI</span></span>');
+            '<img src="/static/si-lens-logo.svg" alt="SI-Lens">' +
+            '<span class="brand-wordmark"><span class="brand-wordmark__core">SI-</span><span class="brand-wordmark__ai">Lens</span></span>');
         var close = el('button', 'm-close-btn', ICON.close);
         close.type = 'button';
         ariaLabel(close, 'mobile.closeNav', '关闭导航菜单');

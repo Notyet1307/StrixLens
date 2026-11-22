@@ -52,12 +52,14 @@
     <link rel="stylesheet" href="/static/css/vulnerability-list.css?v=20261115-timestamps">
     <link rel="stylesheet" href="/static/css/swarm-dashboard.css?v=20261122-swarm-1">
     <link rel="stylesheet" href="/static/css/design-system.css?v=20261115-extra-drawers">
-    <script src="/static/js/router.js?v=20261011-token-settings"></script>
+    <link rel="stylesheet" href="/static/css/si-lens-polish.css?v=20261122-polish-1">
+    <script src="/static/js/router.js?v=20261122-polish-1"></script>
 </head>
 <body>
     <div id="login-overlay" class="login-overlay" style="display: none;">
         <div class="login-card">
             <div class="login-brand">
+                <img src="/static/si-lens-logo.svg" alt="SI-Lens" class="login-brand-logo" width="44" height="44">
                 <h2 class="login-title">
                     <span data-i18n="login.titlePrefix">登录</span>
                     <span class="brand-wordmark brand-wordmark--sm" aria-label="SI-Lens">
@@ -103,6 +105,18 @@
                         <span class="brand-wordmark__core">SI-</span><span class="brand-wordmark__ai">Lens</span>
                     </h1>
                     <span class="version-badge" data-i18n="header.version" data-i18n-attr="title" data-i18n-skip-text="true" title="当前版本">{{.Version}}</span>
+                </div>
+                <div id="sl-topbar-context" class="sl-topbar-context">
+                    <span class="sl-topbar-divider" aria-hidden="true"></span>
+                    <span id="sl-topbar-page-label" class="sl-topbar-page-label" data-i18n="nav.dashboard">仪表盘</span>
+                    <button type="button" id="sl-cmdk-trigger-btn" class="sl-cmdk-trigger" onclick="window.openCommandPalette && window.openCommandPalette()" data-i18n="header.commandSearch" data-i18n-attr="title,aria-label" data-i18n-skip-text="true" title="快速搜索或跳转…" aria-label="快速搜索或跳转…">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.3-4.3"></path>
+                        </svg>
+                        <span data-i18n="header.commandSearch">快速搜索或跳转…</span>
+                        <kbd class="sl-kbd">⌘K</kbd>
+                    </button>
                 </div>
                 <div class="header-right">
                     <div class="header-actions">
@@ -7124,6 +7138,28 @@
         </div>
     </dialog>
 
+    <!-- 全局 ⌘K 命令面板 -->
+    <div id="sl-cmdk-overlay" class="sl-cmdk-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="sl-cmdk-input">
+        <div class="sl-cmdk-dialog">
+            <div class="sl-cmdk-input-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input type="text" id="sl-cmdk-input" class="sl-cmdk-input" autocomplete="off" spellcheck="false" data-i18n="commandPalette.placeholder" data-i18n-attr="placeholder" placeholder="输入页面名称、命令或对话标题…" />
+                <kbd class="sl-kbd">ESC</kbd>
+            </div>
+            <div id="sl-cmdk-list" class="sl-cmdk-list" role="listbox"></div>
+            <div class="sl-cmdk-footer">
+                <div class="sl-cmdk-hints">
+                    <span><kbd class="sl-kbd">↑↓</kbd> <span data-i18n="commandPalette.hintNavigate">选择</span></span>
+                    <span><kbd class="sl-kbd">↵</kbd> <span data-i18n="commandPalette.hintOpen">打开</span></span>
+                </div>
+                <span data-i18n="commandPalette.brandFoot">SI-Lens Precision Workspace</span>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/js/notifications.js"></script>
     <script src="/static/js/info-collect.js?v=20261115-extra-drawers"></script>
     <script src="/static/js/assets.js?v=20260717-7"></script>
@@ -7134,7 +7170,8 @@
     <script src="/static/js/attack-chain-context.js?v=20261012-summary-2"></script>
     <script src="/static/js/chat.js?v=20261118-pi-usage-summary"></script>
     <script src="/static/js/chat-plan-progress.js?v=20260815-1"></script>
-    <script src="/static/js/swarm-dashboard.js?v=20261122-swarm-1"></script>
+    <script src="/static/js/swarm-dashboard.js?v=20261122-polish-1"></script>
+    <script src="/static/js/command-palette.js?v=20261122-polish-1"></script>
     <script src="/static/js/hitl.js?v=20260819-1-pagination-20261027"></script>
     <script src="/static/js/tool-guard.js?v=20261010-conflict"></script>
     <script src="/static/js/token-usage.js?v=20261012-token-analytics"></script>

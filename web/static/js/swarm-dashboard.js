@@ -659,14 +659,14 @@
             pushNodeEvent(node, evObj);
             state._activeTools.set(toolCallId, { nodeId: node.id, eventObj: evObj });
 
-            if (toolName === 'task' || toolName === 'transfer_to_agent' || toolName === 'record_vulnerability') {
+            if (toolName === 'task' || toolName === 'transfer_to_agent' || toolName === 'record_vulnerability' || toolName === 'upsert_project_fact' || node.toolCount === 1 || node.toolCount % 10 === 0) {
                 pushFeedEvent(state, {
                     id: evObj.id,
                     nodeId: node.id,
                     agentName: node.agentName,
                     displayName: node.displayName,
                     eventType: 'tool_call',
-                    title: node.displayName + ' · ' + toolName,
+                    title: node.displayName + ' · #' + node.toolCount + ' ' + toolName,
                     summary: argSummary,
                     status: 'running',
                     createdAt: nowIso
@@ -1027,7 +1027,8 @@
             liveTimer: null,
             pollTimer: null,
             rafQueued: false,
-            lastLiveStreamAt: 0
+            lastLiveStreamAt: 0,
+            lastConvFetchAt: 0
         };
 
         function currentState() {
@@ -1826,13 +1827,23 @@
 
         root.window.addEventListener('conversation-changed', function (e) {
             const cid = e && e.detail && e.detail.conversationId ? String(e.detail.conversationId).trim() : '';
+            const sameConv = cid !== '' && cid === ui.conversationId;
             ui.conversationId = cid;
-            ui.selectedNodeId = '';
-            ui.zoom = 1;
-            ui.panX = 0;
-            ui.panY = 0;
+            if (!sameConv) {
+                ui.selectedNodeId = '';
+                ui.zoom = 1;
+                ui.panX = 0;
+                ui.panY = 0;
+                ui.lastConvFetchAt = 0;
+            }
             renderChatStrip();
             if (cid) {
+                const now = Date.now();
+                if (sameConv && now - ui.lastConvFetchAt < 800) {
+                    scheduleRender();
+                    return;
+                }
+                ui.lastConvFetchAt = now;
                 void fetchSwarmSnapshot(cid, { silent: true });
             } else {
                 scheduleRender();

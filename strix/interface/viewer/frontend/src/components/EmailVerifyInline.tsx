@@ -51,7 +51,7 @@ export default function EmailVerifyInline({ onVerified }: { onVerified: () => vo
     setBusy(false);
     if (result.ok) {
       track("email_submitted", { purpose: "verify" });
-      setNotice(`We sent a 6-digit code to ${value}.`);
+      setNotice(`A 6-digit code went to ${value}.`);
       setStep("code");
     } else {
       if (result.error === "work_email_required") track("work_email_required");

@@ -14,8 +14,8 @@ if [ ! -f "$REPO_ROOT/scripts/with-tool-path.sh" ]; then
   echo "WARN: scripts/with-tool-path.sh not found; continuing with current PATH" >&2
 fi
 
-# Replace with project dependency sync & verification doctor commands:
-uv sync --frozen
+# CI pins Python 3.12 (see .github/workflows/ci.yml); align local .venv so pytest matches CI.
+uv sync --frozen --python 3.12
 # (cd frontend && bun install --frozen-lockfile)
 
 COMMON_GIT_DIR="$(git rev-parse --path-format=absolute --git-common-dir)"

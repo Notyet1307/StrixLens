@@ -140,6 +140,14 @@ CyberStrikeAI connects planning, execution, human oversight, evidence, and repla
 - 📋 **Batch tasks** provide queued execution, editing, status tracking, and retained results.
 - 📱 **Chatbots** connect Personal WeChat, WeCom, DingTalk, Lark, Telegram, Slack, Discord, and QQ Bot.
 
+### Attack Surface Management & Digital Risk Protection (EASM & DRP)
+
+- 🌐 **Attack Surface Management (EASM)**: Standalone **Exposure** sidebar section (between **Workspace** and **Recon & Findings**) with an **EASM Overview** dashboard (KPIs, 30-day new exposures vs. converged trend, top 10 exposed ports, real-time drift timeline, shadow asset ledger) and a **Risk Convergence** workbench (Kanban & list views, drag-and-drop transitions, Before/After JSON diff drawer).
+- 🔍 **Real Discovery & Defensive Retest**: Integrates `subfinder` / `amass` (when installed) plus built-in `crt.sh` Certificate Transparency lookup, concurrent DNS resolution, TCP port probing, read-only banner capture, TLS certificate expiry inspection, and HTTP fingerprint/title extraction; automatically diffs against the CMDB baseline to flag shadow assets and open convergence tickets; runs real TCP/TLS/baseline defensive retests (keeping failed retests in `verifying`) and schedules a 6-hour background cron job to re-probe active asset drift.
+- 🚨 **Digital Risk & Leak Monitor (DRP)**: Ships a **Leak Monitor** center (6-channel health matrix, multi-channel filters, triage drawer, one-click allowlisting) and a **Rules & Connectors** page (keyword/Cron rules plus **Policy Engine & CTI Connectors** cards with **Test Connectivity**).
+- 🔌 **6-Channel Real Plugin Connectors & Masking**: Connects code repositories (local directory Gitleaks / built-in regex scan, GitHub Code Search API, or custom HTTP gateway), public cloud drives (SearXNG / OSINT gateway), public document libraries (SearXNG / OSINT gateway), OpenCTI STIX 2.1 GraphQL, credential leak CTI feeds, and HIBP v3 / domain breach APIs via `IntelligenceProvider`; enforces first-2/last-2 character masking on secrets before persistence, `event_hash` deduplication, and per-rule Cron background scheduling.
+- 🔗 **RESTful Open APIs**: Exposes `/api/v1/easm/*` (dashboard, assets, incremental scans, convergence & retest) and `/api/v1/drp/*` (overview, events, triage & allowlisting, rules, connector config & connectivity test, sync trigger) protected by platform RBAC.
+
 ### Authorized security operations
 
 - 🐚 **WebShell management** provides connection management, a virtual terminal, file operations, and AI-assisted workflows.
@@ -252,6 +260,9 @@ The `run.sh` script will automatically:
    ```
 
    See the `tools/` directory for the full list; refer to each tool's official docs for install details.
+4. **Configure EASM & DRP (optional)**
+   - Open **Exposure → Attack Surface → EASM Overview** in the left sidebar, enter a real target domain or IP, and click **Trigger Incremental Scan** to run discovery and shadow asset diffing.
+   - Open **Exposure → Digital Risk → Rules & Connectors**, configure real Endpoint URLs and API keys under **Policy Engine & CTI Connectors**, run **Test Connectivity**, and add monitoring keywords + Cron schedules for automated background syncs.
 
 **Alternative Launch Methods:**
 ```bash
@@ -341,7 +352,7 @@ ai:
 ```
 CyberStrikeAI/
 ├── cmd/                 # Server, MCP stdio entrypoints, tooling
-├── internal/            # Agent, MCP core, handlers, C2 (`internal/c2`), security executor
+├── internal/            # Agent, MCP core, handlers, EASM/DRP (`internal/easmdrp`), C2 (`internal/c2`), security executor
 ├── web/                 # Static SPA + templates
 ├── tools/               # YAML tool recipes (100+ examples provided)
 ├── roles/               # Role configurations (12+ predefined security testing roles)

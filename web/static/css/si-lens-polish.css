@@ -2129,3 +2129,1039 @@ html[dir="rtl"] .sl-cmdk-item {
         animation-duration: 0.01ms !important;
     }
 }
+
+
+/* ==========================================================================
+   COSS.COM/UI + @COSS/CHAT + MOTION DESIGN SYSTEM OVERRIDE LAYER (v20261123)
+   Neutral Charcoal Palette (#262626 / #fafafa Light, #141414 / #f5f5f5 Dark)
+   ========================================================================== */
+
+:root {
+    --sl-canvas: #fafafa;
+    --sl-surface: #ffffff;
+    --sl-surface-elevated: #ffffff;
+    --sl-surface-muted: rgba(0, 0, 0, 0.035);
+    --sl-surface-hover: rgba(0, 0, 0, 0.048);
+    --sl-ink: #171717;
+    --sl-ink-muted: #525252;
+    --sl-ink-subtle: #737373;
+    --sl-border: rgba(0, 0, 0, 0.08);
+    --sl-border-strong: rgba(0, 0, 0, 0.14);
+
+    --sl-accent: #262626;
+    --sl-accent-hover: #171717;
+    --sl-accent-ink: #fafafa;
+    --sl-accent-soft: rgba(23, 23, 23, 0.06);
+    --sl-accent-ring: rgba(23, 23, 23, 0.18);
+    --sl-ring-soft: rgba(23, 23, 23, 0.11);
+
+    --sl-icon-fg: #404040;
+    --sl-icon-fg-muted: #737373;
+    --sl-icon-bg: rgba(0, 0, 0, 0.045);
+    --sl-icon-border: rgba(0, 0, 0, 0.08);
+
+    --sl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --sl-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --sl-shadow-lg: 0 22px 48px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.05);
+    --sl-btn-bevel: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    --sl-card-bevel: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+
+    --sl-chat-user-bg: rgba(0, 0, 0, 0.07);
+    --sl-chat-user-border: rgba(0, 0, 0, 0.07);
+    --sl-chat-assistant-bg: #ffffff;
+    --sl-chat-assistant-border: rgba(0, 0, 0, 0.08);
+    --sl-chat-composer-bg: #ffffff;
+    --sl-chat-composer-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+
+    /* Legacy / workspace palette harmonisation */
+    --primary-color: #262626;
+    --primary-hover: #171717;
+    --primary-light: rgba(23, 23, 23, 0.06);
+    --bg-primary: #fafafa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f4f4f5;
+    --text-primary: #171717;
+    --text-secondary: #525252;
+    --text-muted: #737373;
+    --border-color: rgba(0, 0, 0, 0.08);
+
+    --c2-surface: #ffffff;
+    --c2-surface-2: #fafafa;
+    --c2-border: rgba(0, 0, 0, 0.08);
+    --c2-accent: #262626;
+    --c2-accent-2: #404040;
+    --c2-accent-ink: #fafafa;
+    --c2-text: #171717;
+    --c2-muted: #525252;
+
+    --ds-bg: #fafafa;
+    --ds-surface: #ffffff;
+    --ds-border: rgba(0, 0, 0, 0.08);
+    --ds-accent: #262626;
+}
+
+html[data-theme="dark"] {
+    --sl-canvas: #141414;
+    --sl-surface: #181818;
+    --sl-surface-elevated: #1e1e1e;
+    --sl-surface-muted: rgba(255, 255, 255, 0.045);
+    --sl-surface-hover: rgba(255, 255, 255, 0.075);
+    --sl-ink: #f5f5f5;
+    --sl-ink-muted: #a3a3a3;
+    --sl-ink-subtle: #737373;
+    --sl-border: rgba(255, 255, 255, 0.08);
+    --sl-border-strong: rgba(255, 255, 255, 0.14);
+
+    --sl-accent: #f5f5f5;
+    --sl-accent-hover: #ffffff;
+    --sl-accent-ink: #171717;
+    --sl-accent-soft: rgba(255, 255, 255, 0.08);
+    --sl-accent-ring: rgba(255, 255, 255, 0.22);
+    --sl-ring-soft: rgba(255, 255, 255, 0.14);
+
+    --sl-icon-fg: #e5e5e5;
+    --sl-icon-fg-muted: #a3a3a3;
+    --sl-icon-bg: rgba(255, 255, 255, 0.06);
+    --sl-icon-border: rgba(255, 255, 255, 0.08);
+
+    --sl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --sl-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.42), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --sl-shadow-lg: 0 24px 56px rgba(0, 0, 0, 0.68), 0 4px 14px rgba(0, 0, 0, 0.42);
+    --sl-btn-bevel: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    --sl-card-bevel: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    --sl-chat-user-bg: rgba(255, 255, 255, 0.11);
+    --sl-chat-user-border: rgba(255, 255, 255, 0.08);
+    --sl-chat-assistant-bg: #1c1c1c;
+    --sl-chat-assistant-border: rgba(255, 255, 255, 0.08);
+    --sl-chat-composer-bg: #1a1a1a;
+    --sl-chat-composer-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    --primary-color: #f5f5f5;
+    --primary-hover: #ffffff;
+    --primary-light: rgba(255, 255, 255, 0.08);
+    --bg-primary: #141414;
+    --bg-secondary: #181818;
+    --bg-tertiary: #202020;
+    --text-primary: #f5f5f5;
+    --text-secondary: #a3a3a3;
+    --text-muted: #737373;
+    --border-color: rgba(255, 255, 255, 0.08);
+
+    --c2-surface: #181818;
+    --c2-surface-2: #1c1c1c;
+    --c2-border: rgba(255, 255, 255, 0.08);
+    --c2-accent: #f5f5f5;
+    --c2-accent-2: #d4d4d4;
+    --c2-accent-ink: #171717;
+    --c2-text: #f5f5f5;
+    --c2-muted: #a3a3a3;
+
+    --ds-bg: #141414;
+    --ds-surface: #181818;
+    --ds-border: rgba(255, 255, 255, 0.08);
+    --ds-accent: #f5f5f5;
+}
+
+/* Remove any residual cobalt/midnight gradients across shell and pages */
+html,
+body,
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+    background: var(--sl-canvas) !important;
+    background-image: none !important;
+    color: var(--sl-ink);
+}
+
+.main-container,
+.main-content,
+.content-area,
+.page {
+    background: var(--sl-canvas);
+    background-image: none;
+    color: var(--sl-ink);
+}
+
+/* Header & Sidebar Chrome */
+.app-header {
+    background: var(--sl-surface) !important;
+    border-bottom: 1px solid var(--sl-border) !important;
+    box-shadow: none !important;
+}
+
+.sidebar,
+.main-sidebar {
+    background: var(--sl-surface) !important;
+    border-inline-end: 1px solid var(--sl-border) !important;
+    box-shadow: none !important;
+}
+
+.brand-wordmark__ai {
+    color: var(--sl-ink) !important;
+    background: var(--sl-accent-soft) !important;
+    border: 1px solid var(--sl-border) !important;
+}
+
+.sl-cmdk-trigger {
+    background: var(--sl-surface-muted) !important;
+    border: 1px solid var(--sl-border) !important;
+    color: var(--sl-ink-muted) !important;
+    border-radius: 9px !important;
+    box-shadow: var(--sl-shadow-sm) !important;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.sl-cmdk-trigger:hover {
+    background: var(--sl-surface-hover) !important;
+    border-color: var(--sl-border-strong) !important;
+    color: var(--sl-ink) !important;
+}
+
+.sl-kbd-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-inline-start: 4px;
+}
+
+.sl-kbd {
+    background: var(--sl-surface) !important;
+    border: 1px solid var(--sl-border-strong) !important;
+    color: var(--sl-ink-subtle) !important;
+    border-radius: 5px !important;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 2px 5px;
+    box-shadow: 0 1px 0 var(--sl-border);
+}
+
+.sl-header-icon-btn,
+.theme-toggle-btn,
+.lang-toggle-btn,
+.notification-btn,
+.user-menu-btn,
+.sidebar-toggle-btn {
+    color: var(--sl-ink-muted) !important;
+    border: 1px solid transparent;
+    border-radius: 8px !important;
+    transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.sl-header-icon-btn:hover,
+.theme-toggle-btn:hover,
+.lang-toggle-btn:hover,
+.notification-btn:hover,
+.user-menu-btn:hover,
+.sidebar-toggle-btn:hover {
+    background: var(--sl-surface-hover) !important;
+    border-color: var(--sl-border) !important;
+    color: var(--sl-ink) !important;
+}
+
+.nav-item-content,
+.nav-submenu-item {
+    border-radius: 8px !important;
+    color: var(--sl-ink-muted) !important;
+    transition: background-color 140ms ease, color 140ms ease, transform 120ms ease;
+}
+
+.nav-item-content:hover,
+.nav-submenu-item:hover {
+    background: var(--sl-surface-hover) !important;
+    color: var(--sl-ink) !important;
+}
+
+.nav-item.active > .nav-item-content,
+.nav-item-content.active,
+.nav-submenu-item.active {
+    background: var(--sl-accent-soft) !important;
+    color: var(--sl-ink) !important;
+    font-weight: 500 !important;
+    box-shadow: inset 0 0 0 1px var(--sl-border) !important;
+}
+
+.nav-item.active > .nav-item-content svg,
+.nav-item-content.active svg,
+.nav-submenu-item.active svg {
+    color: var(--sl-ink) !important;
+}
+
+/* Uniform Lucide Stroke Geometry across chrome & KPI icons */
+.nav-item-content svg,
+.sl-header-icon-btn svg,
+.sl-cmdk-trigger svg,
+.dashboard-kpi-icon svg,
+.dashboard-resource-icon svg,
+.dashboard-severity-status-icon svg {
+    stroke-width: 1.75;
+}
+
+/* Monochrome Neutral Icon Wells (matches coss.com/ui) */
+.dashboard-kpi-icon,
+.dashboard-kpi-icon-tasks,
+.dashboard-kpi-icon-vuln,
+.dashboard-kpi-icon-calls,
+.dashboard-kpi-icon-rate,
+.dashboard-kpi-icon-tokens,
+.dashboard-resource-icon,
+.dashboard-resource-icon-mcp,
+.dashboard-resource-icon-external,
+.dashboard-resource-icon-skills,
+.dashboard-resource-icon-knowledge,
+.dashboard-resource-icon-roles,
+.dashboard-resource-icon-agents,
+.dashboard-severity-status-icon {
+    background: var(--sl-icon-bg) !important;
+    color: var(--sl-icon-fg) !important;
+    border: 1px solid var(--sl-icon-border) !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+
+/* coss Buttons & Interactive Controls */
+.btn-primary,
+button.btn-primary,
+.login-submit,
+.projects-btn-primary,
+.swarm-btn-primary,
+.c2-btn-primary {
+    background: var(--sl-accent) !important;
+    color: var(--sl-accent-ink) !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    box-shadow: var(--sl-btn-bevel), var(--sl-shadow-sm) !important;
+    font-weight: 500 !important;
+    transition: background-color 140ms ease, transform 120ms ease, box-shadow 140ms ease;
+}
+
+.btn-primary:hover,
+button.btn-primary:hover,
+.login-submit:hover,
+.projects-btn-primary:hover,
+.swarm-btn-primary:hover,
+.c2-btn-primary:hover {
+    background: var(--sl-accent-hover) !important;
+}
+
+.btn-primary:active,
+button.btn-primary:active,
+.projects-btn-primary:active,
+.swarm-btn-primary:active {
+    transform: translateY(0.5px) scale(0.99);
+}
+
+.btn-secondary,
+.btn-outline,
+.projects-btn-secondary,
+.swarm-btn-secondary,
+.c2-btn-secondary {
+    background: var(--sl-surface-elevated) !important;
+    color: var(--sl-ink) !important;
+    border: 1px solid var(--sl-border-strong) !important;
+    border-radius: 8px !important;
+    box-shadow: var(--sl-card-bevel), var(--sl-shadow-sm) !important;
+    font-weight: 500 !important;
+    transition: background-color 140ms ease, border-color 140ms ease, transform 120ms ease;
+}
+
+.btn-secondary:hover,
+.btn-outline:hover,
+.projects-btn-secondary:hover,
+.swarm-btn-secondary:hover,
+.c2-btn-secondary:hover {
+    background: var(--sl-surface-hover) !important;
+    border-color: var(--sl-border-strong) !important;
+}
+
+/* coss Cards, Frames & Surfaces */
+.dashboard-kpi-card,
+.dashboard-section,
+.dashboard-cta-block,
+.settings-card,
+.projects-card,
+.project-card,
+.login-card,
+.modal-content,
+.card,
+.swarm-stat-card,
+.swarm-card,
+.swarm-panel,
+.c2-card,
+.table-container {
+    background: var(--sl-surface) !important;
+    border: 1px solid var(--sl-border) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--sl-card-bevel), var(--sl-shadow-sm) !important;
+}
+
+.dashboard-kpi-card:hover,
+.project-card:hover,
+.dashboard-resource-item:hover {
+    border-color: var(--sl-border-strong) !important;
+    background: var(--sl-surface-elevated) !important;
+}
+
+.dashboard-section-link,
+.view-all-link,
+.dashboard-link {
+    color: var(--sl-ink-muted) !important;
+    font-weight: 500;
+}
+
+.dashboard-section-link:hover,
+.view-all-link:hover,
+.dashboard-link:hover {
+    color: var(--sl-ink) !important;
+}
+
+/* Inputs, Selects & Textareas outside React islands */
+.main-content input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.main-content select,
+.main-content textarea,
+.modal-content input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.modal-content select,
+.modal-content textarea,
+.login-card input {
+    border-color: var(--sl-border-strong);
+    border-radius: 8px;
+    background-color: var(--sl-surface);
+    color: var(--sl-ink);
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.main-content input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+.main-content select:focus,
+.main-content textarea:focus,
+.modal-content input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+.modal-content textarea:focus,
+.login-card input:focus {
+    outline: none !important;
+    border-color: var(--sl-ink-subtle) !important;
+    box-shadow: 0 0 0 3px var(--sl-ring-soft) !important;
+}
+
+/* Settings vertical nav subtle coss active pill */
+#page-settings .settings-nav-item {
+    border-left: 0 !important;
+    border-radius: 8px !important;
+    color: var(--sl-ink-muted) !important;
+}
+
+#page-settings .settings-nav-item.active {
+    background: var(--sl-accent-soft) !important;
+    color: var(--sl-ink) !important;
+    font-weight: 500 !important;
+}
+
+/* Projects link highlight removal + coss clean list row */
+#page-projects .projects-list-item::before {
+    display: none !important;
+}
+
+#page-projects .projects-list-item.active {
+    background: var(--sl-accent-soft) !important;
+    border-color: var(--sl-border-strong) !important;
+}
+
+/* ==========================================================================
+   @COSS/CHAT EXPERIENCE STYLING (#page-chat)
+   ========================================================================== */
+#page-chat,
+#page-chat .chat-layout,
+#page-chat .chat-main {
+    background: var(--sl-canvas) !important;
+}
+
+#page-chat .chat-sidebar {
+    background: var(--sl-surface) !important;
+    border-inline-end: 1px solid var(--sl-border) !important;
+}
+
+#page-chat .conversation-item {
+    border-radius: 8px !important;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+
+#page-chat .conversation-item:hover {
+    background: var(--sl-surface-hover) !important;
+}
+
+#page-chat .conversation-item.active {
+    background: var(--sl-accent-soft) !important;
+    color: var(--sl-ink) !important;
+    box-shadow: inset 0 0 0 1px var(--sl-border) !important;
+}
+
+.chat-welcome-project-name {
+    background: var(--sl-surface-muted) !important;
+    border: 1px solid var(--sl-border) !important;
+    color: var(--sl-ink-muted) !important;
+    border-radius: 9999px !important;
+}
+
+/* @coss/chat Bubbles: Outgoing (User) & Incoming (Assistant), preserving no-avatar contract */
+#chat-messages .message.user-message .message-content {
+    background: var(--sl-chat-user-bg) !important;
+    color: var(--sl-ink) !important;
+    border: 1px solid var(--sl-chat-user-border) !important;
+    border-radius: 16px 6px 16px 16px !important;
+    box-shadow: none !important;
+}
+
+#chat-messages .message.assistant-message .message-content {
+    background: var(--sl-chat-assistant-bg) !important;
+    color: var(--sl-ink) !important;
+    border: 1px solid var(--sl-chat-assistant-border) !important;
+    border-radius: 6px 16px 16px 16px !important;
+    box-shadow: var(--sl-card-bevel), var(--sl-shadow-sm) !important;
+}
+
+html[dir="rtl"] #chat-messages .message.user-message .message-content {
+    border-radius: 6px 16px 16px 16px !important;
+}
+
+html[dir="rtl"] #chat-messages .message.assistant-message .message-content {
+    border-radius: 16px 6px 16px 16px !important;
+}
+
+/* @coss/chat Composer Pill & Circular Send Button */
+#chat-input-container,
+#chat-input-container .chat-input-wrapper,
+.chat-input-container .chat-input-wrapper {
+    background: var(--sl-chat-composer-bg) !important;
+    border: 1px solid var(--sl-border-strong) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--sl-chat-composer-shadow) !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+#chat-input-container:focus-within,
+#chat-input-container .chat-input-wrapper:focus-within,
+.chat-input-container .chat-input-wrapper:focus-within {
+    border-color: var(--sl-ink-subtle) !important;
+    box-shadow: 0 0 0 3px var(--sl-ring-soft), var(--sl-chat-composer-shadow) !important;
+}
+
+#chat-send-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    border-radius: 9999px !important;
+    background: var(--sl-accent) !important;
+    color: var(--sl-accent-ink) !important;
+    border: 1px solid transparent !important;
+    box-shadow: var(--sl-btn-bevel), var(--sl-shadow-sm) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), background-color 140ms ease, opacity 140ms ease !important;
+}
+
+#chat-send-btn:hover:not(:disabled) {
+    background: var(--sl-accent-hover) !important;
+    transform: translateY(-1px) scale(1.03);
+}
+
+#chat-send-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+/* @coss/chat Jump-to-Latest Floating Pill */
+#chat-return-latest.chat-return-latest {
+    border-radius: 9999px !important;
+    background: var(--sl-surface-elevated) !important;
+    color: var(--sl-ink) !important;
+    border: 1px solid var(--sl-border-strong) !important;
+    box-shadow: var(--sl-card-bevel), var(--sl-shadow-md) !important;
+    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 160ms ease, opacity 160ms ease !important;
+}
+
+#chat-return-latest.chat-return-latest:hover {
+    transform: translateY(-1px);
+    background: var(--sl-surface-hover) !important;
+}
+
+#sl-coss-chat-typing-root {
+    width: 100%;
+    max-width: min(860px, 100%);
+    margin: 0 auto 8px;
+}
+
+#sl-coss-swarm-status-root {
+    margin-bottom: 12px;
+}
+
+/* ==========================================================================
+   DYNAMIC MICRO-MOTION & SLIDING TAB GLIDER (coss-motion.js)
+   ========================================================================== */
+@keyframes cossPageIn {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 5px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes cossCardIn {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 7px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes cossMsgIn {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 8px, 0) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+.coss-page-in {
+    animation: cossPageIn 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.coss-card-stagger {
+    animation: cossCardIn 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--coss-stagger-i, 0) * 28ms);
+}
+
+.coss-msg-in {
+    animation: cossMsgIn 230ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: bottom center;
+}
+
+.vulnerability-view-switch,
+.projects-tabs,
+.swarm-segmented,
+.swarm-inspector-tabs,
+.asset-period-switch,
+#page-settings .settings-nav {
+    position: relative !important;
+}
+
+.coss-tab-glider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 7px;
+    background: var(--sl-surface-elevated);
+    border: 1px solid var(--sl-border);
+    box-shadow: var(--sl-card-bevel), var(--sl-shadow-sm);
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        width 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        height 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 140ms ease;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+}
+
+.coss-glider-ready > *:not(.coss-tab-glider) {
+    position: relative;
+    z-index: 1;
+}
+
+.coss-glider-ready > .active,
+.coss-glider-ready > [aria-selected="true"] {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    color: var(--sl-ink) !important;
+}
+
+/* ==========================================================================
+   BASE UI / @COSS PORTAL Z-INDEX & MOBILE SHIELD
+   ========================================================================== */
+[data-slot="command-dialog-backdrop"],
+[data-slot="command-dialog-viewport"],
+[data-slot="command-dialog-popup"],
+[data-slot="toast-viewport"],
+[data-slot="autocomplete-positioner"],
+[data-slot="popover-positioner"] {
+    z-index: 12060 !important;
+}
+
+#sl-coss-toast-root [data-slot="toast-root"] {
+    z-index: 12070 !important;
+}
+
+@media (max-width: 767.98px) {
+    /* Shield Base UI / @coss islands from mobile.css unlayered element selectors */
+    .coss-island button,
+    [data-slot] button {
+        min-height: unset;
+        min-width: unset;
+        font-size: inherit;
+        line-height: inherit;
+    }
+
+    .coss-island input,
+    [data-slot="command-input"] {
+        min-height: 44px !important;
+        padding: 10px 4px !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        font-size: 16px !important;
+    }
+
+    [data-slot="command-dialog-popup"] {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+    }
+
+    /* Full coss Neutral mobile chrome */
+    #m-appbar {
+        background: color-mix(in srgb, var(--sl-surface) 90%, transparent) !important;
+        border-bottom: 1px solid var(--sl-border) !important;
+        color: var(--sl-ink) !important;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    #m-appbar button,
+    .m-appbar-btn {
+        color: var(--sl-ink) !important;
+    }
+
+    #m-tabbar {
+        background: color-mix(in srgb, var(--sl-surface) 92%, transparent) !important;
+        border-top: 1px solid var(--sl-border) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    #m-tabbar .m-tab {
+        color: var(--sl-ink-subtle) !important;
+    }
+
+    #m-tabbar .m-tab.m-active {
+        color: var(--sl-ink) !important;
+        font-weight: 600;
+    }
+
+    #m-tabbar .m-tab.m-active svg {
+        color: var(--sl-ink) !important;
+        stroke: var(--sl-ink) !important;
+    }
+
+    .main-sidebar,
+    .sidebar {
+        background: var(--sl-surface) !important;
+        border-inline-end: 1px solid var(--sl-border) !important;
+    }
+
+    #m-sheet .m-sheet-panel,
+    #m-sheet {
+        background: var(--sl-surface) !important;
+        border-color: var(--sl-border) !important;
+    }
+
+    .m-settings-card,
+    .m-chat-card,
+    .mobile-chat-input-bar {
+        background: var(--sl-surface) !important;
+        border-color: var(--sl-border) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .coss-page-in,
+    .coss-card-stagger,
+    .coss-msg-in {
+        animation: none !important;
+    }
+
+    .coss-tab-glider,
+    #chat-send-btn,
+    #chat-return-latest.chat-return-latest,
+    .sl-cmdk-trigger,
+    .btn-primary,
+    .btn-secondary {
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==========================================================================
+   V3 VISUAL AUDIT POLISH: HIGH-SPECIFICITY NEUTRALITY, COMPOSER & CMDK FIXES
+   ========================================================================== */
+
+:root,
+html body {
+    --accent-color: #262626;
+    --accent-hover: #171717;
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+    --accent-color: #f5f5f5;
+    --accent-hover: #ffffff;
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] body .container,
+html[data-theme="dark"] body .main-container,
+html[data-theme="dark"] body .main-content,
+html[data-theme="dark"] body .content-area,
+html[data-theme="dark"] body .dashboard-page,
+html[data-theme="dark"] body #page-chat,
+html[data-theme="dark"] body .chat-container,
+html[data-theme="dark"] body .chat-main {
+    background: var(--sl-canvas) !important;
+    background-image: none !important;
+}
+
+html body .dashboard-page::before,
+html[data-theme="dark"] body .dashboard-page::before {
+    display: none !important;
+    background: none !important;
+}
+
+html[data-theme="dark"] body header,
+html[data-theme="dark"] body .app-header,
+html[data-theme="dark"] body .container > header,
+html[data-theme="dark"] body .sidebar,
+html[data-theme="dark"] body .main-sidebar,
+html[data-theme="dark"] body .conversation-sidebar,
+html[data-theme="dark"] body #page-chat .chat-sidebar {
+    background: var(--sl-surface) !important;
+    background-image: none !important;
+    border-color: var(--sl-border) !important;
+}
+
+html[data-theme="dark"] body :is(
+    .dashboard-kpi-card,
+    .dashboard-kpi-card:nth-child(n),
+    .dashboard-section,
+    .dashboard-cta-block,
+    .dashboard-severity-insights,
+    .dashboard-severity-insight-urgent-item,
+    .dashboard-severity-status-cell,
+    .dashboard-batch-side-stat,
+    .settings-card,
+    .projects-card,
+    .project-card,
+    .login-card,
+    .modal-content,
+    .card,
+    .swarm-stat-card,
+    .swarm-card,
+    .swarm-panel,
+    .swarm-node-card,
+    .c2-card,
+    .table-container
+) {
+    background: var(--sl-surface) !important;
+    background-image: none !important;
+    border-color: var(--sl-border) !important;
+    box-shadow: var(--sl-card-bevel), var(--sl-shadow-sm) !important;
+}
+
+/* Crisp monochrome brand wordmark across desktop & mobile */
+html body .brand-wordmark,
+html body .brand-wordmark__core,
+html body .brand-wordmark__ai,
+html[data-theme="dark"] body .brand-wordmark,
+html[data-theme="dark"] body .brand-wordmark__core,
+html[data-theme="dark"] body .brand-wordmark__ai {
+    background: transparent !important;
+    background-image: none !important;
+    -webkit-background-clip: border-box !important;
+    border: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    color: var(--sl-ink) !important;
+    -webkit-text-fill-color: var(--sl-ink) !important;
+}
+
+html body .brand-wordmark__ai,
+html[data-theme="dark"] body .brand-wordmark__ai {
+    color: var(--sl-ink-muted) !important;
+    -webkit-text-fill-color: var(--sl-ink-muted) !important;
+}
+
+/* Active sidebar & drawer nav row (remove cobalt icon/tint) */
+html body .nav-item.active > .nav-item-content,
+html[data-theme="dark"] body .nav-item.active > .nav-item-content,
+html body .main-sidebar .nav-item.active > .nav-item-content,
+html[data-theme="dark"] body .main-sidebar .nav-item.active > .nav-item-content,
+html body .main-sidebar .nav-submenu-item.active,
+html[data-theme="dark"] body .main-sidebar .nav-submenu-item.active {
+    background: var(--sl-accent-soft) !important;
+    color: var(--sl-ink) !important;
+    box-shadow: inset 0 0 0 1px var(--sl-border) !important;
+}
+
+html body .nav-item.active > .nav-item-content svg,
+html[data-theme="dark"] body .nav-item.active > .nav-item-content svg,
+html body .main-sidebar .nav-item.active > .nav-item-content svg,
+html[data-theme="dark"] body .main-sidebar .nav-item.active > .nav-item-content svg {
+    color: var(--sl-ink) !important;
+    stroke: var(--sl-ink) !important;
+}
+
+/* New Task / New Chat / Swarm Open / Filter Pills -> coss Neutral */
+html body .new-chat-btn,
+html[data-theme="dark"] body .new-chat-btn,
+html body .m-chat-bar-btn.m-primary,
+html[data-theme="dark"] body .m-chat-bar-btn.m-primary {
+    background: var(--sl-accent) !important;
+    background-image: none !important;
+    color: var(--sl-accent-ink) !important;
+    border: 1px solid transparent !important;
+    border-radius: 9px !important;
+    box-shadow: var(--sl-btn-bevel), var(--sl-shadow-sm) !important;
+}
+
+html body .new-chat-btn svg,
+html[data-theme="dark"] body .new-chat-btn svg,
+html body .m-chat-bar-btn.m-primary svg,
+html[data-theme="dark"] body .m-chat-bar-btn.m-primary svg {
+    color: var(--sl-accent-ink) !important;
+    stroke: var(--sl-accent-ink) !important;
+}
+
+html body .chat-swarm-open-btn,
+html[data-theme="dark"] body .chat-swarm-open-btn {
+    background: var(--sl-surface-elevated) !important;
+    border: 1px solid var(--sl-border-strong) !important;
+    color: var(--sl-ink) !important;
+    box-shadow: var(--sl-card-bevel), var(--sl-shadow-sm) !important;
+}
+
+html body .chat-swarm-open-btn:hover,
+html[data-theme="dark"] body .chat-swarm-open-btn:hover {
+    background: var(--sl-accent) !important;
+    border-color: var(--sl-accent) !important;
+    color: var(--sl-accent-ink) !important;
+}
+
+html body .swarm-filter-btn.is-active,
+html[data-theme="dark"] body .swarm-filter-btn.is-active {
+    background: var(--sl-accent) !important;
+    border-color: var(--sl-accent) !important;
+    color: var(--sl-accent-ink) !important;
+    box-shadow: var(--sl-btn-bevel), var(--sl-shadow-sm) !important;
+}
+
+html body #page-projects .projects-fact-toggle:has(input:checked),
+html[data-theme="dark"] body #page-projects .projects-fact-toggle:has(input:checked) {
+    border-color: var(--sl-border-strong) !important;
+    background: var(--sl-accent-soft) !important;
+    color: var(--sl-ink) !important;
+}
+
+/* Unified @coss/chat Composer (eliminate nested outer box double-border) */
+html body #chat-input-container,
+html[data-theme="dark"] body #chat-input-container,
+html body .chat-input-container,
+html[data-theme="dark"] body .chat-input-container {
+    background: var(--sl-canvas) !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+html body .chat-composer-context,
+html[data-theme="dark"] body .chat-composer-context {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+html body .chat-composer-surface.chat-input-primary-row,
+html[data-theme="dark"] body .chat-composer-surface.chat-input-primary-row {
+    background: var(--sl-chat-composer-bg) !important;
+    border: 1px solid var(--sl-border-strong) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--sl-chat-composer-shadow) !important;
+}
+
+html body .chat-composer-surface.chat-input-primary-row:focus-within,
+html[data-theme="dark"] body .chat-composer-surface.chat-input-primary-row:focus-within {
+    border-color: var(--sl-ink-subtle) !important;
+    box-shadow: 0 0 0 3px var(--sl-ring-soft), var(--sl-chat-composer-shadow) !important;
+}
+
+html body #chat-input-container .chat-input-field > #chat-input,
+html[data-theme="dark"] body #chat-input-container .chat-input-field > #chat-input {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--sl-ink) !important;
+}
+
+/* @coss/command Input Transparency & Icon Spacing Shield (Desktop & Dark Mode) */
+html body [data-slot="command-dialog-popup"] [data-slot="input-control"],
+html[data-theme="dark"] body [data-slot="command-dialog-popup"] [data-slot="input-control"],
+html body [data-slot="command-dialog-popup"] input[data-slot="autocomplete-input"],
+html[data-theme="dark"] body [data-slot="command-dialog-popup"] input[data-slot="autocomplete-input"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--sl-ink) !important;
+}
+
+html body [data-slot="command-dialog-popup"] [data-slot="autocomplete-start-addon"] {
+    inset-inline-start: 12px !important;
+    color: var(--sl-ink-subtle) !important;
+}
+
+html body [data-slot="command-dialog-popup"] input[data-slot="autocomplete-input"] {
+    padding-inline-start: 38px !important;
+    padding-inline-end: 12px !important;
+    min-height: 44px !important;
+    line-height: 1.4 !important;
+}
+
+/* Mobile refinements: Neutral tokens, TabBar bar, Composer, and @coss/command spacing */
+@media (max-width: 767.98px) {
+    html body {
+        --accent-color: #262626;
+    }
+
+    html[data-theme="dark"] body {
+        --accent-color: #f5f5f5;
+    }
+
+    html[data-theme="dark"] body .container,
+    html[data-theme="dark"] body .container > header,
+    html[data-theme="dark"] body #m-appbar,
+    html[data-theme="dark"] body #m-tabbar {
+        background-image: none !important;
+    }
+
+    html body #m-tabbar .m-tab.m-active::before,
+    html[data-theme="dark"] body #m-tabbar .m-tab.m-active::before {
+        background: var(--sl-ink) !important;
+    }
+
+    html body [data-slot="command-dialog-popup"] input[data-slot="autocomplete-input"],
+    html[data-theme="dark"] body [data-slot="command-dialog-popup"] input[data-slot="autocomplete-input"] {
+        padding-inline-start: 38px !important;
+        padding-inline-end: 12px !important;
+        font-size: 16px !important;
+    }
+
+    html body .chat-input-container,
+    html[data-theme="dark"] body .chat-input-container {
+        background: var(--sl-canvas) !important;
+        border-top: 1px solid var(--sl-border) !important;
+    }
+}

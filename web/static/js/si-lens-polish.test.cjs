@@ -361,8 +361,10 @@ function rolesFunctionBody(name) {
     return ROLES_SOURCE.slice(start, end === -1 ? undefined : end);
 }
 
-test('阶段四：品牌图标使用光学钴蓝，不再使用紫色', () => {
-    assert.match(LOGO_SOURCE, /#2563EB/i, '品牌图标需包含光学钴蓝 #2563EB');
+test('阶段四：品牌图标使用 coss.com/ui 中性炭黑，不再使用蓝紫渐变', () => {
+    assert.match(LOGO_SOURCE, /#171717/i, '品牌图标需包含 coss.com/ui 中性炭黑 #171717');
+    assert.match(LOGO_SOURCE, /#FAFAFA/i, '品牌图标前景需使用中性白 #FAFAFA');
+    assert.doesNotMatch(LOGO_SOURCE, /#2563EB/i, '品牌图标不应保留钴蓝 #2563EB');
     assert.doesNotMatch(LOGO_SOURCE, /#7C3AED/i, '品牌图标不应保留紫色 #7C3AED');
 });
 
@@ -456,4 +458,134 @@ test('CSS：移动端几何令牌、抽屉与标签栏统一为光学样式', ()
         /\.m-tab\.m-active svg\s*\{[^}]*background:\s*transparent\s*!important[^}]*border-radius:\s*0\s*!important/,
         '.m-tab.m-active svg 需移除圆形底面'
     );
+});
+
+/* ------------------------------------------------------------------ */
+/* 9. 阶段五：@coss/ui 与 @coss/chat 替换、Lucide 图标与微动效契约      */
+/* ------------------------------------------------------------------ */
+
+const COSS_SRC_DIR = path.join(WEB_DIR, 'coss-ui', 'src');
+const COSS_DIST_DIR = path.join(WEB_DIR, 'static', 'coss');
+const COSS_CSS = fs.readFileSync(path.join(COSS_DIST_DIR, 'coss-ui.css'), 'utf8');
+const MOBILE_UI = fs.readFileSync(path.join(JS_DIR, 'mobile-ui.js'), 'utf8');
+const MOTION = require('./coss-motion.js');
+
+test('阶段五：@coss/ui 与 @coss/chat 源组件齐备', () => {
+    const expected = [
+        'components/ui/command.tsx',
+        'components/ui/toast.tsx',
+        'components/ui/button.tsx',
+        'components/ui/badge.tsx',
+        'components/ui/card.tsx',
+        'components/ui/frame.tsx',
+        'components/ui/kbd.tsx',
+        'components/ui/tabs.tsx',
+        'components/ui/tooltip.tsx',
+        'components/chat/chat-bubble.tsx',
+        'components/chat/chat-typing-indicator.tsx',
+        'components/chat/chat-jump-to-latest-button.tsx',
+        'components/chat/chat-date-pill.tsx',
+        'components/chat/chat-delivery-indicator.tsx',
+        'islands/CossCommandPaletteIsland.tsx',
+        'islands/CossToastIsland.tsx',
+        'islands/CossChatExperienceIsland.tsx',
+        'islands/CossSwarmControlsIsland.tsx'
+    ];
+    for (const relative of expected) {
+        const full = path.join(COSS_SRC_DIR, relative);
+        assert.ok(fs.existsSync(full), `缺少 coss 源组件 ${relative}`);
+        assert.ok(fs.statSync(full).size > 0, `coss 源组件 ${relative} 为空文件`);
+    }
+});
+
+test('阶段五：Vite 产物非空且 @layer base 已作用域化，不注入全局 preflight', () => {
+    for (const name of ['coss-ui.js', 'coss-ui.css']) {
+        const full = path.join(COSS_DIST_DIR, name);
+        assert.ok(fs.existsSync(full), `缺少 Vite 产物 static/coss/${name}`);
+        assert.ok(fs.statSync(full).size > 1024, `Vite 产物 ${name} 体积异常，疑似未构建`);
+    }
+
+    const layerIndex = COSS_CSS.indexOf('@layer base{');
+    assert.ok(layerIndex !== -1, 'coss-ui.css 缺少 @layer base');
+    const body = COSS_CSS.slice(layerIndex + '@layer base{'.length);
+    const firstSelector = body.slice(0, body.indexOf('{'));
+    assert.match(firstSelector, /\.coss-island|\[data-slot\]/, '@layer base 首个选择器需作用域到 .coss-island / [data-slot]');
+    assert.doesNotMatch(
+        firstSelector,
+        /(^|,)\s*(\*|html|body|h1|p|a|ul)(\s*,|\s*$)/,
+        '@layer base 不应向全局元素注入 preflight'
+    );
+});
+
+test('阶段五：模板挂载点、样式顺序与脚本加载', () => {
+    const cssIndex = TEMPLATE.indexOf('/static/coss/coss-ui.css');
+    const polishIndex = TEMPLATE.indexOf('/static/css/si-lens-polish.css');
+    assert.ok(cssIndex !== -1 && polishIndex !== -1, '模板缺少 coss-ui.css 或 si-lens-polish.css');
+    assert.ok(cssIndex < polishIndex, 'coss-ui.css 需先于 si-lens-polish.css 加载，供覆盖层生效');
+
+    for (const id of ['sl-coss-chat-typing-root', 'sl-coss-swarm-status-root', 'sl-coss-cmdk-root', 'sl-coss-toast-root']) {
+        assert.ok(TEMPLATE.includes(`id="${id}"`), `模板缺少挂载点 #${id}`);
+    }
+
+    const returnLatest = TEMPLATE.indexOf('id="chat-return-latest"');
+    const planProgress = TEMPLATE.indexOf('id="agent-plan-progress"');
+    const typingRoot = TEMPLATE.indexOf('id="sl-coss-chat-typing-root"');
+    assert.ok(returnLatest !== -1 && planProgress !== -1, '模板缺少 #chat-return-latest 或 #agent-plan-progress');
+    assert.ok(returnLatest < typingRoot, '#chat-return-latest 需在 #sl-coss-chat-typing-root 之前');
+    assert.ok(planProgress < typingRoot, '#agent-plan-progress 需在 #sl-coss-chat-typing-root 之前');
+
+    assert.match(TEMPLATE, /src="\/static\/js\/coss-motion\.js/, '模板需加载 /static/js/coss-motion.js');
+    assert.match(TEMPLATE, /type="module"\s+src="\/static\/coss\/coss-ui\.js/, '模板需以 module 方式加载 coss-ui.js');
+});
+
+test('阶段五：coss-motion.js 导出纯函数与滑块的几何计算', () => {
+    for (const name of ['TAB_CONTAINER_CONFIGS', 'computeGliderRect', 'syncAllGliders', 'initCossMotion']) {
+        assert.ok(name in MOTION, `coss-motion.js 缺少导出 ${name}`);
+    }
+    assert.ok(Array.isArray(MOTION.TAB_CONTAINER_CONFIGS), 'TAB_CONTAINER_CONFIGS 需为数组');
+    assert.ok(MOTION.TAB_CONTAINER_CONFIGS.length > 0, 'TAB_CONTAINER_CONFIGS 不应为空');
+
+    assert.equal(MOTION.computeGliderRect(null, null), null, '容器或激活项缺失时应返回 null');
+    assert.equal(MOTION.computeGliderRect({}, { offsetWidth: 0, offsetHeight: 0 }), null, '隐藏元素应返回 null');
+    assert.deepEqual(
+        MOTION.computeGliderRect({}, { offsetLeft: 12, offsetTop: 4, offsetWidth: 80, offsetHeight: 32 }),
+        { x: 12, y: 4, width: 80, height: 32 },
+        '可见元素应返回其偏移与尺寸'
+    );
+});
+
+test('阶段五：CSS 覆盖层重映射 coss.com/ui 中性色板与聊天/滑块/层级', () => {
+    for (const token of [
+        '--sl-canvas: #fafafa',
+        '--sl-accent: #262626',
+        '--sl-canvas: #141414',
+        '--sl-chat-user-bg'
+    ]) {
+        assert.ok(CSS.includes(token), `覆盖层缺少 ${token}`);
+    }
+    for (const selector of ['#chat-send-btn', '.coss-tab-glider']) {
+        assert.ok(CSS.includes(selector), `覆盖层缺少选择器 ${selector}`);
+    }
+    assert.match(
+        CSS,
+        /\[data-slot="command-dialog-backdrop"\][\s\S]{0,400}?z-index:\s*12060\s*!important/,
+        '命令面板遮罩需抬升到 z-index: 12060 !important'
+    );
+
+    const reducedStart = CSS.lastIndexOf('@media (prefers-reduced-motion: reduce)');
+    assert.ok(reducedStart !== -1, '缺少 prefers-reduced-motion 保护块');
+    assert.ok(CSS.slice(reducedStart).includes('.coss-page-in'), '.coss-page-in 需在减弱动效块内禁用');
+});
+
+test('阶段五：移动端图标走 Lucide 1.75 描边管线，无硬编码中文', () => {
+    const start = MOBILE_UI.indexOf('var ICON = {');
+    assert.ok(start !== -1, 'mobile-ui.js 缺少 ICON 图标表');
+    const end = MOBILE_UI.indexOf('};', start);
+    const block = MOBILE_UI.slice(start, end === -1 ? undefined : end);
+
+    const svgCount = (block.match(/<svg/g) || []).length;
+    const stroked = (block.match(/stroke-width="1\.75"/g) || []).length;
+    assert.ok(svgCount > 0, 'ICON 图标表不应为空');
+    assert.equal(stroked, svgCount, `ICON 图标需全部使用 1.75 描边（${stroked}/${svgCount}）`);
+    assert.doesNotMatch(block, /[\u4e00-\u9fff]/, 'ICON 图标表不应出现硬编码中文');
 });

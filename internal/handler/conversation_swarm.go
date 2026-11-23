@@ -690,14 +690,14 @@ func buildConversationSwarmSnapshot(
 						eventIdx: len(node.Events) - 1,
 					}
 				}
-				if toolName == "task" || toolName == "transfer_to_agent" || toolName == "record_vulnerability" {
+				if toolName == "task" || toolName == "transfer_to_agent" || toolName == "record_vulnerability" || toolName == "upsert_project_fact" || node.ToolCount == 1 || node.ToolCount%10 == 0 {
 					appendFeed(SwarmFeedEvent{
 						ID:          ev.ID,
 						NodeID:      node.ID,
 						AgentName:   node.AgentName,
 						DisplayName: node.DisplayName,
 						EventType:   "tool_call",
-						Title:       fmt.Sprintf("%s 调用 %s", node.DisplayName, toolName),
+						Title:       fmt.Sprintf("%s · #%d %s", node.DisplayName, node.ToolCount, toolName),
 						Summary:     ev.Summary,
 						Status:      "running",
 						CreatedAt:   ts,

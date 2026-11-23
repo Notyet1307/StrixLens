@@ -173,6 +173,14 @@ function switchPage(pageId) {
     // 页面特定的初始化
     initPage(pageId);
 
+    if (typeof window !== 'undefined' && typeof CustomEvent === 'function') {
+        try {
+            window.dispatchEvent(new CustomEvent('si-lens-page-changed', { detail: { pageId: pageId } }));
+        } catch (err) {
+            // ignore
+        }
+    }
+
     if (typeof applyRBACToUI === 'function') {
         applyRBACToUI(targetPage);
     }

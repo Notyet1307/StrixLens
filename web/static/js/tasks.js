@@ -1645,7 +1645,7 @@ function renderBatchQueues() {
                 <div class="batch-queue-item__inner batch-queue-item__inner--grid">
                     <div class="batch-queue-item__lead">
                         <div class="batch-queue-item__title-row">
-                            <span class="batch-queue-item__role-icon" aria-hidden="true">${escapeHtml(roleIcon)}</span>
+                            <span class="batch-queue-item__role-icon" aria-hidden="true">${typeof window.renderRoleIconMarkup === 'function' ? window.renderRoleIconMarkup(roleIcon, queue.role) : escapeHtml(roleIcon)}</span>
                             <div class="batch-queue-item__titles">${titleBlock}</div>
                         </div>
                         <p class="batch-queue-item__config">${configLine}${cronPausedNote}</p>
@@ -1847,27 +1847,17 @@ async function showBatchQueueDetail(queueId) {
         
         let roleLineVal = '';
         if (queue.role && queue.role !== '') {
-            let roleName = queue.role;
-            let roleIcon = '\uD83D\uDC64';
-            if (Array.isArray(loadedRoles) && loadedRoles.length > 0) {
-                const role = loadedRoles.find(r => r.name === roleName);
-                if (role && role.icon) {
-                    let icon = role.icon;
-                    const unicodeMatch = icon.match(/^"?\\U([0-9A-F]{8})"?$/i);
-                    if (unicodeMatch) {
-                        try {
-                            const codePoint = parseInt(unicodeMatch[1], 16);
-                            icon = String.fromCodePoint(codePoint);
-                        } catch (e) {
-                            // ignore
-                        }
-                    }
-                    roleIcon = icon;
-                }
-            }
-            roleLineVal = roleIcon + ' ' + escapeHtml(roleName);
+            const roleName = queue.role;
+            const roleIcon = getRoleIconForDisplay(roleName, loadedRoles);
+            const iconMarkup = typeof window.renderRoleIconMarkup === 'function'
+                ? window.renderRoleIconMarkup(roleIcon, roleName)
+                : escapeHtml(roleIcon);
+            roleLineVal = `<span class="batch-queue-item__role-icon" aria-hidden="true">${iconMarkup}</span> ${escapeHtml(roleName)}`;
         } else {
-            roleLineVal = '\uD83D\uDD35 ' + escapeHtml(_t('batchQueueDetailModal.defaultRole'));
+            const defaultMarkup = typeof window.renderRoleIconMarkup === 'function'
+                ? window.renderRoleIconMarkup('', '')
+                : '';
+            roleLineVal = `<span class="batch-queue-item__role-icon" aria-hidden="true">${defaultMarkup}</span> ${escapeHtml(_t('batchQueueDetailModal.defaultRole'))}`;
         }
         const agentModeText = batchQueueAgentModeLabel(queue.agentMode);
         const scheduleModeText = queue.scheduleMode === 'cron' ? _t('batchImportModal.scheduleModeCron') : _t('batchImportModal.scheduleModeManual');

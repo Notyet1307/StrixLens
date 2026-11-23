@@ -15,20 +15,13 @@ function _t(key, opts) {
 
 // 返回「知识库未启用」提示区块的 HTML（使用 data-i18n 以便语言切换时自动更新）
 function getKnowledgeNotEnabledHTML() {
+    const bookSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>';
     return `
-        <div class="empty-state" style="text-align: center; padding: 40px 20px;">
-            <div style="font-size: 48px; margin-bottom: 20px;">📚</div>
-            <h3 data-i18n="knowledge.notEnabledTitle" style="margin-bottom: 10px; color: #666;"></h3>
-            <p data-i18n="knowledge.notEnabledHint" style="color: #999; margin-bottom: 20px;"></p>
-            <button data-i18n="knowledge.goToSettings" onclick="switchToSettings()" style="
-                background: #007bff;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 14px;
-            "></button>
+        <div class="empty-state" style="text-align: center; padding: 48px 20px;">
+            <div class="sl-empty-state-icon" aria-hidden="true">${bookSvg}</div>
+            <h3 data-i18n="knowledge.notEnabledTitle" style="margin-bottom: 8px; color: var(--sl-ink, var(--text-primary));"></h3>
+            <p data-i18n="knowledge.notEnabledHint" style="color: var(--sl-ink-muted, var(--text-secondary)); margin-bottom: 20px;"></p>
+            <button type="button" class="btn-primary" data-i18n="knowledge.goToSettings" onclick="switchToSettings()"></button>
         </div>
     `;
 }
@@ -508,33 +501,9 @@ async function updateIndexProgress() {
                         ${escapeHtml(knowledgeIndexErrorAdvice(lastError))}
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button onclick="buildKnowledgeIndex()" style="
-                            background: #007bff;
-                            color: white;
-                            border: none;
-                            padding: 6px 12px;
-                            border-radius: 4px;
-                            cursor: pointer;
-                            font-size: 13px;
-                        ">重试</button>
-                        <button onclick="rebuildKnowledgeIndexFull()" style="
-                            background: #6c757d;
-                            color: white;
-                            border: none;
-                            padding: 6px 12px;
-                            border-radius: 4px;
-                            cursor: pointer;
-                            font-size: 13px;
-                        ">全量重建</button>
-                        <button onclick="stopIndexProgressPolling()" style="
-                            background: #6c757d;
-                            color: white;
-                            border: none;
-                            padding: 6px 12px;
-                            border-radius: 4px;
-                            cursor: pointer;
-                            font-size: 13px;
-                        ">关闭</button>
+                        <button type="button" class="btn-primary btn-small" onclick="buildKnowledgeIndex()">重试</button>
+                        <button type="button" class="btn-secondary btn-small" onclick="rebuildKnowledgeIndexFull()">全量重建</button>
+                        <button type="button" class="btn-secondary btn-small" onclick="stopIndexProgressPolling()">关闭</button>
                     </div>
                 </div>
             `;
@@ -612,7 +581,7 @@ async function updateIndexProgress() {
                     </div>
                     <div class="progress-hint">
                         索引构建完成后，语义搜索功能将可用
-                        ${showResume ? '<br><button type="button" onclick="buildKnowledgeIndex()" style="margin-top:8px;background:#007bff;color:#fff;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;">构建索引</button>' : ''}
+                        ${showResume ? '<br><button type="button" class="btn-primary btn-small" style="margin-top:8px;" onclick="buildKnowledgeIndex()">构建索引</button>' : ''}
                     </div>
                 </div>
             `;

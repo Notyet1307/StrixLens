@@ -87,27 +87,27 @@ test('every control the update page disables by state carries the marker the gat
 	// The other half of the pair: a page that writes `disabled` without the marker silently
 	// loses it the moment the gate runs. Asserted over the rendered strings rather than by
 	// reading the source, so a refactor that drops the attribute is what fails.
-	const sandbox = {
-		console,
-		escapeHtml: (v) => String(v),
-		updateT: (key) => key,
-		renderUpdateSwitchHint: () => '',
-		renderUpdateChangesTable: () => '<div class="update-changes"></div>',
-		isUpdateJobRunning: () => true,
-		updateApplyBlockers: (status) => (status.blockingChanges || []).length ? ['blocked'] : [],
-		updateChecking: true,
-	};
-	vm.createContext(sandbox);
-	for (const fn of ['renderUpdateApplyBody', 'renderUpdateRollbackBody']) {
-		vm.runInContext(sourceOf(fn, UPDATE), sandbox);
+	function makeSandbox(selectedFile) {
+		const sandbox = {
+			console,
+			escapeHtml: (v) => String(v),
+			escapeAttr: (v) => String(v),
+			updateT: (key) => key,
+			renderUpdateSwitchHint: () => '',
+			formatPackageSize: (n) => String(n) + ' B',
+			updateBusy: false,
+			selectedUpdatePackageFile: selectedFile,
+		};
+		vm.createContext(sandbox);
+		vm.runInContext(sourceOf('renderUpdatePackageBody', UPDATE), sandbox);
+		return sandbox;
 	}
-	const withBlocker = sandbox.renderUpdateApplyBody(
-		{ installed: true, canBuild: true, blockingChanges: [{ path: 'a.go' }], updateAvailable: true, diverged: false }, null);
-	const noBlocker = sandbox.renderUpdateApplyBody(
-		{ installed: true, canBuild: true, blockingChanges: [], updateAvailable: true, diverged: false }, null);
-	const rollbackRunning = sandbox.renderUpdateRollbackBody({ hasRollback: true, rollbackTo: 'abc' });
 
-	for (const [label, html] of [['apply(blocked)', withBlocker], ['rollback(running)', rollbackRunning]]) {
+	const noFileHtml = makeSandbox(null).renderUpdatePackageBody(null);
+	const runningHtml = makeSandbox(null).renderUpdatePackageBody({ state: 'running' });
+	const readyHtml = makeSandbox({ name: 'strixlens-v2.zip', size: 2048 }).renderUpdatePackageBody(null);
+
+	for (const [label, html] of [['package(no-file)', noFileHtml], ['package(running)', runningHtml]]) {
 		const buttons = html.match(/<button[^>]*>/g) || [];
 		assert.ok(buttons.length > 0, `${label}: rendered no button`);
 		const disabledTags = buttons.filter((t) => / disabled/.test(t));
@@ -118,14 +118,11 @@ test('every control the update page disables by state carries the marker the gat
 		}
 	}
 
-	// And the *apply* control of an unblocked install must not advertise itself as blocked,
-	// or the gate would keep it dead for someone who can legitimately press it. Other buttons
-	// in the same render may still be state-disabled (checking is one), which is why this
-	// asserts about the apply button by name.
-	const applyTag = (noBlocker.match(/<button[^>]*update-apply-btn[^>]*>/) || [])[0];
-	assert.ok(applyTag, 'no apply button rendered when nothing blocks it');
-	assert.ok(!/disabled/.test(applyTag), `a ready apply control must not be disabled: ${applyTag}`);
-	for (const tag of (noBlocker.match(/<button[^>]*>/g) || [])) {
+	// And when a package file IS selected and idle, the upload control must not be state-disabled.
+	const uploadTag = (readyHtml.match(/<button[^>]*update-package-upload-btn[^>]*>/) || [])[0];
+	assert.ok(uploadTag, 'no upload button rendered when a package file is selected');
+	assert.ok(!/disabled/.test(uploadTag), `a ready package upload control must not be disabled: ${uploadTag}`);
+	for (const tag of (readyHtml.match(/<button[^>]*>/g) || [])) {
 		if (/ disabled/.test(tag)) {
 			assert.match(tag, /data-state-disabled="true"/, `every state-disabled control needs the marker: ${tag}`);
 		}

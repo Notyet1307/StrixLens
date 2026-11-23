@@ -13,7 +13,7 @@
     'use strict';
 
     const NODE_W = 248;
-    const NODE_H = 122;
+    const NODE_H = 144;
     const GAP_X = 34;
     const GAP_Y = 72;
     const PAD_X = 28;
@@ -659,14 +659,14 @@
             pushNodeEvent(node, evObj);
             state._activeTools.set(toolCallId, { nodeId: node.id, eventObj: evObj });
 
-            if (toolName === 'task' || toolName === 'transfer_to_agent' || toolName === 'record_vulnerability') {
+            if (toolName === 'task' || toolName === 'transfer_to_agent' || toolName === 'record_vulnerability' || toolName === 'upsert_project_fact' || node.toolCount === 1 || node.toolCount % 10 === 0) {
                 pushFeedEvent(state, {
                     id: evObj.id,
                     nodeId: node.id,
                     agentName: node.agentName,
                     displayName: node.displayName,
                     eventType: 'tool_call',
-                    title: node.displayName + ' · ' + toolName,
+                    title: node.displayName + ' · #' + node.toolCount + ' ' + toolName,
                     summary: argSummary,
                     status: 'running',
                     createdAt: nowIso
@@ -1027,7 +1027,8 @@
             liveTimer: null,
             pollTimer: null,
             rafQueued: false,
-            lastLiveStreamAt: 0
+            lastLiveStreamAt: 0,
+            lastConvFetchAt: 0
         };
 
         function currentState() {
@@ -1251,8 +1252,9 @@
                 ? ('⚙ ' + n.currentTool + (n.currentActivity ? (' · ' + n.currentActivity) : ''))
                 : (n.currentActivity || n.resultPreview || statusLabel(st));
             const tokens = (n.tokenUsage && n.tokenUsage.totalTokens) || 0;
+            const alertIconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
             const errBadge = n.failedToolCount > 0
-                ? '<span class="swarm-pill swarm-pill--failed">' + n.failedToolCount + ' ⚠</span>'
+                ? '<span class="swarm-pill swarm-pill--failed">' + n.failedToolCount + ' ' + alertIconSvg + '</span>'
                 : '';
             const cardHtml =
                 '<button type="button" class="' + cls.join(' ') + '" data-swarm-node="' + escapeHtml(n.id) + '">' +
@@ -1826,13 +1828,23 @@
 
         root.window.addEventListener('conversation-changed', function (e) {
             const cid = e && e.detail && e.detail.conversationId ? String(e.detail.conversationId).trim() : '';
+            const sameConv = cid !== '' && cid === ui.conversationId;
             ui.conversationId = cid;
-            ui.selectedNodeId = '';
-            ui.zoom = 1;
-            ui.panX = 0;
-            ui.panY = 0;
+            if (!sameConv) {
+                ui.selectedNodeId = '';
+                ui.zoom = 1;
+                ui.panX = 0;
+                ui.panY = 0;
+                ui.lastConvFetchAt = 0;
+            }
             renderChatStrip();
             if (cid) {
+                const now = Date.now();
+                if (sameConv && now - ui.lastConvFetchAt < 800) {
+                    scheduleRender();
+                    return;
+                }
+                ui.lastConvFetchAt = now;
                 void fetchSwarmSnapshot(cid, { silent: true });
             } else {
                 scheduleRender();

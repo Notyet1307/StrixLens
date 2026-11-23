@@ -1169,6 +1169,7 @@ func setupRoutes(
 		protected.GET("/system/update/job", updateHandler.Job)
 		protected.POST("/system/update/check", updateHandler.Check)
 		protected.POST("/system/update/apply", updateHandler.Apply)
+		protected.POST("/system/update/package", updateHandler.UploadPackage)
 		protected.POST("/system/update/restart", updateHandler.Restart)
 		protected.POST("/system/update/rollback", updateHandler.Rollback)
 		protected.POST("/system/update/adopt", updateHandler.Adopt)
@@ -1512,17 +1513,31 @@ func setupRoutes(
 	// OpenAPI规范（需要认证，避免暴露API结构信息）
 	protected.GET("/openapi/spec", openAPIHandler.GetOpenAPISpec)
 
+	// 静态与入口 HTML 缓存策略：HTML 禁止缓存，静态资源每次协商校验，避免移动端浏览器沿用旧脚本与样式
+	router.Use(func(c *gin.Context) {
+		p := c.Request.URL.Path
+		if strings.HasPrefix(p, "/static/") || p == "/favicon.ico" {
+			c.Header("Cache-Control", "no-cache, must-revalidate")
+		}
+		c.Next()
+	})
+
 	// API文档页面（公开访问，但需要登录后才能使用API）
 	router.GET("/api-docs", func(c *gin.Context) {
+		c.Header("Cache-Control", "no-store, no-cache, must-revalidate")
 		c.HTML(http.StatusOK, "api-docs.html", nil)
 	})
 
-	// 静态文件
+	// 静态文件与根路径浏览器图标
 	router.Static("/static", "./web/static")
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.File("./web/static/favicon.ico")
+	})
 	router.LoadHTMLGlob("web/templates/*")
 
 	// 前端页面
 	router.GET("/", func(c *gin.Context) {
+		c.Header("Cache-Control", "no-store, no-cache, must-revalidate")
 		version := app.config.Version
 		if version == "" {
 			version = "v1.0.0"

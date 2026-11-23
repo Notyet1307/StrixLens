@@ -647,3 +647,26 @@ test('阶段六：系统更新仅保留离线上传安装包能力', () => {
         assert.equal(updateJs.includes(legacyEndpoint), false, `update.js 不应保留旧接口 ${legacyEndpoint}`);
     }
 });
+
+test('阶段七：防缓存策略与全站图标/移动端防遮挡回归约束', () => {
+    const logoImgs = TEMPLATE.match(/src="\/static\/si-lens-logo\.svg\?v=/g) || [];
+    assert.ok(logoImgs.length >= 2, '登录页与顶栏 Brand Logo 均须带 ?v= 版本号防缓存');
+
+    const appGo = fs.readFileSync(path.join(path.dirname(WEB_DIR), 'internal', 'app', 'app.go'), 'utf8');
+    assert.match(appGo, /Cache-Control",\s*"no-store,\s*no-cache,\s*must-revalidate"/, '根入口须禁止强缓存 HTML');
+    assert.match(appGo, /Cache-Control",\s*"no-cache,\s*must-revalidate"/, '静态资源须启用协商缓存校验');
+
+    const webshellJs = fs.readFileSync(path.join(JS_DIR, 'webshell.js'), 'utf8');
+    assert.ok(webshellJs.includes('wsRenderRoleIconMarkup'), 'webshell.js 需使用统一 Lucide 角色图标渲染器');
+    assert.doesNotMatch(webshellJs, /escapeHtml\(r\.icon\s*\|\|\s*'\\ud83d\\udd35'\)/, 'webshell.js 不应直接回显裸 icon key');
+
+    const tasksJs = fs.readFileSync(path.join(JS_DIR, 'tasks.js'), 'utf8');
+    assert.doesNotMatch(tasksJs, /roleLineVal\s*=\s*'\\uD83D\\uDD35\s*'/, 'tasks.js 详情弹窗不应再输出裸 🔵 表情');
+
+    const knowledgeJs = fs.readFileSync(path.join(JS_DIR, 'knowledge.js'), 'utf8');
+    assert.ok(knowledgeJs.includes('sl-empty-state-icon'), 'knowledge.js 未启用占位态需使用统一单色图标容器');
+    assert.doesNotMatch(knowledgeJs, /#007bff/, 'knowledge.js 不应硬编码 #007bff 蓝按钮');
+
+    const projectsJs = fs.readFileSync(path.join(JS_DIR, 'projects.js'), 'utf8');
+    assert.doesNotMatch(projectsJs, /role-selection-item-icon-main">\$\{isNone \? '—' : '📁'\}/, 'projects.js 选择面板不应使用 📁 表情');
+});

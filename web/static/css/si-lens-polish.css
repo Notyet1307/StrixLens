@@ -3412,3 +3412,207 @@ html[data-theme="dark"] body .btn-secondary:disabled {
     box-shadow: none !important;
     transform: none !important;
 }
+
+/* ==========================================================================
+   V5 CROSS-PAGE LAYOUT POLISH, ICON CONTAINMENT & MOBILE BLUE-BTN REMOVAL
+   ========================================================================== */
+
+/* Protect icon wells from custom-text spill and normalize SVG sizing */
+html body .role-card-icon,
+html[data-theme="dark"] body .role-card-icon,
+html body .role-selection-item-icon-main,
+html[data-theme="dark"] body .role-selection-item-icon-main,
+html body .role-selector-icon,
+html[data-theme="dark"] body .role-selector-icon {
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+}
+
+html body .role-selector-icon svg,
+html[data-theme="dark"] body .role-selector-icon svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    display: block;
+}
+
+/* Neutral empty-state icon container (replaces oversized 📚 emoji) */
+.sl-empty-state-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    margin: 0 auto 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sl-icon-bg);
+    border: 1px solid var(--sl-icon-border);
+    color: var(--sl-icon-fg);
+    box-shadow: var(--sl-card-bevel), var(--sl-shadow-sm);
+}
+
+.swarm-pill--failed svg {
+    width: 12px;
+    height: 12px;
+    vertical-align: -1.5px;
+    margin-inline-start: 3px;
+    flex-shrink: 0;
+}
+
+/* Settings & data-table horizontal containment on Desktop & Mobile */
+html body .settings-content {
+    min-width: 0 !important;
+}
+
+html body .audit-log-table-wrap,
+html body .token-usage-data-card,
+html body .mcp-stats-timeline__chart-wrap,
+html body .swarm-topo-viewport {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Mobile cross-page layout, vulnerability grid, chart containment & neutral buttons */
+@media (max-width: 767.98px) {
+    html body .dashboard-empty-action,
+    html[data-theme="dark"] body .dashboard-empty-action,
+    html body #page-knowledge-management .empty-state button,
+    html[data-theme="dark"] body #page-knowledge-management .empty-state button,
+    html body #page-knowledge-management .empty-state .btn,
+    html[data-theme="dark"] body #page-knowledge-management .empty-state .btn,
+    html body #hitl-pending-count,
+    html[data-theme="dark"] body #hitl-pending-count,
+    html body .c2-payload-card .btn-primary,
+    html[data-theme="dark"] body .c2-payload-card .btn-primary,
+    html:not([data-theme="dark"]) body #page-c2-payloads .btn-primary,
+    html[data-theme="dark"] body #page-c2-payloads .btn-primary,
+    html:not([data-theme="dark"]) body .c2-payload-card .btn-primary,
+    html:not([data-theme="dark"]) body #c2-build-btn,
+    html body #c2-build-btn,
+    html[data-theme="dark"] body #c2-build-btn,
+    html body .btn-filter.active,
+    html[data-theme="dark"] body .btn-filter.active {
+        background: var(--sl-accent) !important;
+        background-color: var(--sl-accent) !important;
+        border-color: var(--sl-accent) !important;
+        color: var(--sl-accent-ink) !important;
+    }
+
+    html body #page-vulnerabilities .dashboard-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        overflow-x: visible !important;
+        gap: 8px !important;
+        padding-bottom: 0 !important;
+    }
+
+    html body #page-vulnerabilities .stat-card {
+        min-height: 76px !important;
+        padding: 10px 10px !important;
+    }
+
+    html body #page-vulnerabilities .stat-value {
+        font-size: 22px !important;
+        margin: 2px 0 !important;
+    }
+
+    html body .token-usage-charts {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html body .token-usage-chart-card {
+        overflow-x: auto !important;
+        max-width: 100% !important;
+    }
+
+    html body .token-usage-chart-card svg,
+    html body .token-usage-trend-svg {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    html body .c2-tasks-time-presets {
+        flex-wrap: wrap !important;
+    }
+
+    html body .projects-tabs {
+        overflow-x: auto !important;
+        max-width: 100% !important;
+    }
+
+    html body .mcp-stats-timeline__chart {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    html body .mcp-stats-timeline-moments,
+    html body .mcp-stats-timeline-moments__list {
+        flex-wrap: wrap !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    html body .mcp-stats-timeline-moment {
+        max-width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+
+    html body [id^="page-"] .page-header,
+    html[data-theme="dark"] body [id^="page-"] .page-header {
+        padding: 10px 14px !important;
+        gap: 6px !important;
+    }
+
+    html body [id^="page-"] .page-header-actions {
+        gap: 6px !important;
+    }
+
+    html body [id^="page-"] .page-header-actions :is(button, .btn-primary, .btn-secondary, .btn-small) {
+        min-height: 32px !important;
+        height: 32px !important;
+        padding: 0 11px !important;
+        font-size: 12.5px !important;
+    }
+}
+
+/* Neutralize active selector chevrons, "+ New Project" CTA, C2 payload icons & WebShell link icon */
+html body .role-selector-btn.active .role-selector-arrow,
+html[data-theme="dark"] body .role-selector-btn.active .role-selector-arrow,
+html body .chat-composer-context .role-selector-btn.active .role-selector-arrow,
+html[data-theme="dark"] body .chat-composer-context .role-selector-btn.active .role-selector-arrow {
+    color: var(--sl-ink) !important;
+}
+
+html body .chat-project-panel .role-selection-item-main.chat-project-panel-create-btn,
+html[data-theme="dark"] body .chat-project-panel .role-selection-item-main.chat-project-panel-create-btn {
+    border: 1.5px dashed var(--sl-border-strong) !important;
+    background: var(--sl-surface-muted) !important;
+    color: var(--sl-ink) !important;
+    box-shadow: none !important;
+}
+
+html body .chat-project-panel .role-selection-item-main.chat-project-panel-create-btn:hover,
+html[data-theme="dark"] body .chat-project-panel .role-selection-item-main.chat-project-panel-create-btn:hover {
+    background: var(--sl-surface-hover) !important;
+    border-color: var(--sl-ink-muted) !important;
+    color: var(--sl-ink) !important;
+}
+
+html body .c2-payload-card h3 .c2-payload-icon,
+html[data-theme="dark"] body .c2-payload-card h3 .c2-payload-icon,
+html body .c2-payload-card h3 .c2-payload-icon--shell,
+html body .c2-payload-card h3 .c2-payload-icon--beacon {
+    background: var(--sl-icon-bg) !important;
+    color: var(--sl-icon-fg) !important;
+    border: 1px solid var(--sl-icon-border) !important;
+}
+
+html body .webshell-sidebar-header::before {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/%3E%3C/svg%3E") center/contain no-repeat !important;
+}
+
+html[data-theme="dark"] body .webshell-sidebar-header::before {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/%3E%3C/svg%3E") center/contain no-repeat !important;
+}

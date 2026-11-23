@@ -3767,8 +3767,11 @@ function appendChatProjectPanelItem(list, project, selectedId, onSelect, tFn) {
     btn.setAttribute('aria-label', fullName);
     btn.setAttribute('data-selection-detail', fullDesc);
     btn.onclick = () => onSelect(project.id || '');
+    const projectIconSvg = isNone
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>';
     btn.innerHTML = `
-        <div class="role-selection-item-icon-main">${isNone ? '—' : '📁'}</div>
+        <div class="role-selection-item-icon-main">${projectIconSvg}</div>
         <div class="role-selection-item-content-main">
             <div class="role-selection-item-name-main" title="${escapeAttr(fullName)}">${escapeHtml(displayName)}</div>
             <div class="role-selection-item-description-main">${escapeHtml(desc)}</div>

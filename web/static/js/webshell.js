@@ -193,26 +193,33 @@ function wsLoadRoles() {
     }).catch(function () { /* ignore */ });
 }
 
+function wsRenderRoleIconMarkup(icon, roleName) {
+    if (typeof window.renderRoleIconMarkup === 'function') {
+        return window.renderRoleIconMarkup(icon, roleName);
+    }
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>';
+}
+
 function wsUpdateRoleSelectorDisplay() {
     var iconEl = document.getElementById('ws-role-selector-icon');
     var textEl = document.getElementById('ws-role-selector-text');
     if (!iconEl || !textEl) return;
     var cur = (typeof getCurrentRole === 'function') ? getCurrentRole() : (localStorage.getItem('currentRole') || '');
     if (!cur) {
-        iconEl.textContent = '\ud83d\udd35';
+        iconEl.innerHTML = wsRenderRoleIconMarkup('', '');
         textEl.textContent = (typeof window.t === 'function' ? window.t('chat.defaultRole') : '') || '默认';
         return;
     }
     if (wsRolesCache) {
         for (var i = 0; i < wsRolesCache.length; i++) {
             if (wsRolesCache[i].name === cur) {
-                iconEl.textContent = wsRolesCache[i].icon || '\ud83d\udd35';
+                iconEl.innerHTML = wsRenderRoleIconMarkup(wsRolesCache[i].icon || '', cur);
                 textEl.textContent = cur;
                 return;
             }
         }
     }
-    iconEl.textContent = '\ud83d\udd35';
+    iconEl.innerHTML = wsRenderRoleIconMarkup('', cur);
     textEl.textContent = cur;
 }
 
@@ -225,7 +232,7 @@ function wsRenderRoleList() {
     var defSelected = !cur ? ' selected' : '';
     var defDesc = wsTOr('roles.defaultRoleDescription', '默认角色，不额外携带用户提示词，使用所有工具');
     html += '<button type="button" class="role-selection-item-main' + defSelected + '" data-selection-detail="' + escapeHtmlAttr(defDesc) + '" onclick="wsSelectRole(\'\')">' +
-        '<div class="role-selection-item-icon-main">\ud83d\udd35</div>' +
+        '<div class="role-selection-item-icon-main">' + wsRenderRoleIconMarkup('', '') + '</div>' +
         '<div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' +
         (wsTOr('chat.defaultRole', '默认')) +
         '</div><div class="role-selection-item-description-main">' +
@@ -241,7 +248,7 @@ function wsRenderRoleList() {
             var sel = (r.name === cur) ? ' selected' : '';
             var desc = r.description || '';
             html += '<button type="button" class="role-selection-item-main' + sel + '" data-selection-detail="' + escapeHtmlAttr(desc) + '" onclick="wsSelectRole(\'' + r.name.replace(/'/g, "\\'") + '\')">' +
-                '<div class="role-selection-item-icon-main">' + escapeHtml(r.icon || '\ud83d\udd35') + '</div>' +
+                '<div class="role-selection-item-icon-main">' + wsRenderRoleIconMarkup(r.icon || '', r.name) + '</div>' +
                 '<div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' + escapeHtml(r.name) + '</div>' +
                 '<div class="role-selection-item-description-main">' + escapeHtml(desc.substring(0, 60)) + '</div></div>' +
                 (sel ? '<div class="role-selection-checkmark-main">\u2713</div>' : '') +
@@ -323,7 +330,10 @@ function wsSyncAgentMode(value) {
     var icon = document.getElementById('ws-agent-mode-icon');
     if (hid) hid.value = value;
     if (label) label.textContent = (typeof getAgentModeLabelForValue === 'function') ? getAgentModeLabelForValue(value) : value;
-    if (icon) icon.textContent = (typeof getAgentModeIconForValue === 'function') ? getAgentModeIconForValue(value) : '\ud83e\udd16';
+    if (icon) {
+        var iconMap = { single: 'zap', deep: 'network', plan_execute: 'list', supervisor: 'target' };
+        icon.innerHTML = wsSelectorSvg(iconMap[value] || 'bot');
+    }
     var wrapper = document.getElementById('ws-agent-mode-wrapper');
     if (wrapper) {
         wrapper.querySelectorAll('.ws-agent-mode-option').forEach(function (el) {
@@ -2442,6 +2452,18 @@ function webshellAiConvListSelect(conn, convId, messagesContainer, listEl) {
         .catch(function (e) { console.warn('加载对话失败', e); });
 }
 
+function wsSelectorSvg(kind) {
+    var paths = {
+        folder: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>',
+        bot: '<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 16h.01"/><path d="M16 16h.01"/>',
+        zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+        network: '<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
+        list: '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+        target: '<circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/>'
+    };
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (paths[kind] || paths.bot) + '</svg>';
+}
+
 // 选择连接：渲染终端 + 文件管理 Tab，并初始化终端
 function selectWebshell(id, stateReady) {
     currentWebshellId = id;
@@ -2537,7 +2559,7 @@ function selectWebshell(id, stateReady) {
         '<div class="webshell-ai-selectors-row">' +
         '<div class="ws-project-selector-wrapper project-selector-wrapper">' +
         '<button type="button" id="ws-project-btn" class="role-selector-btn" onclick="wsToggleProjectPanel()" aria-label="' + escapeHtml(wsProjectT('projects.chatSelectorButton', '选择项目')) + '" aria-haspopup="listbox" aria-expanded="false" title="' + escapeHtml(wsProjectT('projects.chatSelectorButton', '绑定项目后共享事实黑板（跨对话）')) + '">' +
-        '<span class="role-selector-icon" aria-hidden="true">📁</span>' +
+        '<span class="role-selector-icon" aria-hidden="true">' + wsSelectorSvg('folder') + '</span>' +
         '<span id="ws-project-text" class="role-selector-text">' + escapeHtml(wsProjectT('projects.noProject', '无项目')) + '</span>' +
         '<svg class="role-selector-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
         '</button>' +
@@ -2562,7 +2584,7 @@ function selectWebshell(id, stateReady) {
         '</div></div></div></div>' +
         '<div class="ws-role-selector-wrapper">' +
         '<button type="button" class="role-selector-btn ws-role-selector-btn" id="ws-role-selector-btn" onclick="wsToggleRolePanel()">' +
-        '<span id="ws-role-selector-icon" class="role-selector-icon">\ud83d\udd35</span>' +
+        '<span id="ws-role-selector-icon" class="role-selector-icon">' + wsRenderRoleIconMarkup('', '') + '</span>' +
         '<span id="ws-role-selector-text" class="role-selector-text">' + (wsT('chat.defaultRole') || '默认') + '</span>' +
         '<svg class="role-selector-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
         '</button>' +
@@ -2574,7 +2596,7 @@ function selectWebshell(id, stateReady) {
         '<div class="ws-agent-mode-wrapper" id="ws-agent-mode-wrapper" style="display:none;">' +
         '<div class="agent-mode-inner">' +
         '<button type="button" class="role-selector-btn agent-mode-btn" id="ws-agent-mode-btn" onclick="wsToggleAgentModePanel()">' +
-        '<span id="ws-agent-mode-icon" class="role-selector-icon">\ud83e\udd16</span>' +
+        '<span id="ws-agent-mode-icon" class="role-selector-icon">' + wsSelectorSvg('bot') + '</span>' +
         '<span id="ws-agent-mode-text" class="role-selector-text">' + (wsT('chat.agentModePiSingle') || 'Pi 单代理') + '</span>' +
         '<svg class="role-selector-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
         '</button>' +
@@ -2583,10 +2605,10 @@ function selectWebshell(id, stateReady) {
         '<button type="button" class="role-selection-panel-close" onclick="wsCloseAgentModePanel()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
         '</div>' +
         '<div class="agent-mode-options">' +
-        '<button type="button" class="role-selection-item-main agent-mode-option ws-agent-mode-option" data-value="single" role="option" onclick="wsSelectAgentMode(\'single\')" data-agent-mode-detail="' + escapeHtmlAttr(wsT('chat.agentModePiSingleHint') || 'Pi ChatModelAgent + Runner') + '"><div class="role-selection-item-icon-main">\u26a1</div><div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' + (wsT('chat.agentModePiSingle') || 'Pi 单代理') + '</div><div class="role-selection-item-description-main">' + (wsT('chat.agentModePiSingleHint') || 'Pi ChatModelAgent + Runner') + '</div></div><div class="role-selection-checkmark-main agent-mode-check" data-agent-mode-check="single">\u2713</div></button>' +
-        '<button type="button" class="role-selection-item-main agent-mode-option ws-agent-mode-option" data-value="deep" role="option" onclick="wsSelectAgentMode(\'deep\')" data-agent-mode-detail="' + escapeHtmlAttr(wsT('chat.agentModeDeepHint') || 'Pi 多代理，适合复杂安全测试、多阶段 task 子代理委派与汇总') + '"><div class="role-selection-item-icon-main">\ud83e\udde9</div><div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' + (wsT('chat.agentModeDeep') || 'Deep（DeepAgent）') + '</div><div class="role-selection-item-description-main">' + (wsT('chat.agentModeDeepHint') || 'Pi 多代理，适合复杂安全测试、多阶段 task 子代理委派与汇总') + '</div></div><div class="role-selection-checkmark-main agent-mode-check" data-agent-mode-check="deep">\u2713</div></button>' +
-        '<button type="button" class="role-selection-item-main agent-mode-option ws-agent-mode-option" data-value="plan_execute" role="option" onclick="wsSelectAgentMode(\'plan_execute\')" data-agent-mode-detail="' + escapeHtmlAttr(wsT('chat.agentModePlanExecuteHint') || '规划 → 执行 → 重规划') + '"><div class="role-selection-item-icon-main">\ud83d\udccb</div><div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' + (wsT('chat.agentModePlanExecuteLabel') || 'Plan-Execute') + '</div><div class="role-selection-item-description-main">' + (wsT('chat.agentModePlanExecuteHint') || '规划 → 执行 → 重规划') + '</div></div><div class="role-selection-checkmark-main agent-mode-check" data-agent-mode-check="plan_execute">\u2713</div></button>' +
-        '<button type="button" class="role-selection-item-main agent-mode-option ws-agent-mode-option" data-value="supervisor" role="option" onclick="wsSelectAgentMode(\'supervisor\')" data-agent-mode-detail="' + escapeHtmlAttr(wsT('chat.agentModeSupervisorHint') || '专家路由场景：监督者通过 transfer 动态分派多个专业子代理') + '"><div class="role-selection-item-icon-main">\ud83c\udfaf</div><div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' + (wsT('chat.agentModeSupervisorLabel') || 'Supervisor（专家路由）') + '</div><div class="role-selection-item-description-main">' + (wsT('chat.agentModeSupervisorHint') || '专家路由场景：监督者通过 transfer 动态分派多个专业子代理') + '</div></div><div class="role-selection-checkmark-main agent-mode-check" data-agent-mode-check="supervisor">\u2713</div></button>' +
+        '<button type="button" class="role-selection-item-main agent-mode-option ws-agent-mode-option" data-value="single" role="option" onclick="wsSelectAgentMode(\'single\')" data-agent-mode-detail="' + escapeHtmlAttr(wsT('chat.agentModePiSingleHint') || 'Pi ChatModelAgent + Runner') + '"><div class="role-selection-item-icon-main">' + wsSelectorSvg('zap') + '</div><div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' + (wsT('chat.agentModePiSingle') || 'Pi 单代理') + '</div><div class="role-selection-item-description-main">' + (wsT('chat.agentModePiSingleHint') || 'Pi ChatModelAgent + Runner') + '</div></div><div class="role-selection-checkmark-main agent-mode-check" data-agent-mode-check="single">\u2713</div></button>' +
+        '<button type="button" class="role-selection-item-main agent-mode-option ws-agent-mode-option" data-value="deep" role="option" onclick="wsSelectAgentMode(\'deep\')" data-agent-mode-detail="' + escapeHtmlAttr(wsT('chat.agentModeDeepHint') || 'Pi 多代理，适合复杂安全测试、多阶段 task 子代理委派与汇总') + '"><div class="role-selection-item-icon-main">' + wsSelectorSvg('network') + '</div><div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' + (wsT('chat.agentModeDeep') || 'Deep（DeepAgent）') + '</div><div class="role-selection-item-description-main">' + (wsT('chat.agentModeDeepHint') || 'Pi 多代理，适合复杂安全测试、多阶段 task 子代理委派与汇总') + '</div></div><div class="role-selection-checkmark-main agent-mode-check" data-agent-mode-check="deep">\u2713</div></button>' +
+        '<button type="button" class="role-selection-item-main agent-mode-option ws-agent-mode-option" data-value="plan_execute" role="option" onclick="wsSelectAgentMode(\'plan_execute\')" data-agent-mode-detail="' + escapeHtmlAttr(wsT('chat.agentModePlanExecuteHint') || '规划 → 执行 → 重规划') + '"><div class="role-selection-item-icon-main">' + wsSelectorSvg('list') + '</div><div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' + (wsT('chat.agentModePlanExecuteLabel') || 'Plan-Execute') + '</div><div class="role-selection-item-description-main">' + (wsT('chat.agentModePlanExecuteHint') || '规划 → 执行 → 重规划') + '</div></div><div class="role-selection-checkmark-main agent-mode-check" data-agent-mode-check="plan_execute">\u2713</div></button>' +
+        '<button type="button" class="role-selection-item-main agent-mode-option ws-agent-mode-option" data-value="supervisor" role="option" onclick="wsSelectAgentMode(\'supervisor\')" data-agent-mode-detail="' + escapeHtmlAttr(wsT('chat.agentModeSupervisorHint') || '专家路由场景：监督者通过 transfer 动态分派多个专业子代理') + '"><div class="role-selection-item-icon-main">' + wsSelectorSvg('target') + '</div><div class="role-selection-item-content-main"><div class="role-selection-item-name-main">' + (wsT('chat.agentModeSupervisorLabel') || 'Supervisor（专家路由）') + '</div><div class="role-selection-item-description-main">' + (wsT('chat.agentModeSupervisorHint') || '专家路由场景：监督者通过 transfer 动态分派多个专业子代理') + '</div></div><div class="role-selection-checkmark-main agent-mode-check" data-agent-mode-check="supervisor">\u2713</div></button>' +
         '</div></div></div>' +
         '<input type="hidden" id="ws-agent-mode-select" value="single" autocomplete="off" />' +
         '</div>' +

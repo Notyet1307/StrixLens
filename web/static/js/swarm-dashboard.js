@@ -1252,8 +1252,9 @@
                 ? ('⚙ ' + n.currentTool + (n.currentActivity ? (' · ' + n.currentActivity) : ''))
                 : (n.currentActivity || n.resultPreview || statusLabel(st));
             const tokens = (n.tokenUsage && n.tokenUsage.totalTokens) || 0;
+            const alertIconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
             const errBadge = n.failedToolCount > 0
-                ? '<span class="swarm-pill swarm-pill--failed">' + n.failedToolCount + ' ⚠</span>'
+                ? '<span class="swarm-pill swarm-pill--failed">' + n.failedToolCount + ' ' + alertIconSvg + '</span>'
                 : '';
             const cardHtml =
                 '<button type="button" class="' + cls.join(' ') + '" data-swarm-node="' + escapeHtml(n.id) + '">' +

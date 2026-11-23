@@ -265,9 +265,16 @@
         var c = document.querySelector('.chat-input-container');
         if (!c) return;
         var top = c.getBoundingClientRect().top;
+        var ctx = document.querySelector('.chat-composer-context');
+        if (ctx) {
+            var ctxRect = ctx.getBoundingClientRect();
+            if (ctxRect.height > 0 && ctxRect.top > 0) {
+                top = Math.min(top, ctxRect.top);
+            }
+        }
         var vh = window.innerHeight || document.documentElement.clientHeight;
         var root = document.documentElement.style;
-        root.setProperty('--m-panel-offset', Math.round(Math.max(60, vh - top + 8)) + 'px');
+        root.setProperty('--m-panel-offset', Math.round(Math.max(60, vh - top + 10)) + 'px');
         root.setProperty('--m-panel-maxh', Math.max(200, Math.min(Math.round(top - 16), Math.round(vh * 0.45))) + 'px');
     }
 

@@ -56,6 +56,7 @@
     <link rel="stylesheet" href="/static/css/design-system.css?v=20261115-extra-drawers">
     <link rel="stylesheet" href="/static/coss/coss-ui.css?v=20261123-coss-3">
     <link rel="stylesheet" href="/static/css/si-lens-polish.css?v=20261123-coss-4">
+    <link rel="stylesheet" href="/static/css/easm-drp.css?v=20261123-easm-drp-3">
     <script src="/static/js/router.js?v=20261122-polish-1"></script>
 </head>
 <body>
@@ -258,6 +259,31 @@
                                 <path d="M16 10v6"></path>
                             </svg>
                             <span data-i18n="nav.projects">项目管理</span>
+                        </div>
+                    </div>
+                    <div class="nav-section-label" role="presentation">
+                        <span data-i18n="navGroups.exposure">暴露面</span>
+                    </div>
+                    <div class="nav-item nav-item-has-submenu" data-page="easm" data-require-permission="asset:read">
+                        <div class="nav-item-content" data-title="暴露面治理" onclick="window.toggleSubmenu('easm')" data-i18n="nav.easm" data-i18n-attr="data-title" data-i18n-skip-text="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+                            <span data-i18n="nav.easm">暴露面治理</span>
+                            <svg class="submenu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div class="nav-submenu">
+                            <div class="nav-submenu-item" data-page="easm-overview" onclick="switchPage('easm-overview')" data-i18n="nav.easmOverview">暴露面总览大盘</div>
+                            <div class="nav-submenu-item" data-page="easm-convergence" onclick="switchPage('easm-convergence')" data-i18n="nav.easmConvergence">风险收敛工作台</div>
+                        </div>
+                    </div>
+                    <div class="nav-item nav-item-has-submenu" data-page="drp" data-require-permission="asset:read">
+                        <div class="nav-item-content" data-title="数字风险监测" onclick="window.toggleSubmenu('drp')" data-i18n="nav.drp" data-i18n-attr="data-title" data-i18n-skip-text="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                            <span data-i18n="nav.drp">数字风险监测</span>
+                            <svg class="submenu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div class="nav-submenu">
+                            <div class="nav-submenu-item" data-page="drp-monitor" onclick="switchPage('drp-monitor')" data-i18n="nav.drpMonitor">监测全景与告警</div>
+                            <div class="nav-submenu-item" data-page="drp-config" onclick="switchPage('drp-config')" data-i18n="nav.drpConfig">策略与情报源配置</div>
                         </div>
                     </div>
                     <div class="nav-section-label" role="presentation">
@@ -2225,6 +2251,254 @@
                             <div id="asset-detail-grid" class="asset-detail-grid"></div>
                         </div>
                         <div class="modal-footer"><button class="btn-secondary" onclick="closeAssetDetail()" data-i18n="common.close">关闭</button><button id="asset-detail-edit" class="btn-primary" data-require-permission="asset:write" onclick="editAssetFromDetail()" data-i18n="common.edit">编辑</button></div>
+                    </div>
+                </div>
+
+                <!-- 暴露面治理：总览大盘 -->
+                <div id="page-easm-overview" class="page easm-page">
+                    <div class="page-header">
+                        <h2>暴露面治理总览</h2>
+                        <div class="page-header-actions easm-scan-bar">
+                            <input id="easm-scan-domain" class="easm-scan-input" type="text" placeholder="输入目标域名或 IP（如 example.com）" autocomplete="off">
+                            <button id="easm-trigger-scan-btn" class="btn-primary" data-require-permission="asset:write" type="button" onclick="triggerEASMIncrementalScan()">触发增量测绘</button>
+                            <button class="btn-secondary" type="button" onclick="loadEASMOverview()">刷新</button>
+                            <button class="btn-secondary" type="button" onclick="switchPage('easm-convergence')">风险收敛工作台</button>
+                        </div>
+                    </div>
+                    <div class="page-content easm-content">
+                        <div class="easm-kpi-grid">
+                            <section class="easm-kpi-card">
+                                <span class="easm-kpi-label">在线资产总数</span>
+                                <strong id="easm-kpi-active" class="easm-kpi-value">0</strong>
+                                <span id="easm-kpi-total-sub" class="easm-kpi-sub">累计纳管 0 项资产</span>
+                            </section>
+                            <section class="easm-kpi-card easm-kpi-card--warning">
+                                <span class="easm-kpi-label">待认领影子资产数</span>
+                                <strong id="easm-kpi-shadow" class="easm-kpi-value">0</strong>
+                                <span class="easm-kpi-sub">未在 CMDB 已知基线登记</span>
+                            </section>
+                            <section class="easm-kpi-card">
+                                <span class="easm-kpi-label">本周暴露面新增变更</span>
+                                <strong id="easm-kpi-weekly" class="easm-kpi-value">0</strong>
+                                <span id="easm-kpi-open-sub" class="easm-kpi-sub">待收敛工单 0 条</span>
+                            </section>
+                            <section class="easm-kpi-card easm-kpi-card--ring">
+                                <div>
+                                    <span class="easm-kpi-label">风险收敛率</span>
+                                    <div id="easm-kpi-mttr" class="easm-kpi-sub" style="margin-top:8px;">平均收敛时长 MTTR：0.0h</div>
+                                </div>
+                                <div class="easm-ring-wrap">
+                                    <svg class="easm-ring-svg" viewBox="0 0 66 66">
+                                        <circle class="easm-ring-bg" cx="33" cy="33" r="27"></circle>
+                                        <circle id="easm-kpi-ring-fg" class="easm-ring-fg" cx="33" cy="33" r="27" stroke-dasharray="169.65" stroke-dashoffset="169.65"></circle>
+                                    </svg>
+                                    <span id="easm-kpi-rate-text" class="easm-ring-text">0%</span>
+                                </div>
+                            </section>
+                        </div>
+                        <div class="easm-charts-grid">
+                            <section class="easm-panel">
+                                <div class="easm-panel-head">
+                                    <div><h3>近 30 天新增暴露 vs 已收敛风险</h3><p class="easm-panel-sub">持续跟踪外部暴露面扩张与治理闭环速度</p></div>
+                                    <div class="easm-legend">
+                                        <span><i class="easm-legend-dot" style="background:#f59e0b"></i>新增暴露</span>
+                                        <span><i class="easm-legend-dot" style="background:#10b981"></i>已收敛风险</span>
+                                    </div>
+                                </div>
+                                <div id="easm-trend-chart" class="easm-trend-svg-wrap"></div>
+                            </section>
+                            <section class="easm-panel">
+                                <div class="easm-panel-head">
+                                    <div><h3>高危暴露端口 / 服务 Top 10</h3><p class="easm-panel-sub">标红为数据库、远程管理等高危暴露端口</p></div>
+                                </div>
+                                <div id="easm-top-ports" class="easm-port-bars"></div>
+                            </section>
+                        </div>
+                        <section class="easm-panel">
+                            <div class="easm-panel-head">
+                                <div><h3>实时暴露面漂移时间轴</h3><p class="easm-panel-sub">点击任意变更记录可查看 Before/After 快照差异并发起复测</p></div>
+                                <button class="btn-link" type="button" onclick="switchPage('easm-convergence')">查看全部工单 →</button>
+                            </div>
+                            <div id="easm-drift-timeline" class="easm-timeline"></div>
+                        </section>
+                        <section class="easm-panel">
+                            <div class="easm-panel-head">
+                                <div><h3>暴露面与影子资产台账</h3><p class="easm-panel-sub">支持筛选未知影子资产并一键认领归属部门</p></div>
+                                <div class="drp-filter-bar">
+                                    <select id="easm-filter-shadow" onchange="applyEASMAssetFilters()"><option value="">全部资产</option><option value="true">仅影子资产</option><option value="false">已登记基线</option></select>
+                                    <select id="easm-filter-risk" onchange="applyEASMAssetFilters()"><option value="">全部风险</option><option value="critical">严重</option><option value="high">高危</option><option value="medium">中危</option><option value="low">低危</option></select>
+                                    <input id="easm-filter-q" type="search" placeholder="搜索资产标识 / IP / 服务" onkeydown="if(event.key==='Enter')applyEASMAssetFilters()">
+                                    <button class="btn-secondary" type="button" onclick="applyEASMAssetFilters()">筛选</button>
+                                </div>
+                            </div>
+                            <div class="asset-table-wrap">
+                                <table class="asset-table">
+                                    <thead><tr><th>资产标识</th><th>IP</th><th>端口/服务</th><th>影子标记</th><th>风险等级</th><th>归属部门</th><th>操作</th></tr></thead>
+                                    <tbody id="easm-assets-tbody"><tr><td colspan="7" class="muted">加载中...</td></tr></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- 暴露面治理：风险收敛工作台 -->
+                <div id="page-easm-convergence" class="page easm-page">
+                    <div class="page-header">
+                        <h2>风险收敛工作台</h2>
+                        <div class="page-header-actions">
+                            <div id="easm-conv-view-switch" class="easm-view-switch" role="group">
+                                <button type="button" data-view="kanban" class="is-active" onclick="switchEASMConvergenceView('kanban')">看板视图</button>
+                                <button type="button" data-view="list" onclick="switchEASMConvergenceView('list')">列表视图</button>
+                            </div>
+                            <select id="easm-conv-status-filter" class="easm-scan-input" style="min-width:130px;" onchange="loadEASMConvergence()">
+                                <option value="">全部状态</option><option value="open">待研判</option><option value="assigned">已认领</option><option value="fixing">整改中</option><option value="verifying">待复测</option><option value="closed">已收敛</option><option value="false_positive">误报</option>
+                            </select>
+                            <input id="easm-conv-search" class="easm-scan-input" type="search" placeholder="搜索资产 / 责任人" onkeydown="if(event.key==='Enter')loadEASMConvergence()">
+                            <button class="btn-secondary" type="button" onclick="loadEASMConvergence()">刷新</button>
+                        </div>
+                    </div>
+                    <div class="page-content easm-content">
+                        <div id="easm-convergence-kanban" class="easm-kanban-board"></div>
+                        <div id="easm-convergence-list-wrap" class="easm-panel" hidden>
+                            <div class="asset-table-wrap">
+                                <table class="asset-table">
+                                    <thead><tr><th>资产标识</th><th>变更类型</th><th>漂移摘要</th><th>责任人</th><th>收敛状态</th><th>操作</th></tr></thead>
+                                    <tbody id="easm-convergence-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EASM 风险收敛详情抽屉 -->
+                <div id="easm-convergence-drawer" class="modal" data-ui-surface="drawer" style="display:none" role="dialog" aria-modal="true" onclick="if(event.target===this)closeEASMConvergenceDrawer()">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <div><h2 id="easm-drawer-title">暴露面变更详情</h2><p id="easm-drawer-subtitle" class="asset-page-subtitle"></p></div>
+                            <button type="button" class="modal-close" onclick="closeEASMConvergenceDrawer()" aria-label="关闭">&times;</button>
+                        </div>
+                        <div class="modal-body" style="display:flex;flex-direction:column;gap:16px;">
+                            <div>
+                                <h4 style="margin:0 0 8px;">Before / After 快照差异（JSON Diff）</h4>
+                                <div class="easm-diff-grid">
+                                    <div class="easm-diff-box"><div class="easm-diff-box-head">变更前快照 (Before)</div><pre id="easm-diff-before">{}</pre></div>
+                                    <div class="easm-diff-box"><div class="easm-diff-box-head">变更后快照 (After)</div><pre id="easm-diff-after">{}</pre></div>
+                                </div>
+                            </div>
+                            <div class="drp-form-grid">
+                                <label class="drp-form-field"><span>指派责任人</span><input id="easm-drawer-assignee" type="text" placeholder="如：secops-alice"></label>
+                                <label class="drp-form-field"><span>收敛状态</span><select id="easm-drawer-status"><option value="open">待研判</option><option value="assigned">已认领</option><option value="fixing">整改中</option><option value="verifying">待复测</option><option value="closed">已收敛</option><option value="false_positive">误报</option></select></label>
+                            </div>
+                            <div>
+                                <h4 style="margin:0 0 8px;">自动化复测验证结果</h4>
+                                <div class="easm-diff-box"><pre id="easm-drawer-retest-result">尚未发起自动化复测验证</pre></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn-secondary" onclick="closeEASMConvergenceDrawer()">关闭</button>
+                            <button type="button" class="btn-secondary" data-require-permission="asset:write" onclick="saveEASMConvergenceDrawer(false)">保存更新</button>
+                            <button type="button" class="btn-primary" data-require-permission="asset:write" onclick="saveEASMConvergenceDrawer(true)">发起复测验证并收敛</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数字风险与泄露监测：全景与多渠道告警中心 -->
+                <div id="page-drp-monitor" class="page drp-page">
+                    <div class="page-header">
+                        <h2>数字风险与泄露监测</h2>
+                        <div class="page-header-actions">
+                            <button id="drp-trigger-scan-btn" class="btn-primary" data-require-permission="asset:write" type="button" onclick="triggerDRPScan()">立即同步情报源</button>
+                            <button class="btn-secondary" type="button" onclick="loadDRPMonitor()">刷新</button>
+                            <button class="btn-secondary" type="button" onclick="switchPage('drp-config')">策略与情报源配置</button>
+                        </div>
+                    </div>
+                    <div class="page-content drp-content">
+                        <section id="drp-channel-matrix" class="drp-channel-matrix"></section>
+                        <section class="drp-panel">
+                            <div class="drp-panel-head">
+                                <div><h3>多渠道敏感泄露告警中心</h3><p class="easm-panel-sub">所有凭据片段在落库前均已完成强制脱敏（仅保留首尾 2 位）</p></div>
+                                <div class="drp-filter-bar">
+                                    <select id="drp-filter-severity" onchange="applyDRPEventFilters()"><option value="all">全部等级</option><option value="critical">严重</option><option value="high">高危</option><option value="medium">中危</option><option value="low">低危</option></select>
+                                    <select id="drp-filter-status" onchange="applyDRPEventFilters()"><option value="all">全部状态</option><option value="new">待核实</option><option value="confirmed">确认泄露</option><option value="remediated">已处置</option><option value="ignored">误报</option></select>
+                                    <input id="drp-filter-q" type="search" placeholder="搜索实体 / 邮箱 / 摘要" onkeydown="if(event.key==='Enter')applyDRPEventFilters()">
+                                    <button class="btn-secondary" type="button" onclick="applyDRPEventFilters()">搜索</button>
+                                </div>
+                            </div>
+                            <div id="drp-channel-tabs" class="drp-tabs" role="tablist">
+                                <button type="button" class="drp-tab is-active" data-channel="all" onclick="selectDRPChannelTab('all')">全部渠道</button>
+                                <button type="button" class="drp-tab" data-channel="code_repo" onclick="selectDRPChannelTab('code_repo')">代码仓库</button>
+                                <button type="button" class="drp-tab" data-channel="cloud_drive" onclick="selectDRPChannelTab('cloud_drive')">云盘监测</button>
+                                <button type="button" class="drp-tab" data-channel="doc_library" onclick="selectDRPChannelTab('doc_library')">文库监测</button>
+                                <button type="button" class="drp-tab" data-channel="darkweb_cti" onclick="selectDRPChannelTab('darkweb_cti')">外部情报源</button>
+                                <button type="button" class="drp-tab" data-channel="stealer_cti" onclick="selectDRPChannelTab('stealer_cti')">凭据预警</button>
+                                <button type="button" class="drp-tab" data-channel="platform_email" onclick="selectDRPChannelTab('platform_email')">平台与邮箱</button>
+                            </div>
+                            <div class="asset-table-wrap">
+                                <table class="asset-table">
+                                    <thead><tr><th>风险等级</th><th>来源渠道</th><th>泄露类型</th><th>受影响实体</th><th>脱敏命中摘要</th><th>首次发现时间</th><th>处置状态</th><th>操作</th></tr></thead>
+                                    <tbody id="drp-events-tbody"><tr><td colspan="8" class="muted">加载中...</td></tr></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- DRP 告警处置抽屉 -->
+                <div id="drp-event-drawer" class="modal" data-ui-surface="drawer" style="display:none" role="dialog" aria-modal="true" onclick="if(event.target===this)closeDRPEventDrawer()">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <div><h2 id="drp-drawer-title">泄露告警研判</h2><p id="drp-drawer-subtitle" class="asset-page-subtitle"></p></div>
+                            <button type="button" class="modal-close" onclick="closeDRPEventDrawer()" aria-label="关闭">&times;</button>
+                        </div>
+                        <div class="modal-body" style="display:flex;flex-direction:column;gap:16px;">
+                            <div>
+                                <h4 style="margin:0 0 8px;">脱敏上下文片段</h4>
+                                <div id="drp-drawer-snippet" class="drp-snippet-box"></div>
+                                <div style="margin-top:6px;font-size:12px;color:var(--text-secondary);">来源引用：<code id="drp-drawer-ref">-</code></div>
+                            </div>
+                            <div>
+                                <h4 style="margin:0 0 8px;">建议处置清单</h4>
+                                <ul id="drp-drawer-checklist" class="drp-remediation-list"></ul>
+                            </div>
+                            <label class="drp-form-field"><span>处置记录 / 凭证备注</span><textarea id="drp-drawer-note" rows="3" placeholder="记录令牌吊销单号、下架回执或强制改密工单号..."></textarea></label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn-secondary" onclick="closeDRPEventDrawer()">关闭</button>
+                            <button type="button" class="btn-secondary" data-require-permission="asset:write" onclick="triageActiveDRPEvent('ignored', true)">误报并加白降噪</button>
+                            <button type="button" class="btn-secondary" data-require-permission="asset:write" onclick="triageActiveDRPEvent('confirmed', false)">确认泄露</button>
+                            <button type="button" class="btn-primary" data-require-permission="asset:write" onclick="triageActiveDRPEvent('remediated', false)">标记已处置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数字风险与泄露监测：策略与情报源配置页 -->
+                <div id="page-drp-config" class="page drp-page">
+                    <div class="page-header">
+                        <h2>DRP 策略与情报源配置</h2>
+                        <div class="page-header-actions">
+                            <button class="btn-secondary" type="button" onclick="switchPage('drp-monitor')">返回告警中心</button>
+                            <button class="btn-secondary" type="button" onclick="loadDRPConfig()">刷新</button>
+                        </div>
+                    </div>
+                    <div class="page-content drp-content">
+                        <div class="drp-config-grid">
+                            <section class="drp-panel">
+                                <div class="drp-panel-head"><div><h3>企业资产特征词与监测规则</h3><p class="easm-panel-sub">配置域名、邮箱后缀、品牌词与敏感代码特征正则</p></div></div>
+                                <div class="drp-form-grid">
+                                    <label class="drp-form-field"><span>规则名称</span><input id="drp-rule-name" type="text" placeholder="如：核心域名代码泄露监测"></label>
+                                    <label class="drp-form-field"><span>监测渠道组</span><select id="drp-rule-channel"><option value="code_repo">代码仓库</option><option value="cloud_drive">云盘监测</option><option value="doc_library">文库监测</option><option value="darkweb_cti">外部情报源</option><option value="stealer_cti">凭据预警</option><option value="platform_email">平台与邮箱</option></select></label>
+                                    <label class="drp-form-field drp-form-field--wide"><span>监测关键词 / 域名 / 邮箱后缀（逗号分隔）</span><input id="drp-rule-keywords" type="text" placeholder="corp.example, @corp.example, 内部项目代号"></label>
+                                    <label class="drp-form-field"><span>白名单排除词（逗号分隔）</span><input id="drp-rule-exclude" type="text" placeholder="test-repo, example-doc"></label>
+                                    <label class="drp-form-field"><span>定时调度 Cron</span><input id="drp-rule-cron" type="text" value="0 */6 * * *"></label>
+                                </div>
+                                <div><button class="btn-primary" data-require-permission="asset:write" type="button" onclick="createDRPRuleFromForm()">添加监测规则</button></div>
+                                <div id="drp-rules-list" style="display:flex;flex-direction:column;gap:10px;margin-top:6px;"></div>
+                            </section>
+                            <section class="drp-panel">
+                                <div class="drp-panel-head"><div><h3>策略引擎与 CTI 情报源连接器</h3><p class="easm-panel-sub">统一通过 IntelligenceProvider 插件接口接入，支持独立开关与密钥脱敏存储</p></div></div>
+                                <div id="drp-connectors-grid" class="drp-connector-grid"></div>
+                            </section>
+                        </div>
                     </div>
                 </div>
 
@@ -7180,6 +7454,7 @@
     <script src="/static/js/notifications.js"></script>
     <script src="/static/js/info-collect.js?v=20261115-extra-drawers"></script>
     <script src="/static/js/assets.js?v=20260717-7"></script>
+    <script src="/static/js/easm-drp.js?v=20261123-easm-drp-3"></script>
     <script src="/static/js/agents.js"></script>
     <script src="/static/js/dashboard.js?v=20261011-token-settings-cache-only"></script>
     <script src="/static/js/chat-scroll.js?v=20260815-1-20261113-chat-scroll"></script>
@@ -7188,7 +7463,7 @@
     <script src="/static/js/chat.js?v=20261118-pi-usage-summary"></script>
     <script src="/static/js/chat-plan-progress.js?v=20260815-1"></script>
     <script src="/static/js/swarm-dashboard.js?v=20261123-coss-3"></script>
-    <script src="/static/js/command-palette.js?v=20261122-polish-1"></script>
+    <script src="/static/js/command-palette.js?v=20261123-easm-drp-2"></script>
     <script src="/static/js/hitl.js?v=20260819-1-pagination-20261027"></script>
     <script src="/static/js/tool-guard.js?v=20261010-conflict"></script>
     <script src="/static/js/token-usage.js?v=20261012-token-analytics"></script>

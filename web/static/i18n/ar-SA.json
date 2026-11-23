@@ -312,6 +312,7 @@
   },
   "navGroups": {
     "workbench": "مساحة العمل",
+    "exposure": "سطح الهجوم",
     "operations": "العمليات الهجومية",
     "capabilities": "قدرات الذكاء",
     "administration": "الحوكمة والإدارة",

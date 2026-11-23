@@ -76,6 +76,7 @@ type App struct {
 	c2WatchdogCancel   context.CancelFunc        // 看门狗取消函数
 	c2Handler          *handler.C2Handler        // C2 REST（与 Manager 生命周期同步）
 	storageHandler     *handler.StorageHandler   // 运行空间占用统计与垃圾清理
+	easmDRPHandler     *handler.EASMDRPHandler   // 暴露面治理与数字风险监测（含定时调度）
 	auditSvc           *audit.Service
 }
 
@@ -459,6 +460,7 @@ func New(cfg *config.Config, log *logger.Logger, configPath, updateActivation st
 	vulnerabilityHandler := handler.NewVulnerabilityHandler(db, log.Logger)
 	vulnerabilityHandler.SetTaskStateProvider(agentHandler)
 	assetHandler := handler.NewAssetHandler(db, log.Logger)
+	easmDRPHandler := handler.NewEASMDRPHandler(db, log.Logger)
 	projectHandler := handler.NewProjectHandler(db, log.Logger)
 	rbacHandler := handler.NewRBACHandler(db, log.Logger)
 	rbacHandler.SetAudit(auditSvc)
@@ -538,8 +540,10 @@ func New(cfg *config.Config, log *logger.Logger, configPath, updateActivation st
 		c2WatchdogCancel:   watchdogCancel,
 		c2Handler:          c2Handler,
 		storageHandler:     storageHandler,
+		easmDRPHandler:     easmDRPHandler,
 		auditSvc:           auditSvc,
 	}
+	easmDRPHandler.StartScheduler()
 	// 飞书/钉钉长连接（无需公网），启用时在后台启动；后续前端应用配置时会通过 RestartRobotConnections 重启
 	app.startRobotConnections()
 	alertCtx, alertCancel := context.WithCancel(context.Background())
@@ -642,6 +646,7 @@ func New(cfg *config.Config, log *logger.Logger, configPath, updateActivation st
 		app, // 传递 App 实例以便动态获取 knowledgeHandler
 		vulnerabilityHandler,
 		assetHandler,
+		easmDRPHandler,
 		projectHandler,
 		workflowHandler,
 		webshellHandler,
@@ -823,6 +828,9 @@ func (a *App) Shutdown() {
 }
 
 func (a *App) shutdown() {
+	if a.easmDRPHandler != nil {
+		a.easmDRPHandler.StopScheduler()
+	}
 	if a.agentHandler != nil {
 		a.agentHandler.ShutdownTasks()
 	}
@@ -960,6 +968,7 @@ func setupRoutes(
 	app *App, // 传递 App 实例以便动态获取 knowledgeHandler
 	vulnerabilityHandler *handler.VulnerabilityHandler,
 	assetHandler *handler.AssetHandler,
+	easmDRPHandler *handler.EASMDRPHandler,
 	projectHandler *handler.ProjectHandler,
 	workflowHandler *handler.WorkflowHandler,
 	webshellHandler *handler.WebShellHandler,
@@ -1104,6 +1113,32 @@ func setupRoutes(
 		protected.POST("/assets/merge", security.RequirePermission("asset:write"), assetHandler.Merge)
 		protected.PUT("/assets/:id", assetHandler.Update)
 		protected.DELETE("/assets/:id", assetHandler.Delete)
+
+		// 暴露面治理（EASM）与数字风险监测（DRP）
+		easmV1 := protected.Group("/v1/easm")
+		{
+			easmV1.GET("/dashboard", easmDRPHandler.GetEASMDashboard)
+			easmV1.GET("/assets", easmDRPHandler.ListEASMAssets)
+			easmV1.POST("/assets", easmDRPHandler.CreateEASMAsset)
+			easmV1.PATCH("/assets/:id", easmDRPHandler.UpdateEASMAsset)
+			easmV1.POST("/scans/trigger", easmDRPHandler.TriggerEASMScan)
+			easmV1.GET("/convergence", easmDRPHandler.ListEASMConvergence)
+			easmV1.PATCH("/convergence/:id", easmDRPHandler.UpdateEASMConvergence)
+		}
+		drpV1 := protected.Group("/v1/drp")
+		{
+			drpV1.GET("/overview", easmDRPHandler.GetDRPOverview)
+			drpV1.GET("/events", easmDRPHandler.ListDRPEvents)
+			drpV1.PATCH("/events/:id/triage", easmDRPHandler.TriageDRPEvent)
+			drpV1.GET("/rules", easmDRPHandler.ListDRPRules)
+			drpV1.POST("/rules", easmDRPHandler.CreateDRPRule)
+			drpV1.PUT("/rules/:id", easmDRPHandler.UpdateDRPRule)
+			drpV1.DELETE("/rules/:id", easmDRPHandler.DeleteDRPRule)
+			drpV1.GET("/connectors", easmDRPHandler.ListDRPConnectors)
+			drpV1.PUT("/connectors/:id", easmDRPHandler.UpdateDRPConnector)
+			drpV1.POST("/connectors/:id/test", easmDRPHandler.TestDRPConnector)
+			drpV1.POST("/scans/trigger", easmDRPHandler.TriggerDRPScan)
+		}
 
 		// 批量任务管理
 		protected.POST("/batch-tasks", agentHandler.CreateBatchQueue)
@@ -2334,7 +2369,7 @@ func corsMiddleware(configuredOrigins []string) gin.HandlerFunc {
 			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 		c.Writer.Header().Set("Access-Control-Max-Age", "600")
 
 		if c.Request.Method == "OPTIONS" {

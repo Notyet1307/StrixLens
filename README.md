@@ -1,20 +1,20 @@
 <div align="center">
-  <img src="images/logo.png" alt="CyberStrikeAI Logo" width="200" >
+  <img src="web/static/si-lens-logo.svg" alt="StrixLens Logo" width="96">
 </div>
 
-# CyberStrikeAI
+# StrixLens
 
 
 [中文](README_CN.md) | [English](README.md)
 
 **The system of action for AI-native cybersecurity—where intent becomes governed execution, evidence becomes operational memory, and every operation improves the next.**
 
-CyberStrikeAI connects planning, execution, human oversight, evidence, and replay in one auditable workspace. Built in Go, it combines Pi-powered agents, MCP-native tools, RAG knowledge, visual workflows, and attack-chain modeling and analysis for authorized security operations.
+StrixLens connects planning, execution, human oversight, evidence, and replay in one auditable workspace. Built in Go, it combines Pi-powered agents, MCP-native tools, RAG knowledge, visual workflows, and attack-chain modeling and analysis for authorized security operations.
 
 **Start here:** [Quick start](#quick-start-one-command-deployment) · [Documentation](docs/en-US/README.md) · [Security hardening](docs/en-US/security-hardening.md)
 
 > [!IMPORTANT]
-> Use CyberStrikeAI only on systems you own or are explicitly authorized to test. For shared or production environments, review the [security model](docs/en-US/security-model.md) and [hardening guide](docs/en-US/security-hardening.md) before enabling high-risk tools, WebShell, or C2 capabilities.
+> Use StrixLens only on systems you own or are explicitly authorized to test. For shared or production environments, review the [security model](docs/en-US/security-model.md) and [hardening guide](docs/en-US/security-hardening.md) before enabling high-risk tools, WebShell, or C2 capabilities.
 
 ## Interface & Integration Preview
 
@@ -157,20 +157,20 @@ CyberStrikeAI connects planning, execution, human oversight, evidence, and repla
 
 ## Plugins
 
-CyberStrikeAI includes optional integrations under `plugins/`.
+StrixLens includes optional integrations under `plugins/`.
 
 - **Burp Suite extension**: `plugins/burp-suite/cyberstrikeai-burp-extension/`  
   Build output: `plugins/burp-suite/cyberstrikeai-burp-extension/dist/cyberstrikeai-burp-extension.jar`  
   Docs: `plugins/burp-suite/cyberstrikeai-burp-extension/README.md`
 - **Browser extension (Chrome / Edge)**: `plugins/browser-extension/cyberstrikeai-browser-extension/`  
-  Capture Network traffic in DevTools and send it to CyberStrikeAI for AI-assisted security testing—aligned with the Burp plugin.  
+  Capture Network traffic in DevTools and send it to StrixLens for AI-assisted security testing—aligned with the Burp plugin.  
   Install: `chrome://extensions/` → Load unpacked → F12 → **CyberStrikeAI** tab  
   Package output: `plugins/browser-extension/cyberstrikeai-browser-extension/dist/cyberstrikeai-browser-extension.zip`  
   Docs: `plugins/browser-extension/cyberstrikeai-browser-extension/README.md` / `README.zh-CN.md`
 
 ## Tool Overview
 
-CyberStrikeAI ships with 100+ curated tools covering the whole kill chain:
+StrixLens ships with 100+ curated tools covering the whole kill chain:
 
 <details>
 <summary><strong>View the complete tool categories</strong></summary>
@@ -205,8 +205,8 @@ See [tools/README_EN.md](tools/README_EN.md) for tool definitions, customization
 
 **One-Command Deployment:**
 ```bash
-git clone https://github.com/Ed1s0nZ/CyberStrikeAI.git
-cd CyberStrikeAI
+git clone https://github.com/Notyet1307/StrixLens.git
+cd StrixLens
 chmod +x run.sh && ./run.sh
 ```
 
@@ -299,7 +299,7 @@ right on the console page - the official repository, your own fork, or somebody 
 installation unpacked from a Release archive (no git) can be previewed and connected from the same
 page and updates in one click from then on.
 
-**CyberStrikeAI upgrade script:**
+**StrixLens upgrade script:**
 1. (First time) enable the script: `chmod +x upgrade.sh`
 2. Upgrade with: `./upgrade.sh` (optional flags: `--check`, `--tag vX.Y.Z`, `--repo owner/name`, `--no-venv`, `--yes`). Local `tools/`, `roles/`, `skills/` and `agents/` are always preserved.
 3. The script will back up your `config.yaml` and `data/`, upgrade the code, update `config.yaml`'s `version`, then restart the server.
@@ -350,7 +350,7 @@ ai:
 ## Project Layout
 
 ```
-CyberStrikeAI/
+StrixLens/
 ├── cmd/                 # Server, MCP stdio entrypoints, tooling
 ├── internal/            # Agent, MCP core, handlers, EASM/DRP (`internal/easmdrp`), C2 (`internal/c2`), security executor
 ├── web/                 # Static SPA + templates
@@ -384,46 +384,13 @@ Compress the 5 MB nuclei report, summarize critical CVEs, and attach the artifac
 Build an attack chain for the latest engagement and export the node list with severity >= high.
 ```
 
-## 404Starlink 
-
-<img src="./images/404StarLinkLogo.png" width="30%">
-
-CyberStrikeAI has joined [404Starlink](https://github.com/knownsec/404StarLink)
-
-## TCH Top-Ranked Intelligent Pentest Project  
-<div align="left">
-  <a href="https://zc.tencent.com/competition/competitionHackathon?code=cha004" target="_blank">
-    <img src="./images/tch.png" alt="TCH Top-Ranked Intelligent Pentest Project" width="30%">
-  </a>
-</div>
-
-
-
----
-
-## Community and Support
-
-- Join the community on [Discord](https://discord.gg/8PjVCMu8Zw).
-
-<details>
-<summary><strong>WeCom group</strong></summary>
-
-<img src="./images/wecom-group-cyberstrikeai-qr.png" alt="CyberStrikeAI WeCom group QR code" width="280">
-
-</details>
-
-## License
-
-CyberStrikeAI is licensed under the Apache License 2.0.  
-See the [LICENSE](LICENSE) file for details.
-
 ---
 
 ## ⚠️ Disclaimer
 
 **This tool is for educational and authorized testing purposes only!**
 
-CyberStrikeAI is a professional security testing platform designed to assist security researchers, penetration testers, and IT professionals in conducting security assessments and vulnerability research **with explicit authorization**.
+StrixLens is a professional security testing platform designed to assist security researchers, penetration testers, and IT professionals in conducting security assessments and vulnerability research **with explicit authorization**.
 
 **By using this tool, you agree to:**
 - Use this tool only on systems where you have clear written authorization

@@ -779,6 +779,120 @@ html[data-theme="dark"] .drp-conn-error {
     font-size: 13px;
 }
 
+.drp-form-field input[type="checkbox"] {
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.drp-source-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.drp-source-toolbar .btn-link {
+    padding: 0;
+    font-size: 12px;
+}
+
+.drp-source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 8px;
+}
+
+.drp-source-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    margin: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-primary);
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+
+.drp-source-card:hover {
+    border-color: color-mix(in srgb, var(--accent-color, #2563eb) 45%, var(--border-color));
+}
+
+.drp-source-card:has(input:checked) {
+    border-color: var(--accent-color, #2563eb);
+    background: color-mix(in srgb, var(--accent-color, #2563eb) 8%, var(--bg-primary));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color, #2563eb) 25%, transparent);
+}
+
+.drp-source-mark {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    position: relative;
+}
+
+.drp-source-card:has(input:checked) .drp-source-mark {
+    border-color: var(--accent-color, #2563eb);
+    background: var(--accent-color, #2563eb);
+}
+
+.drp-source-card:has(input:checked) .drp-source-mark::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid #fff;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+}
+
+.drp-source-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.drp-source-copy strong {
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.drp-source-copy em {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-style: normal;
+    line-height: 1.3;
+}
+
+.drp-form-field--wide > small {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
 @media (max-width: 1200px) {
     .easm-kpi-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -9,6 +9,7 @@ test('easm-drp exports all expected EASM and DRP UI handlers', () => {
     const expected = [
         'loadEASMOverview',
         'triggerEASMIncrementalScan',
+        'triggerEASMExposureAssess',
         'claimShadowAsset',
         'applyEASMAssetFilters',
         'loadEASMConvergence',

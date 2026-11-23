@@ -45,7 +45,23 @@ func DefaultConnectors() []ConnectorMetadata {
 			ChannelGroup: ChannelCodeRepo,
 			ProviderType: "gitleaks_trufflehog",
 			DefaultCron:  "0 */4 * * *",
-			CoverageNote: "GitHub / Gitee / GitLab 或本地 Git 仓库敏感凭据扫描",
+			CoverageNote: "GitHub Code Search、本地目录或自定义代码网关",
+		},
+		{
+			ID:           "conn_code_gitlab",
+			Name:         "GitLab 代码检索",
+			ChannelGroup: ChannelCodeRepo,
+			ProviderType: "gitlab_api",
+			DefaultCron:  "0 */4 * * *",
+			CoverageNote: "对接 GitLab.com 或自建 GitLab /api/v4 代码检索",
+		},
+		{
+			ID:           "conn_code_gitee",
+			Name:         "Gitee 代码检索",
+			ChannelGroup: ChannelCodeRepo,
+			ProviderType: "gitee_api",
+			DefaultCron:  "0 */4 * * *",
+			CoverageNote: "对接 Gitee 公开仓库检索 API",
 		},
 		{
 			ID:           "conn_cloud_drive",
@@ -69,7 +85,7 @@ func DefaultConnectors() []ConnectorMetadata {
 			ChannelGroup: ChannelDarkwebCTI,
 			ProviderType: "opencti_stix",
 			DefaultCron:  "0 */6 * * *",
-			CoverageNote: "通过 OpenCTI GraphQL API 订阅合规 STIX 2.1 外部威胁预警",
+			CoverageNote: "对接 OpenCTI，或把 Endpoint 指向已授权 MISP /events/restSearch",
 		},
 		{
 			ID:           "conn_cti_credential",
@@ -77,7 +93,7 @@ func DefaultConnectors() []ConnectorMetadata {
 			ChannelGroup: ChannelStealerCTI,
 			ProviderType: "cti_credential_feed",
 			DefaultCron:  "0 */6 * * *",
-			CoverageNote: "对接合规第三方凭据泄露情报 API（强制脱敏入库）",
+			CoverageNote: "对接合规凭据情报 API 或已授权 MISP，结果强制脱敏入库",
 		},
 		{
 			ID:           "conn_platform_email",
@@ -86,6 +102,14 @@ func DefaultConnectors() []ConnectorMetadata {
 			ProviderType: "domain_breach_api",
 			DefaultCron:  "0 0 * * *",
 			CoverageNote: "对接 Have I Been Pwned v3 或自定义企业域名泄露 API",
+		},
+		{
+			ID:           "conn_platform_public",
+			Name:         "新媒体与移动应用公开索引",
+			ChannelGroup: ChannelPlatformEmail,
+			ProviderType: "platform_public_index",
+			DefaultCron:  "0 */12 * * *",
+			CoverageNote: "通过 SearXNG、Bing 或百度公开索引监测新媒体与应用市场",
 		},
 	}
 }
@@ -111,12 +135,16 @@ func NewConnectorRegistryWithClient(client *http.Client) *ConnectorRegistry {
 	for _, m := range DefaultConnectors() {
 		metas[m.ID] = m
 	}
-	r.Register(&codeRepoProvider{meta: metas["conn_code_gitleaks"], client: client, scanner: NewGitleaksTruffleHogAdapter()})
+	codeScanner := NewGitleaksTruffleHogAdapter()
+	r.Register(&codeRepoProvider{meta: metas["conn_code_gitleaks"], client: client, scanner: codeScanner})
+	r.Register(&codeRepoProvider{meta: metas["conn_code_gitlab"], client: client, scanner: codeScanner})
+	r.Register(&codeRepoProvider{meta: metas["conn_code_gitee"], client: client, scanner: codeScanner})
 	r.Register(&osintSearchProvider{meta: metas["conn_cloud_drive"], client: client, mode: "cloud"})
 	r.Register(&osintSearchProvider{meta: metas["conn_doc_metadata"], client: client, mode: "doc"})
 	r.Register(&openCTIProvider{meta: metas["conn_cti_opencti"], client: client})
 	r.Register(&credentialCTIProvider{meta: metas["conn_cti_credential"], client: client})
 	r.Register(&domainBreachProvider{meta: metas["conn_platform_email"], client: client})
+	r.Register(&osintSearchProvider{meta: metas["conn_platform_public"], client: client, mode: "platform"})
 	return r
 }
 
@@ -176,6 +204,18 @@ func (p *codeRepoProvider) TestConnection(ctx context.Context, cfg ConnectorRunt
 		}
 		return nil
 	}
+	if isGitLabEndpoint(ep) || (p.meta.ID == "conn_code_gitlab" && ep == "") {
+		if ep == "" || secret == "" {
+			return fmt.Errorf("%w: 请配置 GitLab 地址（如 https://gitlab.com）与 Private Token", ErrConnectorUnconfigured)
+		}
+		return p.testGitLab(ctx, ep, secret)
+	}
+	if isGiteeEndpoint(ep) || (p.meta.ID == "conn_code_gitee" && ep == "") {
+		if ep == "" || secret == "" {
+			return fmt.Errorf("%w: 请配置 Gitee 地址（如 https://gitee.com）与私人令牌", ErrConnectorUnconfigured)
+		}
+		return p.testGitee(ctx, ep, secret)
+	}
 	if ep == "" && secret == "" {
 		return fmt.Errorf("%w: 请配置 GitHub PAT（API Key）、本地代码目录路径或自定义监测网关 URL", ErrConnectorUnconfigured)
 	}
@@ -211,7 +251,16 @@ func (p *codeRepoProvider) FetchAlerts(ctx context.Context, cfg ConnectorRuntime
 	ep := strings.TrimSpace(cfg.EndpointURL)
 	secret := strings.TrimSpace(cfg.APIKeySecret)
 	if localDir, ok := asLocalDir(ep); ok {
-		return p.scanner.ScanLocalPath(ctx, localDir, keywords)
+		findings, scanErr := p.scanner.ScanLocalPath(ctx, localDir, keywords)
+		for i := range findings {
+			if findings[i].SourcePlatform == "" || findings[i].SourcePlatform == "Code Scanner" {
+				findings[i].SourcePlatform = "本地授权仓库"
+			}
+		}
+		return findings, scanErr
+	}
+	if routed, handled, routeErr := p.routeCodeHost(ctx, cfg, ep, secret, keywords); handled {
+		return routed, routeErr
 	}
 	if ep == "" && secret == "" {
 		return nil, fmt.Errorf("%w: 请配置 GitHub PAT（API Key）、本地代码目录路径或自定义监测网关 URL", ErrConnectorUnconfigured)
@@ -337,6 +386,9 @@ func (p *openCTIProvider) SourceType() string      { return p.meta.ProviderType 
 func (p *openCTIProvider) ChannelCategory() string { return p.meta.ChannelGroup }
 
 func (p *openCTIProvider) TestConnection(ctx context.Context, cfg ConnectorRuntimeConfig) error {
+	if isMISPEndpoint(cfg.EndpointURL) {
+		return testMISPConnection(ctx, p.client, cfg)
+	}
 	ep, secret, err := requireEndpointAndKey(cfg, "OpenCTI GraphQL URL 与 API Token")
 	if err != nil {
 		return err
@@ -366,6 +418,12 @@ func (p *openCTIProvider) TestConnection(ctx context.Context, cfg ConnectorRunti
 }
 
 func (p *openCTIProvider) FetchAlerts(ctx context.Context, cfg ConnectorRuntimeConfig, keywords []string, _ time.Time) ([]RawLeakFinding, error) {
+	if isMISPEndpoint(cfg.EndpointURL) {
+		return fetchMISPEvents(ctx, p.client, cfg, ChannelDarkwebCTI, keywords)
+	}
+	if u, err := url.Parse(cfg.EndpointURL); err == nil && u.Path != "" && u.Path != "/" && !strings.HasSuffix(u.Path, "/graphql") {
+		return fetchGenericJSONFeed(ctx, p.client, cfg.EndpointURL, cfg.APIKeySecret, ChannelDarkwebCTI, "授权暗网情报网关", keywords, time.Time{})
+	}
 	ep, secret, err := requireEndpointAndKey(cfg, "OpenCTI GraphQL URL 与 API Token")
 	if err != nil {
 		return nil, err
@@ -484,6 +542,9 @@ func (p *credentialCTIProvider) TestConnection(ctx context.Context, cfg Connecto
 	if ep == "" {
 		return fmt.Errorf("%w: 请配置合规凭据泄露 CTI 网关 Endpoint URL", ErrConnectorUnconfigured)
 	}
+	if isMISPEndpoint(ep) {
+		return testMISPConnection(ctx, p.client, cfg)
+	}
 	status, body, err := doHTTPRequest(ctx, p.client, http.MethodGet, ep, nil, buildAuthHeaders(cfg.APIKeySecret))
 	if err != nil {
 		return err
@@ -498,6 +559,9 @@ func (p *credentialCTIProvider) FetchAlerts(ctx context.Context, cfg ConnectorRu
 	ep := strings.TrimSpace(cfg.EndpointURL)
 	if ep == "" {
 		return nil, fmt.Errorf("%w: 请配置合规凭据泄露 CTI 网关 Endpoint URL", ErrConnectorUnconfigured)
+	}
+	if isMISPEndpoint(ep) {
+		return fetchMISPEvents(ctx, p.client, cfg, ChannelStealerCTI, keywords)
 	}
 	return fetchGenericJSONFeed(ctx, p.client, ep, cfg.APIKeySecret, ChannelStealerCTI, "CTI Credential Feed", keywords, since)
 }
@@ -682,7 +746,11 @@ func (p *osintSearchProvider) TestConnection(ctx context.Context, cfg ConnectorR
 	if ep == "" {
 		return fmt.Errorf("%w: 请配置 SearXNG 或 OSINT 检索网关 Endpoint URL", ErrConnectorUnconfigured)
 	}
-	testURL, err := appendQueryParams(ep, map[string]string{"q": "healthcheck", "format": "json"})
+	params := map[string]string{"q": "healthcheck", "format": "json"}
+	if useHTMLSearch(ep) {
+		params = htmlSearchParams(ep, "healthcheck")
+	}
+	testURL, err := appendQueryParams(ep, params)
 	if err != nil {
 		return err
 	}
@@ -704,73 +772,88 @@ func (p *osintSearchProvider) FetchAlerts(ctx context.Context, cfg ConnectorRunt
 	if len(keywords) == 0 {
 		return nil, nil
 	}
-	scopeExpr := "(site:pan.baidu.com OR site:aliyundrive.com OR site:alipan.com OR site:drive.google.com OR site:1drv.ms OR site:dropbox.com OR site:mega.nz OR site:weiyun.com OR site:box.com)"
 	defaultPlatform := "OSINT 云盘监测"
 	if p.mode == "doc" {
-		scopeExpr = "(site:wenku.baidu.com OR site:docin.com OR site:doc88.com OR site:book118.com OR site:scribd.com OR site:slideshare.net)"
 		defaultPlatform = "OSINT 文库监测"
+	} else if p.mode == "platform" {
+		defaultPlatform = "互联网平台公开索引"
 	}
 	now := time.Now().UTC()
 	out := make([]RawLeakFinding, 0)
+	sources := SelectedSources(p.meta.ChannelGroup, cfg.EnabledSources)
+	htmlMode := useHTMLSearch(ep)
 	for _, kw := range keywords {
 		k := strings.TrimSpace(kw)
 		if k == "" {
 			continue
 		}
-		q := k + " " + scopeExpr
-		reqURL, err := appendQueryParams(ep, map[string]string{"q": q, "format": "json"})
-		if err != nil {
-			return nil, err
+		queries := SourceQueries(p.meta.ChannelGroup, cfg.EnabledSources, k)
+		if len(queries) == 0 {
+			queries = []string{k}
 		}
-		status, body, err := doHTTPRequest(ctx, p.client, http.MethodGet, reqURL, nil, buildAuthHeaders(cfg.APIKeySecret))
-		if err != nil {
-			return nil, err
-		}
-		if status >= 400 {
-			return nil, fmt.Errorf("OSINT 检索网关返回 HTTP %d: %s", status, truncateErr(body))
-		}
-
-		// Try SearXNG `{results: [...]}` shape first, then fallback to generic feed parser.
-		var searx struct {
-			Results []struct {
-				Title   string `json:"title"`
-				URL     string `json:"url"`
-				Content string `json:"content"`
-				Engine  string `json:"engine"`
-			} `json:"results"`
-		}
-		if json.Unmarshal(body, &searx) == nil && len(searx.Results) > 0 {
-			for _, r := range searx.Results {
-				if strings.TrimSpace(r.URL) == "" && strings.TrimSpace(r.Title) == "" {
-					continue
-				}
-				sev := "medium"
-				if p.mode == "cloud" {
-					sev = "high"
-				}
-				out = append(out, RawLeakFinding{
-					ChannelGroup:   p.meta.ChannelGroup,
-					SourcePlatform: firstNonEmptyStr(r.Engine, defaultPlatform),
-					LeakType:       "internal_doc",
-					Severity:       sev,
-					Title:          firstNonEmptyStr(r.Title, fmt.Sprintf("命中公开检索关键词「%s」", k)),
-					SourceRef:      r.URL,
-					MatchedRule:    "osint:" + p.mode + ":" + k,
-					RawSnippet:     firstNonEmptyStr(r.Content, r.Title, r.URL),
-					AffectedEntity: k,
-					DetectedAt:     now,
-				})
+		for _, q := range queries {
+			params := map[string]string{"q": q, "format": "json"}
+			if htmlMode {
+				params = htmlSearchParams(ep, q)
 			}
-			continue
+			reqURL, err := appendQueryParams(ep, params)
+			if err != nil {
+				return nil, err
+			}
+			status, body, err := doHTTPRequest(ctx, p.client, http.MethodGet, reqURL, nil, buildAuthHeaders(cfg.APIKeySecret))
+			if err != nil {
+				return nil, err
+			}
+			if status >= 400 {
+				return nil, fmt.Errorf("OSINT 检索网关返回 HTTP %d: %s", status, truncateErr(body))
+			}
+			if htmlMode {
+				out = append(out, parseHTMLIndexLinks(body, p.meta.ChannelGroup, k, sources)...)
+				continue
+			}
+			var searx struct {
+				Results []struct {
+					Title   string `json:"title"`
+					URL     string `json:"url"`
+					Content string `json:"content"`
+					Engine  string `json:"engine"`
+				} `json:"results"`
+			}
+			if json.Unmarshal(body, &searx) == nil && len(searx.Results) > 0 {
+				for _, item := range searx.Results {
+					if strings.TrimSpace(item.URL) == "" && strings.TrimSpace(item.Title) == "" {
+						continue
+					}
+					sev := "medium"
+					if p.mode == "cloud" {
+						sev = "high"
+					}
+					finding := RawLeakFinding{
+						ChannelGroup:   p.meta.ChannelGroup,
+						SourcePlatform: firstNonEmptyStr(item.Engine, defaultPlatform),
+						LeakType:       "internal_doc",
+						Severity:       sev,
+						Title:          firstNonEmptyStr(item.Title, fmt.Sprintf("命中公开检索关键词「%s」", k)),
+						SourceRef:      item.URL,
+						MatchedRule:    "osint:" + p.mode + ":" + k,
+						RawSnippet:     firstNonEmptyStr(item.Content, item.Title, item.URL),
+						AffectedEntity: k,
+						DetectedAt:     now,
+					}
+					out = append(out, attributePlatform(finding, p.meta.ChannelGroup, cfg.EnabledSources))
+				}
+				continue
+			}
+			generic, err := parseGenericJSONFeed(body, p.meta.ChannelGroup, defaultPlatform, k)
+			if err != nil {
+				return nil, err
+			}
+			for _, item := range generic {
+				out = append(out, attributePlatform(item, p.meta.ChannelGroup, cfg.EnabledSources))
+			}
 		}
-
-		generic, err := parseGenericJSONFeed(body, p.meta.ChannelGroup, defaultPlatform, k)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, generic...)
 	}
-	return out, nil
+	return dedupeFindings(out), nil
 }
 
 // ============================================================================
@@ -797,8 +880,8 @@ func asLocalDir(ep string) (string, bool) {
 }
 
 func isGitHubEndpoint(ep string) bool {
-	low := strings.ToLower(ep)
-	return strings.Contains(low, "api.github.com") || strings.HasSuffix(strings.TrimRight(low, "/"), "/search/code")
+	u, err := url.Parse(ep)
+	return err == nil && (strings.EqualFold(u.Hostname(), "api.github.com") || strings.HasSuffix(strings.TrimRight(u.Path, "/"), "/search/code"))
 }
 
 func githubSearchCodeURL(ep string) string {
@@ -834,7 +917,8 @@ func normalizeOpenCTIURL(ep string) string {
 }
 
 func isHIBPEndpoint(ep string) bool {
-	return strings.Contains(strings.ToLower(ep), "haveibeenpwned.com")
+	u, err := url.Parse(ep)
+	return err == nil && strings.EqualFold(u.Hostname(), "haveibeenpwned.com")
 }
 
 func buildAuthHeaders(secret string) map[string]string {

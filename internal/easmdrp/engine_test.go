@@ -373,3 +373,131 @@ func TestSchedulerReloadAndValidateCron(t *testing.T) {
 		t.Fatalf("expected 1 scheduled job after reload, got count=%d active=%d err=%v", count2, sched.ActiveJobCount(), err)
 	}
 }
+
+func TestGitLabGiteeMISPAndPublicIndex(t *testing.T) {
+	gitlabSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("PRIVATE-TOKEN") != "gl-token" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		if strings.HasSuffix(r.URL.Path, "/version") {
+			_, _ = w.Write([]byte(`{"version":"16.0.0"}`))
+			return
+		}
+		_, _ = w.Write([]byte(`[{"basename":".env","path":".env","data":"password=GitLabSecret99","project_id":7,"ref":"main"}]`))
+	}))
+	defer gitlabSrv.Close()
+
+	giteeSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("access_token") != "gitee-token" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		if strings.HasSuffix(r.URL.Path, "/user") {
+			_, _ = w.Write([]byte(`{"login":"ops"}`))
+			return
+		}
+		_, _ = w.Write([]byte(`[{"full_name":"acme/config","html_url":"https://gitee.com/acme/config","description":"password=GiteeSecret99"}]`))
+	}))
+	defer giteeSrv.Close()
+
+	htmlSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`<a href="https://pan.baidu.com/s/1abc">内部备份</a>`))
+	}))
+	defer htmlSrv.Close()
+
+	mispSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "misp-key" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		if strings.HasSuffix(r.URL.Path, "/getVersion") {
+			_, _ = w.Write([]byte(`{"version":"2.4"}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"response":[{"Event":{"id":"9","info":"茶马古道 提及 acme.com","date":"2026-01-02","threat_level_id":"1","Attribute":[{"type":"text","value":"acme.com","comment":"forum mention"}]}}]}`))
+	}))
+	defer mispSrv.Close()
+
+	reg := NewConnectorRegistry()
+	ctx := context.Background()
+	gitlab, ok := reg.Get("conn_code_gitlab")
+	if !ok {
+		t.Fatal("missing gitlab connector")
+	}
+	glCfg := ConnectorRuntimeConfig{EndpointURL: gitlabSrv.URL + "/api/v4", APIKeySecret: "gl-token"}
+	if err := gitlab.TestConnection(ctx, glCfg); err != nil {
+		t.Fatalf("gitlab test: %v", err)
+	}
+	glFindings, err := gitlab.FetchAlerts(ctx, glCfg, []string{"acme"}, time.Time{})
+	if err != nil || len(glFindings) != 1 || glFindings[0].SourcePlatform != "GitLab" || glFindings[0].Severity != "high" {
+		t.Fatalf("gitlab findings: err=%v items=%+v", err, glFindings)
+	}
+
+	gitee, _ := reg.Get("conn_code_gitee")
+	geCfg := ConnectorRuntimeConfig{EndpointURL: giteeSrv.URL + "/api/v5", APIKeySecret: "gitee-token"}
+	if err := gitee.TestConnection(ctx, geCfg); err != nil {
+		t.Fatalf("gitee test: %v", err)
+	}
+	geFindings, err := gitee.FetchAlerts(ctx, geCfg, []string{"acme"}, time.Time{})
+	if err != nil || len(geFindings) != 1 || geFindings[0].SourcePlatform != "Gitee" {
+		t.Fatalf("gitee findings: err=%v items=%+v", err, geFindings)
+	}
+
+	cloud, _ := reg.Get("conn_cloud_drive")
+	htmlFindings, err := cloud.FetchAlerts(ctx, ConnectorRuntimeConfig{EndpointURL: htmlSrv.URL + "/html"}, []string{"acme"}, time.Time{})
+	if err != nil || len(htmlFindings) != 1 || htmlFindings[0].SourcePlatform != "百度网盘" {
+		t.Fatalf("html index findings: err=%v items=%+v", err, htmlFindings)
+	}
+
+	octi, _ := reg.Get("conn_cti_opencti")
+	mispCfg := ConnectorRuntimeConfig{EndpointURL: mispSrv.URL + "/events/restSearch", APIKeySecret: "misp-key"}
+	if err := octi.TestConnection(ctx, mispCfg); err != nil {
+		t.Fatalf("misp test: %v", err)
+	}
+	mispFindings, err := octi.FetchAlerts(ctx, mispCfg, []string{"acme.com"}, time.Time{})
+	if err != nil || len(mispFindings) != 1 || mispFindings[0].SourcePlatform != "茶马古道" || mispFindings[0].Severity != "critical" {
+		t.Fatalf("misp findings: err=%v items=%+v", err, mispFindings)
+	}
+	if ProviderCovers("conn_code_gitlab", ChannelCodeRepo, []string{"github"}) {
+		t.Fatal("gitlab connector should not cover github-only rules")
+	}
+	if !ProviderCovers("conn_code_gitlab", ChannelCodeRepo, []string{"gitlab"}) {
+		t.Fatal("gitlab connector should cover gitlab rules")
+	}
+}
+
+func TestExposureAssessmentParsers(t *testing.T) {
+	services := ParseNmapServices("80/tcp open http nginx 1.18\n6379/tcp open redis Redis key-value store\n")
+	if services[80].Name != "http" || services[6379].Version == "" {
+		t.Fatalf("unexpected nmap parse: %+v", services)
+	}
+	httpx := ParseHttpxJSONLines([]byte("{\"url\":\"https://app.example:8443/\",\"title\":\"Jenkins\",\"status_code\":200,\"tech\":[\"Jenkins\"]}\n"))
+	info, ok := httpx["app.example:8443"]
+	if !ok || info.Title != "Jenkins" || len(info.Tech) != 1 {
+		t.Fatalf("unexpected httpx parse: %+v", httpx)
+	}
+	level, notes := ClassifyExposure(DiscoveredAsset{
+		Identifier:  "app.example:8443",
+		Port:        8443,
+		ServiceName: "https",
+		Fingerprint: map[string]interface{}{"title": "Jenkins", "service_version": "2.426"},
+	})
+	if level != "high" || len(notes) == 0 {
+		t.Fatalf("expected admin console note, level=%s notes=%v", level, notes)
+	}
+	_, diffs := ComputeAssetDiffs(DiscoveredAsset{
+		Identifier:  "app.example:8443",
+		Port:        8443,
+		Fingerprint: map[string]interface{}{"exposure_findings": []string{"疑似管理入口或敏感控制台：jenkins"}},
+	}, nil, true)
+	found := false
+	for _, d := range diffs {
+		if d.ChangeType == ChangeExposureAssessed {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("expected exposure ticket, got %+v", diffs)
+	}
+}

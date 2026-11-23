@@ -99,7 +99,7 @@ func ComputeAssetDiffs(discovered DiscoveredAsset, prev *ExistingAssetSnapshot, 
 				DetectedAt: now,
 			})
 		}
-		return isShadow, diffs
+		return isShadow, appendExposureDiff(diffs, discovered, nil, map[string]interface{}{"exposure_findings": []string{}}, afterMap, now)
 	}
 
 	isShadow = prev.IsShadow && !inCMDBBaseline
@@ -142,7 +142,44 @@ func ComputeAssetDiffs(discovered DiscoveredAsset, prev *ExistingAssetSnapshot, 
 		})
 	}
 
-	return isShadow, diffs
+	return isShadow, appendExposureDiff(diffs, discovered, prev, beforeMap, afterMap, now)
+}
+
+func appendExposureDiff(diffs []AssetSnapshotDiff, discovered DiscoveredAsset, prev *ExistingAssetSnapshot, before, after map[string]interface{}, now time.Time) []AssetSnapshotDiff {
+	notes := exposureNotes(discovered.Fingerprint)
+	if len(notes) == 0 {
+		return diffs
+	}
+	if prev != nil && strings.Join(exposureNotes(prev.Fingerprint), "|") == strings.Join(notes, "|") {
+		return diffs
+	}
+	return append(diffs, AssetSnapshotDiff{
+		ChangeType: ChangeExposureAssessed,
+		Summary:    fmt.Sprintf("暴露面安全验证：%s。%s", discovered.Identifier, strings.Join(notes, "；")),
+		Before:     before,
+		After:      after,
+		DetectedAt: now,
+	})
+}
+
+func exposureNotes(fp map[string]interface{}) []string {
+	if len(fp) == 0 {
+		return nil
+	}
+	switch v := fp["exposure_findings"].(type) {
+	case []string:
+		return append([]string(nil), v...)
+	case []interface{}:
+		out := make([]string, 0, len(v))
+		for _, item := range v {
+			if s, ok := item.(string); ok && strings.TrimSpace(s) != "" {
+				out = append(out, s)
+			}
+		}
+		return out
+	default:
+		return nil
+	}
 }
 
 // ValidateConvergenceTransition verifies that a convergence status value is valid.

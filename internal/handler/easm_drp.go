@@ -380,6 +380,7 @@ func (h *EASMDRPHandler) TriggerEASMScan(c *gin.Context) {
 		TargetDomain string                    `json:"target_domain"`
 		Ports        []int                     `json:"ports"`
 		Assets       []easmdrp.DiscoveredAsset `json:"assets"` // Optional direct snapshot injection for OpenAPI / worker callbacks
+		Assess       bool                      `json:"assess"`
 	}
 	if c.Request.ContentLength > 0 {
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -410,6 +411,12 @@ func (h *EASMDRPHandler) TriggerEASMScan(c *gin.Context) {
 		enginesUsed = batch.EnginesUsed
 		warnings = batch.Warnings
 		engineName = h.discovery.Name()
+	}
+	if req.Assess && len(discovered) > 0 {
+		assessed := easmdrp.AssessExposedAssets(c.Request.Context(), discovered, 12)
+		discovered = assessed.Assets
+		enginesUsed = append(enginesUsed, assessed.Engines...)
+		warnings = append(warnings, assessed.Notes...)
 	}
 
 	res := easmdrp.ScanResult{
@@ -488,6 +495,125 @@ func (h *EASMDRPHandler) TriggerEASMScan(c *gin.Context) {
 		}
 	}
 
+	res.CompletedAt = time.Now().UTC()
+	c.JSON(http.StatusOK, res)
+}
+
+// AssessEASMAssets handles POST /api/v1/easm/assess.
+// It reviews stored or newly discovered assets with built-in probing and optional nmap/httpx.
+// Exploit scripts are not executed.
+func (h *EASMDRPHandler) AssessEASMAssets(c *gin.Context) {
+	var req struct {
+		TargetDomain string `json:"target_domain"`
+		Limit        int    `json:"limit"`
+	}
+	if c.Request.ContentLength > 0 {
+		_ = c.ShouldBindJSON(&req)
+	}
+	started := time.Now().UTC()
+	limit := req.Limit
+	if limit <= 0 || limit > 20 {
+		limit = 12
+	}
+	discovered := make([]easmdrp.DiscoveredAsset, 0)
+	execMode := "exposure_assess"
+	engineName := "strixlens_exposure_review"
+	var warnings []string
+	if strings.TrimSpace(req.TargetDomain) != "" {
+		batch, err := h.discovery.DiscoverWithOptions(c.Request.Context(), req.TargetDomain, nil)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "资产测绘执行失败: " + err.Error()})
+			return
+		}
+		discovered = batch.Assets
+		warnings = append(warnings, batch.Warnings...)
+		execMode = batch.ExecutionMode
+		engineName = h.discovery.Name()
+	} else {
+		items, _, err := h.db.ListEASMAssets(database.EASMAssetFilter{Status: "active", Page: 1, PageSize: limit})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "读取暴露面资产失败: " + err.Error()})
+			return
+		}
+		for _, item := range items {
+			discovered = append(discovered, easmdrp.DiscoveredAsset{
+				AssetType:   item.AssetType,
+				Identifier:  item.Identifier,
+				IPAddress:   item.IPAddress,
+				Port:        item.Port,
+				ServiceName: item.ServiceName,
+				Fingerprint: item.Fingerprint,
+				RiskLevel:   item.RiskLevel,
+				OwnerDept:   item.OwnerDept,
+				Source:      "exposure_assess",
+			})
+		}
+	}
+	if len(discovered) == 0 {
+		c.JSON(http.StatusOK, easmdrp.ScanResult{
+			Engine:        engineName,
+			ExecutionMode: execMode,
+			Target:        strings.TrimSpace(req.TargetDomain),
+			Warnings:      []string{"没有可验证的暴露面资产"},
+			StartedAt:     started,
+			CompletedAt:   time.Now().UTC(),
+		})
+		return
+	}
+	assessed := easmdrp.AssessExposedAssets(c.Request.Context(), discovered, limit)
+	warnings = append(warnings, assessed.Notes...)
+	res := easmdrp.ScanResult{
+		Engine:          engineName,
+		ExecutionMode:   execMode,
+		Target:          strings.TrimSpace(req.TargetDomain),
+		EnginesUsed:     assessed.Engines,
+		Warnings:        warnings,
+		DiscoveredCount: len(assessed.Assets),
+		StartedAt:       started,
+	}
+	for _, item := range assessed.Assets {
+		if strings.TrimSpace(item.Identifier) == "" {
+			continue
+		}
+		prev, _ := h.db.GetEASMAssetByKey(item.AssetType, item.Identifier)
+		var prevSnap *easmdrp.ExistingAssetSnapshot
+		if prev != nil {
+			prevSnap = &easmdrp.ExistingAssetSnapshot{
+				ID: prev.ID, AssetType: prev.AssetType, Identifier: prev.Identifier,
+				IPAddress: prev.IPAddress, Port: prev.Port, ServiceName: prev.ServiceName,
+				Fingerprint: prev.Fingerprint, IsShadow: prev.IsShadow, RiskLevel: prev.RiskLevel, Status: prev.Status,
+			}
+		}
+		inCMDB := h.db.IsInCMDBBaseline(item.Identifier, item.IPAddress)
+		isShadow, diffs := easmdrp.ComputeAssetDiffs(item, prevSnap, inCMDB)
+		if isShadow {
+			res.ShadowAssetsCount++
+		}
+		asset := &database.EASMAsset{
+			AssetType: item.AssetType, Identifier: item.Identifier, IPAddress: item.IPAddress,
+			Port: item.Port, ServiceName: item.ServiceName, Fingerprint: item.Fingerprint,
+			IsShadow: isShadow, OwnerDept: item.OwnerDept, RiskLevel: easmdrp.EvaluateRiskLevel(item, isShadow), Status: "active",
+		}
+		created, err := h.db.UpsertEASMAsset(asset)
+		if err != nil {
+			continue
+		}
+		if created {
+			res.NewAssetsCount++
+		}
+		for _, d := range diffs {
+			ticket := &database.EASMConvergence{
+				AssetID: asset.ID, ChangeType: d.ChangeType,
+				DiffDetail: map[string]interface{}{
+					"summary": d.Summary, "before": d.Before, "after": d.After, "detected_at": d.DetectedAt.Format(time.RFC3339),
+				},
+				ConvergenceStatus: easmdrp.ConvergenceOpen,
+			}
+			if err := h.db.CreateEASMConvergence(ticket); err == nil {
+				res.ConvergenceCreated++
+			}
+		}
+	}
 	res.CompletedAt = time.Now().UTC()
 	c.JSON(http.StatusOK, res)
 }
@@ -722,6 +848,10 @@ func (h *EASMDRPHandler) CreateDRPRule(c *gin.Context) {
 	if req.ScheduleCron == "" {
 		req.ScheduleCron = "0 */6 * * *"
 	}
+	if err := easmdrp.ValidateMonitorRule(req.ChannelGroup, req.EnabledSources, req.Keywords); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	if err := easmdrp.ValidateCron(req.ScheduleCron); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -753,6 +883,14 @@ func (h *EASMDRPHandler) UpdateDRPRule(c *gin.Context) {
 		}
 	}
 	req.ID = id
+	if strings.TrimSpace(req.RuleName) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "规则名称不能为空"})
+		return
+	}
+	if err := easmdrp.ValidateMonitorRule(req.ChannelGroup, req.EnabledSources, req.Keywords); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	if err := h.db.UpdateDRPMonitorRule(&req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "更新监测规则失败: " + err.Error()})
 		return
@@ -783,7 +921,7 @@ func (h *EASMDRPHandler) ListDRPConnectors(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "查询情报源连接器失败: " + err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"connectors": items})
+	c.JSON(http.StatusOK, gin.H{"connectors": items, "sources": easmdrp.SourceCatalog()})
 }
 
 // UpdateDRPConnector handles PUT /api/v1/drp/connectors/:id
@@ -1012,6 +1150,10 @@ func (h *EASMDRPHandler) executeDRPScan(ctx context.Context, channelGroup string
 				cfg.IsEnabled = conn.IsEnabled
 			}
 
+			if !easmdrp.ProviderCovers(p.ID(), rule.ChannelGroup, rule.EnabledSources) {
+				continue
+			}
+			cfg.EnabledSources = rule.EnabledSources
 			findings, fetchErr := p.FetchAlerts(ctx, cfg, rule.Keywords, since)
 			if fetchErr != nil {
 				if errors.Is(fetchErr, easmdrp.ErrConnectorUnconfigured) {
@@ -1029,6 +1171,7 @@ func (h *EASMDRPHandler) executeDRPScan(ctx context.Context, channelGroup string
 			}
 
 			syncedProviders[p.ID()] = true
+			findings = easmdrp.FilterSourceFindings(findings, rule.ChannelGroup, rule.EnabledSources)
 			addedForProvider := 0
 			for _, f := range findings {
 				res.RawFindings++

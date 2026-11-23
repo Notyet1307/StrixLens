@@ -30,6 +30,7 @@ skills/.pi/
 # Build outputs
 cyberstrike-ai
 cyberstrike-ai.exe
+cyberstrike-ai-linux-*
 *.test
 bin/
 dist/

@@ -90,12 +90,12 @@ StrixLens 将规划、执行、人工监督、证据与复盘连接在同一个�
 <img src="./images/settings.png" alt="系统设置" width="100%">
 </td>
 <td width="33.33%" align="center">
-<strong>MCP stdio 模式</strong><br/>
-<img src="./images/mcp-stdio2.png" alt="MCP stdio 模式" width="100%">
+<strong>暴露面总览大盘（EASM）</strong><br/>
+<img src="./images/easm-overview.png" alt="暴露面总览大盘（EASM）" width="100%">
 </td>
 <td width="33.33%" align="center">
-<strong>Burp Suite 插件</strong><br/>
-<img src="./images/plugins.png" alt="Burp Suite 插件" width="100%">
+<strong>数字风险与泄露监测（DRP）</strong><br/>
+<img src="./images/drp-monitor.png" alt="数字风险与泄露监测（DRP）" width="100%">
 </td>
 </tr>
 </table>

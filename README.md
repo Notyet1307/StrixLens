@@ -91,12 +91,12 @@ StrixLens connects planning, execution, human oversight, evidence, and replay in
 <img src="./images/settings.png" alt="System settings" width="100%">
 </td>
 <td width="33.33%" align="center">
-<strong>MCP stdio Mode</strong><br/>
-<img src="./images/mcp-stdio2.png" alt="MCP stdio mode" width="100%">
+<strong>EASM Overview</strong><br/>
+<img src="./images/easm-overview.png" alt="EASM Overview" width="100%">
 </td>
 <td width="33.33%" align="center">
-<strong>Burp Suite Plugin</strong><br/>
-<img src="./images/plugins.png" alt="Burp Suite plugin" width="100%">
+<strong>DRP Leak Monitor</strong><br/>
+<img src="./images/drp-monitor.png" alt="DRP Leak Monitor" width="100%">
 </td>
 </tr>
 </table>

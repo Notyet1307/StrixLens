@@ -670,3 +670,25 @@ test('阶段七：防缓存策略与全站图标/移动端防遮挡回归约束'
     const projectsJs = fs.readFileSync(path.join(JS_DIR, 'projects.js'), 'utf8');
     assert.doesNotMatch(projectsJs, /role-selection-item-icon-main">\$\{isNone \? '—' : '📁'\}/, 'projects.js 选择面板不应使用 📁 表情');
 });
+
+test('阶段八：系统设置子卡片内边距、防双边框、Token 用量下拉与 MCP 面板样式契约', () => {
+    const subsectionRule = cssRuleBody('html body #page-settings .settings-subsection,\nhtml[data-theme="dark"] body #page-settings .settings-subsection');
+    assert.match(subsectionRule, /padding:\s*22px\s+24px/, '#page-settings .settings-subsection 需包含 22px 24px 内边距');
+
+    const aiManagerWrapperRule = cssRuleBody('html body #page-settings .settings-subsection:has(> .ai-channel-manager),\nhtml[data-theme="dark"] body #page-settings .settings-subsection:has(> .ai-channel-manager)');
+    assert.match(aiManagerWrapperRule, /padding:\s*0\b/, '包含 .ai-channel-manager 的外层 .settings-subsection 需重置 padding: 0');
+    assert.match(aiManagerWrapperRule, /border:\s*0\b/, '包含 .ai-channel-manager 的外层 .settings-subsection 需去除外层边框以防双边框');
+
+    const tokenSelectRule = cssRuleBody('html body #settings-section-token-usage .token-usage-toolbar .settings-custom-select');
+    assert.match(tokenSelectRule, /width:\s*auto\b/, '#settings-section-token-usage 工具栏选择器需设置 width: auto');
+
+    const cardSurfaceStart = CSS.indexOf('/* ----------------------------------------------------------------------------\n * 6. High-Density Operations Workspaces');
+    const cardSurfaceEnd = CSS.indexOf('background: var(--sl-surface-elevated);', cardSurfaceStart);
+    assert.ok(cardSurfaceStart !== -1 && cardSurfaceEnd !== -1, '未找到阶段6卡片公共表面规则块');
+    const cardSurfaceHeader = CSS.slice(cardSurfaceStart, cardSurfaceEnd);
+    assert.equal(
+        cardSurfaceHeader.includes('.mcp-stats-tools-panel'),
+        false,
+        '.mcp-stats-tools-panel 不应在公共卡片表面列表中添加内嵌边框'
+    );
+});

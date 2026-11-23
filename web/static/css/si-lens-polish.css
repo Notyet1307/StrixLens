@@ -1318,7 +1318,7 @@ html body .page :is(
     .c2-listener-card, .c2-profile-card, .c2-payload-card, .c2-event-card, .c2-task-row,
     .c2-session-detail, .c2-tab-panel--card, .settings-subsection, .settings-section,
     .ai-channel-card, .storage-overview-card, .skills-overview-card, .mcp-stats-kpi__item,
-    .mcp-stats-combined, .mcp-stats-tools-panel, .vulnerability-filter-panel,
+    .mcp-stats-combined, .vulnerability-filter-panel,
     .vulnerability-host-sidebar, .vulnerability-record-row, .hitl-pending-item,
     .hitl-log-readonly-section, .swarm-kpi-card, .swarm-canvas-panel, .swarm-inspector,
     .swarm-feed-panel, .swarm-toolbar
@@ -1331,7 +1331,7 @@ html[data-theme="dark"] body .page :is(
     .c2-listener-card, .c2-profile-card, .c2-payload-card, .c2-event-card, .c2-task-row,
     .c2-session-detail, .c2-tab-panel--card, .settings-subsection, .settings-section,
     .ai-channel-card, .storage-overview-card, .skills-overview-card, .mcp-stats-kpi__item,
-    .mcp-stats-combined, .mcp-stats-tools-panel, .vulnerability-filter-panel,
+    .mcp-stats-combined, .vulnerability-filter-panel,
     .vulnerability-host-sidebar, .vulnerability-record-row, .hitl-pending-item,
     .hitl-log-readonly-section, .swarm-kpi-card, .swarm-canvas-panel, .swarm-inspector,
     .swarm-feed-panel, .swarm-toolbar
@@ -3615,4 +3615,366 @@ html body .webshell-sidebar-header::before {
 
 html[data-theme="dark"] body .webshell-sidebar-header::before {
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/%3E%3C/svg%3E") center/contain no-repeat !important;
+}
+
+/* ============================================================================
+ * 11. Settings Layout, Card Padding & Visual Hierarchy Polish (12 Sub-Pages)
+ * ============================================================================ */
+
+html body #page-settings .settings-section-header {
+    margin-bottom: 20px;
+}
+
+html body #page-settings .settings-section-header:has(+ .storage-desc, + .update-intro) {
+    margin-bottom: 8px;
+}
+
+html body #page-settings .settings-section-header h3,
+html body #page-settings .audit-section-head h3 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--sl-ink);
+    line-height: 1.3;
+    margin: 0;
+}
+
+html body #page-settings .settings-section-header .settings-description {
+    margin: 6px 0 0;
+    font-size: 0.875rem;
+    color: var(--sl-ink-secondary);
+    line-height: 1.55;
+}
+
+html body #page-settings .storage-desc,
+html body #page-settings .update-intro {
+    margin: 0 0 18px;
+    font-size: 0.875rem;
+    color: var(--sl-ink-secondary);
+    line-height: 1.55;
+}
+
+html body #page-settings .audit-section-head {
+    margin: 0 0 16px;
+}
+
+/* Subsection Cards: give every bordered card generous inner breathing room */
+html body #page-settings .settings-subsection,
+html[data-theme="dark"] body #page-settings .settings-subsection {
+    padding: 22px 24px;
+    margin-bottom: 20px;
+}
+
+/* AI Channel Manager already renders a complete bordered card; strip double outer box */
+html body #page-settings .settings-subsection:has(> .ai-channel-manager),
+html[data-theme="dark"] body #page-settings .settings-subsection:has(> .ai-channel-manager) {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+html body #page-settings .ai-channel-manager,
+html[data-theme="dark"] body #page-settings .ai-channel-manager {
+    background: var(--sl-surface-elevated);
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-card);
+    box-shadow: var(--sl-shadow-sm);
+    overflow: hidden;
+}
+
+html body #page-settings .ai-channel-manager-header,
+html[data-theme="dark"] body #page-settings .ai-channel-manager-header {
+    background: var(--sl-surface);
+    border-bottom-color: var(--sl-border);
+}
+
+html body #page-settings .ai-channel-switcher,
+html[data-theme="dark"] body #page-settings .ai-channel-switcher {
+    background: var(--sl-surface-muted);
+    border-bottom-color: var(--sl-border);
+}
+
+html body #page-settings .settings-subsection.robot-editor-panel,
+html[data-theme="dark"] body #page-settings .settings-subsection.robot-editor-panel {
+    padding: 22px 24px;
+    margin-top: 12px;
+    background: var(--sl-surface-elevated);
+}
+
+html body #page-settings .settings-subsection.robot-command-entry,
+html[data-theme="dark"] body #page-settings .settings-subsection.robot-command-entry {
+    padding: 18px 22px;
+    margin-top: 20px;
+    margin-bottom: 0;
+    background: var(--sl-surface-elevated);
+}
+
+/* Subsection internal typography & form rhythm */
+html body #page-settings .settings-subsection > h4:first-child {
+    margin: 0 0 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sl-ink);
+    line-height: 1.4;
+}
+
+html body #page-settings .settings-subsection > h4:has(+ .settings-description),
+html body #page-settings .settings-subsection > h4:has(+ .form-hint) {
+    margin-bottom: 6px;
+}
+
+html body #page-settings .settings-subsection > .settings-description,
+html body #page-settings .settings-subsection > .form-hint {
+    margin: 0 0 18px;
+    color: var(--sl-ink-secondary);
+    font-size: 0.875rem;
+    line-height: 1.55;
+}
+
+html body #page-settings .settings-subsection .settings-subsection-header {
+    margin: 22px 0 14px;
+    padding-top: 18px;
+    border-top: 1px solid var(--sl-border);
+}
+
+html body #page-settings .settings-subsection .settings-subsection-header h5 {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--sl-ink);
+}
+
+html body #page-settings .settings-subsection .settings-form {
+    gap: 16px;
+}
+
+html body #page-settings #vision-fields-panel,
+html body #page-settings #vision-fields-panel details > div,
+html body #page-settings #robot-service-account-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+html body #page-settings #vision-provider,
+html body #page-settings #vision-detail {
+    background-color: var(--sl-surface) !important;
+    color: var(--sl-ink) !important;
+    border-color: var(--sl-border-strong) !important;
+}
+
+html body #page-settings #test-vision-btn,
+html body #page-settings #test-hitl-audit-model-btn,
+html body #page-settings #vision-fields-panel details > summary {
+    color: var(--sl-ink-secondary) !important;
+    font-weight: 500;
+}
+
+html body #page-settings #test-vision-btn:hover,
+html body #page-settings #test-hitl-audit-model-btn:hover,
+html body #page-settings #vision-fields-panel details > summary:hover {
+    color: var(--sl-ink) !important;
+}
+
+html body #page-settings .settings-subsection .settings-form .form-actions {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--sl-border);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+html body #page-settings .settings-actions {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--sl-border);
+}
+
+html body #page-settings input[type="checkbox"] {
+    accent-color: var(--sl-accent);
+}
+
+/* Token Usage Toolbar & Neutral Coss Cards */
+html body #settings-section-token-usage .token-usage-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    margin-bottom: 12px;
+}
+
+html body #settings-section-token-usage .token-usage-toolbar .settings-custom-select {
+    width: auto;
+    min-width: 128px;
+    flex: 0 0 auto;
+}
+
+html body #settings-section-token-usage .token-usage-toolbar .settings-custom-select-trigger {
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    border-radius: 8px;
+}
+
+html body #settings-section-token-usage .token-usage-metric,
+html[data-theme="dark"] body #settings-section-token-usage .token-usage-metric,
+html body #settings-section-token-usage .token-usage-secondary,
+html[data-theme="dark"] body #settings-section-token-usage .token-usage-secondary,
+html body #settings-section-token-usage .token-usage-chart-card,
+html[data-theme="dark"] body #settings-section-token-usage .token-usage-chart-card,
+html body #settings-section-token-usage .token-usage-data-card,
+html[data-theme="dark"] body #settings-section-token-usage .token-usage-data-card {
+    background: var(--sl-surface-elevated);
+    border-color: var(--sl-border);
+    border-radius: var(--sl-radius-card);
+    box-shadow: var(--sl-shadow-sm);
+}
+
+html body #settings-section-token-usage .token-usage-secondary .token-usage-metric,
+html[data-theme="dark"] body #settings-section-token-usage .token-usage-secondary .token-usage-metric {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+html body #settings-section-token-usage .token-usage-secondary .token-usage-metric + .token-usage-metric {
+    border-left: 1px solid var(--sl-border);
+}
+
+html body #settings-section-token-usage .token-usage-primary [data-metric="usageTotal"],
+html[data-theme="dark"] body #settings-section-token-usage .token-usage-primary [data-metric="usageTotal"] {
+    background: var(--sl-surface-elevated);
+    border-color: var(--sl-border-strong);
+}
+
+html body #settings-section-token-usage .token-usage-primary [data-metric="usageTotal"] strong {
+    color: var(--sl-ink);
+}
+
+html body #settings-section-token-usage .token-usage-chart-tabs button[aria-pressed="true"] {
+    background: var(--sl-accent-soft);
+    color: var(--sl-ink);
+    font-weight: 600;
+}
+
+/* Audit Logs, Storage & Robots Cards */
+html body #page-settings .audit-filter-card,
+html[data-theme="dark"] body #page-settings .audit-filter-card {
+    padding: 18px 20px;
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-card);
+    background: var(--sl-surface-elevated);
+    box-shadow: var(--sl-shadow-sm);
+}
+
+html body #page-settings .audit-log-table-wrap,
+html[data-theme="dark"] body #page-settings .audit-log-table-wrap {
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-card);
+    background: var(--sl-surface-elevated);
+    box-shadow: var(--sl-shadow-sm);
+    overflow-x: auto;
+}
+
+html body #page-settings .audit-log-table-wrap > .audit-log-table,
+html[data-theme="dark"] body #page-settings .audit-log-table-wrap > .audit-log-table {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    min-width: 0;
+}
+
+html body #settings-section-audit .audit-log-table th,
+html body #settings-section-audit .audit-log-table td {
+    padding: 10px 9px;
+}
+
+html body #settings-section-audit .audit-log-col-msg {
+    max-width: 200px;
+}
+
+html body #settings-section-audit .audit-log-col-resource {
+    max-width: 110px;
+}
+
+html body #settings-section-storage .storage-policy,
+html[data-theme="dark"] body #settings-section-storage .storage-policy {
+    margin-top: 20px;
+    padding: 20px 24px;
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-card);
+    background: var(--sl-surface-elevated);
+    box-shadow: var(--sl-shadow-sm);
+}
+
+html body #settings-section-storage .storage-policy .form-actions {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--sl-border);
+    display: flex;
+    justify-content: flex-end;
+}
+
+html body #settings-section-robots .vulnerability-alert-settings,
+html[data-theme="dark"] body #settings-section-robots .vulnerability-alert-settings {
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-card);
+    background: var(--sl-surface-elevated);
+    box-shadow: var(--sl-shadow-sm);
+    overflow: hidden;
+}
+
+html body #settings-section-robots .vulnerability-alert-icon {
+    background: var(--sl-icon-bg);
+    color: var(--sl-icon-fg);
+    border: 1px solid var(--sl-icon-border);
+}
+
+html body #settings-section-robots .vulnerability-alert-controls,
+html[data-theme="dark"] body #settings-section-robots .vulnerability-alert-controls {
+    background: var(--sl-surface-muted);
+    border-radius: 0;
+}
+
+html body #settings-section-robots .robot-editor-empty,
+html[data-theme="dark"] body #settings-section-robots .robot-editor-empty {
+    border-color: var(--sl-border-strong);
+    border-radius: var(--sl-radius-card);
+    background: var(--sl-surface);
+}
+
+@media (max-width: 767.98px) {
+    html body #page-settings .settings-content,
+    html[data-theme="dark"] body #page-settings .settings-content {
+        padding: 16px 14px;
+    }
+
+    html body #page-settings .settings-subsection,
+    html[data-theme="dark"] body #page-settings .settings-subsection {
+        padding: 16px;
+    }
+
+    html body #page-settings .settings-subsection:has(> .ai-channel-manager),
+    html[data-theme="dark"] body #page-settings .settings-subsection:has(> .ai-channel-manager) {
+        padding: 0;
+    }
+
+    html body #settings-section-storage .storage-policy,
+    html[data-theme="dark"] body #settings-section-storage .storage-policy {
+        padding: 16px;
+    }
+
+    html body #page-settings .audit-filter-card,
+    html[data-theme="dark"] body #page-settings .audit-filter-card {
+        padding: 14px;
+    }
+
+    html body #page-settings .settings-subsection .settings-form .form-actions {
+        flex-wrap: wrap;
+    }
 }

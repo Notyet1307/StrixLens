@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"archive/zip"
+	"bytes"
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -46,6 +49,7 @@ func newUpdateRouterWithSource(root string, restart func(),
 	router.GET("/api/system/update/job", h.Job)
 	router.POST("/api/system/update/check", h.Check)
 	router.POST("/api/system/update/apply", h.Apply)
+	router.POST("/api/system/update/package", h.UploadPackage)
 	router.POST("/api/system/update/restart", h.Restart)
 	router.POST("/api/system/update/rollback", h.Rollback)
 	router.POST("/api/system/update/adopt", h.Adopt)
@@ -437,4 +441,73 @@ func TestFailedUpdateSourceWriteKeepsActiveSource(t *testing.T) {
 	if got := h.UpdateSource(); got != original {
 		t.Fatalf("failed save changed live update source to %q", got)
 	}
+}
+
+func TestUploadPackageRejectsUnsupportedAndInstallsZip(t *testing.T) {
+	root := t.TempDir()
+	writeFakeBinary(t, root, "v1")
+	router, _ := newUpdateRouter(root, func() {})
+
+	// Reject unsupported file extension
+	var badBody bytes.Buffer
+	badW := multipart.NewWriter(&badBody)
+	fwBad, _ := badW.CreateFormFile("file", "notes.txt")
+	_, _ = fwBad.Write([]byte("not an archive"))
+	_ = badW.Close()
+	reqBad := httptest.NewRequest(http.MethodPost, "/api/system/update/package", &badBody)
+	reqBad.Header.Set("Content-Type", badW.FormDataContentType())
+	wBad := httptest.NewRecorder()
+	router.ServeHTTP(wBad, reqBad)
+	if wBad.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 for .txt upload, got %d %s", wBad.Code, wBad.Body)
+	}
+
+	// Build a valid .zip update package in memory
+	var zipBuf bytes.Buffer
+	zw := zip.NewWriter(&zipBuf)
+	zf, _ := zw.Create("web/static/test-pack.txt")
+	_, _ = zf.Write([]byte("updated"))
+	_ = zw.Close()
+
+	var okBody bytes.Buffer
+	okW := multipart.NewWriter(&okBody)
+	fwOk, _ := okW.CreateFormFile("file", "strixlens-update.zip")
+	_, _ = fwOk.Write(zipBuf.Bytes())
+	_ = okW.WriteField("restart", "false")
+	_ = okW.Close()
+	reqOk := httptest.NewRequest(http.MethodPost, "/api/system/update/package", &okBody)
+	reqOk.Header.Set("Content-Type", okW.FormDataContentType())
+	wOk := httptest.NewRecorder()
+	router.ServeHTTP(wOk, reqOk)
+	if wOk.Code != http.StatusAccepted {
+		t.Fatalf("expected 202 for valid zip upload, got %d %s", wOk.Code, wOk.Body)
+	}
+
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		jw := doUpdate(router, http.MethodGet, "/api/system/update/job", "")
+		var parsed struct {
+			Job *struct {
+				Kind  string `json:"kind"`
+				State string `json:"state"`
+			} `json:"job"`
+		}
+		if err := json.Unmarshal(jw.Body.Bytes(), &parsed); err == nil && parsed.Job != nil {
+			if parsed.Job.State == "failed" {
+				t.Fatalf("package upload job failed: %s", jw.Body.String())
+			}
+			if parsed.Job.State == "succeeded" {
+				if parsed.Job.Kind != "package" {
+					t.Fatalf("job.Kind = %q, want package", parsed.Job.Kind)
+				}
+				got, _ := os.ReadFile(filepath.Join(root, "web", "static", "test-pack.txt"))
+				if string(got) != "updated" {
+					t.Fatalf("extracted content = %q, want updated", got)
+				}
+				return
+			}
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	t.Fatal("package upload job did not complete in time")
 }

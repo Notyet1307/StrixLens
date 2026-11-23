@@ -3165,3 +3165,250 @@ html body [data-slot="command-dialog-popup"] input[data-slot="autocomplete-input
         border-top: 1px solid var(--sl-border) !important;
     }
 }
+
+/* ==========================================================================
+   V4 ROLE ICON WELLS, ICON PICKER, SIDEBAR GROUP DIVIDERS & UPLOAD DROPZONE
+   ========================================================================== */
+
+html body .role-card-icon,
+html[data-theme="dark"] body .role-card-icon,
+html body .role-selection-item-icon-main,
+html[data-theme="dark"] body .role-selection-item-icon-main {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 9px !important;
+    background: var(--sl-icon-bg) !important;
+    color: var(--sl-icon-fg) !important;
+    border: 1px solid var(--sl-icon-border) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    font-size: 14px !important;
+    box-shadow: none !important;
+}
+
+html body .role-card-icon svg,
+html body .role-selection-item-icon-main svg {
+    width: 17px !important;
+    height: 17px !important;
+    stroke: currentColor;
+}
+
+html body .batch-queue-item__role-icon svg {
+    width: 15px !important;
+    height: 15px !important;
+    vertical-align: middle;
+}
+
+.sl-role-icon-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--sl-surface-muted);
+    border: 1px solid var(--sl-border);
+}
+
+.sl-role-icon-option {
+    height: 36px;
+    min-width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--sl-border);
+    background: var(--sl-surface);
+    color: var(--sl-ink-muted);
+    cursor: pointer;
+    transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, transform 120ms ease;
+}
+
+.sl-role-icon-option:hover {
+    background: var(--sl-surface-hover);
+    border-color: var(--sl-border-strong);
+    color: var(--sl-ink);
+}
+
+.sl-role-icon-option.is-selected {
+    background: var(--sl-accent) !important;
+    color: var(--sl-accent-ink) !important;
+    border-color: var(--sl-accent) !important;
+    box-shadow: var(--sl-btn-bevel), var(--sl-shadow-sm);
+}
+
+/* Sidebar 5-group semantic separation */
+html body .main-sidebar-nav .nav-section-label:not(:first-child) {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--sl-border);
+}
+
+/* Offline Update Package Dropzone */
+.update-dropzone {
+    position: relative;
+    border: 1.5px dashed var(--sl-border-strong);
+    border-radius: 12px;
+    background: var(--sl-surface-muted);
+    padding: 24px 16px;
+    text-align: center;
+    transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+    margin-bottom: 12px;
+}
+
+.update-dropzone:hover,
+.update-dropzone.is-dragover {
+    border-color: var(--sl-ink);
+    background: var(--sl-surface-hover);
+    box-shadow: 0 0 0 3px var(--sl-ring-soft);
+}
+
+.update-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.update-dropzone-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.update-dropzone-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    background: var(--sl-surface);
+    border: 1px solid var(--sl-border-strong);
+    color: var(--sl-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--sl-card-bevel), var(--sl-shadow-sm);
+}
+
+.update-dropzone-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--sl-ink);
+}
+
+.update-browse-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    font-size: 12.5px;
+}
+
+.update-file-pill {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--sl-border-strong);
+    background: var(--sl-surface-elevated);
+}
+
+.update-file-pill-label {
+    font-size: 12.5px;
+    color: var(--sl-ink-muted);
+}
+
+.update-file-pill-name {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--sl-ink);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.update-file-pill-size {
+    font-size: 12px;
+    color: var(--sl-ink-subtle);
+    margin-inline-end: auto;
+}
+
+.update-file-clear-btn {
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+}
+
+/* Monochrome coss/ui overrides for chat role & agent-mode selection panel */
+html body .role-selection-item-main:hover,
+html[data-theme="dark"] body .role-selection-item-main:hover,
+html body .chat-project-panel .role-selection-item-main:hover,
+html[data-theme="dark"] body .chat-project-panel .role-selection-item-main:hover {
+    background: var(--sl-surface-hover) !important;
+    border-color: var(--sl-border-strong) !important;
+    box-shadow: var(--sl-shadow-sm) !important;
+}
+
+html body .role-selection-item-main.selected,
+html[data-theme="dark"] body .role-selection-item-main.selected,
+html body .agent-mode-option.selected,
+html[data-theme="dark"] body .agent-mode-option.selected {
+    background: var(--sl-surface-muted) !important;
+    border-color: var(--sl-accent) !important;
+    box-shadow: 0 0 0 1px var(--sl-accent), var(--sl-shadow-sm) !important;
+}
+
+html body .role-selection-item-main:hover .role-selection-item-icon-main,
+html[data-theme="dark"] body .role-selection-item-main:hover .role-selection-item-icon-main {
+    background: var(--sl-surface) !important;
+    color: var(--sl-ink) !important;
+    border-color: var(--sl-border-strong) !important;
+    transform: none !important;
+}
+
+html body .role-selection-item-main.selected .role-selection-item-icon-main,
+html[data-theme="dark"] body .role-selection-item-main.selected .role-selection-item-icon-main {
+    background: var(--sl-accent) !important;
+    color: var(--sl-accent-ink) !important;
+    border-color: var(--sl-accent) !important;
+    box-shadow: var(--sl-btn-bevel) !important;
+}
+
+html body .role-selection-item-main.selected .role-selection-item-name-main,
+html[data-theme="dark"] body .role-selection-item-main.selected .role-selection-item-name-main,
+html body .agent-mode-option.selected .role-selection-item-name-main,
+html[data-theme="dark"] body .agent-mode-option.selected .role-selection-item-name-main {
+    color: var(--sl-ink) !important;
+    font-weight: 600;
+}
+
+html body .role-selection-item-main.selected .role-selection-item-description-main,
+html[data-theme="dark"] body .role-selection-item-main.selected .role-selection-item-description-main {
+    color: var(--sl-ink-muted) !important;
+}
+
+html body .role-selection-checkmark-main,
+html[data-theme="dark"] body .role-selection-checkmark-main {
+    background: var(--sl-accent) !important;
+    color: var(--sl-accent-ink) !important;
+    box-shadow: var(--sl-shadow-sm) !important;
+}
+
+/* Clear disabled affordance on coss primary & secondary buttons */
+html body .btn-primary:disabled,
+html body button.btn-primary:disabled,
+html[data-theme="dark"] body .btn-primary:disabled,
+html[data-theme="dark"] body button.btn-primary:disabled,
+html body .btn-secondary:disabled,
+html[data-theme="dark"] body .btn-secondary:disabled {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}

@@ -6,10 +6,12 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f8fafc",
-  "theme_color": "#f8fafc",
+  "background_color": "#fafafa",
+  "theme_color": "#171717",
   "icons": [
-    { "src": "/static/si-lens-logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/static/logo.png", "sizes": "any", "type": "image/png", "purpose": "any" }
+    { "src": "/static/si-lens-logo.svg?v=20261123-coss-2", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/static/favicon-32x32.png?v=20261123-coss-2", "sizes": "32x32", "type": "image/png", "purpose": "any" },
+    { "src": "/static/apple-touch-icon.png?v=20261123-coss-2", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "/static/logo.png?v=20261123-coss-2", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }

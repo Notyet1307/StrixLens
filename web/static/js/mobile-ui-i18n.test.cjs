@@ -59,8 +59,8 @@ test('带插值的文案在三种语言里都保留占位符', () => {
 });
 
 test('语言与主题动作复用桌面端既有键，不另立一套', () => {
-    assert.ok(keys.has('header.apiDocs'), 'API 文档应复用 header.apiDocs');
-    assert.ok(keys.has('header.github'), 'GitHub 应复用 header.github 而不是另立键');
+    assert.ok(!keys.has('header.apiDocs'), '已隐藏的 API 文档不应再出现在移动端菜单中');
+    assert.ok(!keys.has('header.github'), '已隐藏的 GitHub 链接不应再出现在移动端菜单中');
     assert.ok(keys.has('nav.dashboard'), '底部标签应复用 nav.* 分组名');
 });
 

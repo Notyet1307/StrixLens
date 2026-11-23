@@ -1645,7 +1645,7 @@ function renderBatchQueues() {
                 <div class="batch-queue-item__inner batch-queue-item__inner--grid">
                     <div class="batch-queue-item__lead">
                         <div class="batch-queue-item__title-row">
-                            <span class="batch-queue-item__role-icon" aria-hidden="true">${escapeHtml(roleIcon)}</span>
+                            <span class="batch-queue-item__role-icon" aria-hidden="true">${typeof window.renderRoleIconMarkup === 'function' ? window.renderRoleIconMarkup(roleIcon, queue.role) : escapeHtml(roleIcon)}</span>
                             <div class="batch-queue-item__titles">${titleBlock}</div>
                         </div>
                         <p class="batch-queue-item__config">${configLine}${cronPausedNote}</p>

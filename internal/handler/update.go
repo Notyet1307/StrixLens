@@ -5,8 +5,10 @@ import (
 	"cyberstrike-ai/internal/audit"
 	"cyberstrike-ai/internal/update"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -318,6 +320,68 @@ func (h *UpdateHandler) Apply(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"job_id": job.ID, "state": job.State, "bootID": h.bootID})
 }
 
+// UploadPackage answers POST /api/system/update/package: saves the uploaded archive
+// (.zip, .tar.gz, .tgz) to a temporary file and starts an asynchronous package install.
+func (h *UpdateHandler) UploadPackage(c *gin.Context) {
+	fh, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请先选择要上传的更新安装包（.zip / .tar.gz / .tgz）"})
+		return
+	}
+	fileName := filepath.Base(strings.TrimSpace(fh.Filename))
+	ext, ok := update.PackageArchiveExt(fileName)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "安装包格式不支持，请上传 .zip、.tar.gz 或 .tgz 文件"})
+		return
+	}
+	restartRaw := strings.TrimSpace(strings.ToLower(c.PostForm("restart")))
+	wantRestart := restartRaw == "true" || restartRaw == "1"
+	if wantRestart && h.prepareRestart == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "本次启动没有提供重启钩子，更新完成后请由外部进程管理器重启服务"})
+		return
+	}
+
+	src, err := fh.Open()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "读取上传文件失败：" + err.Error()})
+		return
+	}
+	tmp, err := os.CreateTemp("", "strixlens-upload-*"+ext)
+	if err != nil {
+		_ = src.Close()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建临时文件失败：" + err.Error()})
+		return
+	}
+	tmpPath := tmp.Name()
+	_, copyErr := io.Copy(tmp, src)
+	closeSrcErr := src.Close()
+	closeTmpErr := tmp.Close()
+	if copyErr != nil || closeSrcErr != nil || closeTmpErr != nil {
+		_ = os.Remove(tmpPath)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存上传安装包失败"})
+		return
+	}
+
+	job, started := h.startPackageJob(tmpPath, fileName, wantRestart)
+	if !started {
+		_ = os.Remove(tmpPath)
+		c.JSON(http.StatusConflict, gin.H{"error": "已有一次更新在进行中", "job": job, "bootID": h.bootID})
+		return
+	}
+	h.record(c, "update.package", "started", "开始安装离线更新包："+fileName, map[string]interface{}{
+		"job":      job.ID,
+		"fileName": fileName,
+		"size":     fh.Size,
+		"restart":  wantRestart,
+	})
+	c.JSON(http.StatusAccepted, gin.H{
+		"job_id":   job.ID,
+		"state":    job.State,
+		"bootID":   h.bootID,
+		"fileName": fileName,
+	})
+}
+
 // Restart answers POST /api/system/update/restart: replace this process so the binary
 // already on disk - an update or a rollback that ran without one - becomes the thing
 // answering requests. It refuses when there is nothing to activate, because a bounce that
@@ -390,9 +454,26 @@ func (h *UpdateHandler) Rollback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": res})
 }
 
+func (h *UpdateHandler) startPackageJob(pkgPath, pkgName string, restart bool) (*updateJob, bool) {
+	return h.startAsyncJob("package", restart, func(ctx context.Context, opts update.Options, onStep func(update.Step)) (*update.Result, error) {
+		defer os.Remove(pkgPath)
+		return update.ApplyPackage(ctx, opts, pkgPath, pkgName, onStep)
+	})
+}
+
 func (h *UpdateHandler) startJob(kind string, restart bool) (*updateJob, bool) {
+	return h.startAsyncJob(kind, restart, func(ctx context.Context, opts update.Options, onStep func(update.Step)) (*update.Result, error) {
+		if kind == "adopt" {
+			return update.Adopt(ctx, opts, onStep)
+		}
+		return update.Apply(ctx, opts, onStep)
+	})
+}
+
+func (h *UpdateHandler) startAsyncJob(kind string, restart bool, runner func(context.Context, update.Options, func(update.Step)) (*update.Result, error)) (*updateJob, bool) {
 	h.mu.Lock()
 	if h.active != "" {
+		defer h.mu.Unlock()
 		return h.jobs[h.active].view(), false
 	}
 	job := &updateJob{
@@ -416,10 +497,6 @@ func (h *UpdateHandler) startJob(kind string, restart bool) (*updateJob, bool) {
 	opts := h.options()
 	h.mu.Unlock()
 
-	// The update outlives its HTTP request on purpose: the caller gets a handle, and a
-	// browser that closes the tab must not cancel a merge halfway through. Once the
-	// working tree has moved there is no going back, so the context is generous with
-	// time instead of inheriting the request's deadline.
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Minute)
 		defer cancel()
@@ -432,11 +509,7 @@ func (h *UpdateHandler) startJob(kind string, restart bool) (*updateJob, bool) {
 				h.logger.Info("更新进度", zap.String("phase", s.Phase), zap.String("message", s.Message))
 			}
 		}
-		var run func(context.Context, update.Options, func(update.Step)) (*update.Result, error) = update.Apply
-		if kind == "adopt" {
-			run = update.Adopt
-		}
-		res, err := run(ctx, opts, onStep)
+		res, err := runner(ctx, opts, onStep)
 		finish := "succeeded"
 		if err != nil {
 			finish = "failed"

@@ -1169,6 +1169,7 @@ func setupRoutes(
 		protected.GET("/system/update/job", updateHandler.Job)
 		protected.POST("/system/update/check", updateHandler.Check)
 		protected.POST("/system/update/apply", updateHandler.Apply)
+		protected.POST("/system/update/package", updateHandler.UploadPackage)
 		protected.POST("/system/update/restart", updateHandler.Restart)
 		protected.POST("/system/update/rollback", updateHandler.Rollback)
 		protected.POST("/system/update/adopt", updateHandler.Adopt)
@@ -1517,8 +1518,11 @@ func setupRoutes(
 		c.HTML(http.StatusOK, "api-docs.html", nil)
 	})
 
-	// 静态文件
+	// 静态文件与根路径浏览器图标
 	router.Static("/static", "./web/static")
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.File("./web/static/favicon.ico")
+	})
 	router.LoadHTMLGlob("web/templates/*")
 
 	// 前端页面

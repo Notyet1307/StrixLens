@@ -342,18 +342,125 @@ function handleRoleChange(roleName) {
     }
 }
 
-const DEFAULT_ROLE_ICON_SVG = '<svg class="sl-role-default-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>';
+const DEFAULT_ROLE_ICON_SVG = '<svg class="sl-role-default-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>';
 
-function isDefaultSymbolRoleIcon(icon) {
-    const normalized = String(icon || '').trim();
-    return !normalized || normalized === '🔵' || normalized === '👤';
+function makeLucideRoleSvg(inner) {
+    return '<svg class="sl-role-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
 }
 
-function renderRoleIconMarkup(icon) {
-    if (isDefaultSymbolRoleIcon(icon)) {
+const ROLE_ICON_CATALOG = [
+    { key: 'user', label: '默认', svg: DEFAULT_ROLE_ICON_SVG },
+    { key: 'crosshair', label: '渗透测试', svg: makeLucideRoleSvg('<circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/>') },
+    { key: 'radar', label: '信息收集', svg: makeLucideRoleSvg('<path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/>') },
+    { key: 'scan-search', label: '数字取证', svg: makeLucideRoleSvg('<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/><path d="m16 16-1.9-1.9"/>') },
+    { key: 'cpu', label: '二进制分析', svg: makeLucideRoleSvg('<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>') },
+    { key: 'waypoints', label: '后渗透测试', svg: makeLucideRoleSvg('<circle cx="12" cy="4.5" r="2.5"/><path d="m10.2 6.3-3.9 3.9"/><circle cx="4.5" cy="12" r="2.5"/><path d="M7 12h10"/><circle cx="19.5" cy="12" r="2.5"/><path d="m13.8 17.7 3.9-3.9"/><circle cx="12" cy="19.5" r="2.5"/>') },
+    { key: 'box', label: '容器安全', svg: makeLucideRoleSvg('<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>') },
+    { key: 'cloud', label: '云安全审计', svg: makeLucideRoleSvg('<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>') },
+    { key: 'shield-alert', label: '漏洞扫描', svg: makeLucideRoleSvg('<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>') },
+    { key: 'webhook', label: 'API安全', svg: makeLucideRoleSvg('<path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/><path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/><path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/>') },
+    { key: 'flag', label: 'CTF', svg: makeLucideRoleSvg('<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>') },
+    { key: 'layers', label: 'Web框架', svg: makeLucideRoleSvg('<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>') },
+    { key: 'globe', label: 'Web应用', svg: makeLucideRoleSvg('<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>') },
+    { key: 'shield-check', label: '安全加固', svg: makeLucideRoleSvg('<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>') },
+    { key: 'bug', label: '代码审计', svg: makeLucideRoleSvg('<path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/>') },
+    { key: 'terminal', label: '红队终端', svg: makeLucideRoleSvg('<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>') },
+    { key: 'lock', label: '合规密钥', svg: makeLucideRoleSvg('<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>') },
+    { key: 'database', label: '数据安全', svg: makeLucideRoleSvg('<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>') },
+    { key: 'network', label: '内网拓扑', svg: makeLucideRoleSvg('<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>') },
+    { key: 'key-round', label: '身份权限', svg: makeLucideRoleSvg('<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>') },
+];
+
+const ROLE_ICON_MAP = ROLE_ICON_CATALOG.reduce((acc, item) => {
+    acc[item.key] = item.svg;
+    return acc;
+}, Object.create(null));
+
+const LEGACY_EMOJI_TO_ROLE_ICON = {
+    '🔵': 'user',
+    '👤': 'user',
+    '🎯': 'crosshair',
+    '🔍': 'radar',
+    '🔎': 'scan-search',
+    '🔬': 'cpu',
+    '🕵': 'waypoints',
+    '🛡': 'box',
+    '☁': 'cloud',
+    '⚠': 'shield-alert',
+    '📡': 'webhook',
+    '🏆': 'flag',
+    '🌐': 'globe',
+};
+
+const ROLE_NAME_DEFAULT_ICON = {
+    '默认': 'user',
+    '二进制分析': 'cpu',
+    '后渗透测试': 'waypoints',
+    '容器安全': 'box',
+    '渗透测试': 'crosshair',
+    '数字取证': 'scan-search',
+    '信息收集': 'radar',
+    '云安全审计': 'cloud',
+    '综合漏洞扫描': 'shield-alert',
+    'API安全测试': 'webhook',
+    'CTF': 'flag',
+    'Web框架测试': 'layers',
+    'Web应用扫描': 'globe',
+};
+
+function decodeRoleIconRaw(icon) {
+    let s = String(icon || '').trim();
+    if (!s) return '';
+    const unicodeMatch = s.match(/^"?\\U([0-9A-F]{8})"?$/i);
+    if (unicodeMatch) {
+        try {
+            s = String.fromCodePoint(parseInt(unicodeMatch[1], 16));
+        } catch (e) {
+            return '';
+        }
+    }
+    return s.replace(/[\uFE0E\uFE0F]/g, '').trim();
+}
+
+function resolveRoleIconKey(icon, roleName) {
+    const raw = decodeRoleIconRaw(icon);
+    const key = raw.toLowerCase();
+    if (ROLE_ICON_MAP[key]) {
+        return key;
+    }
+    if (raw === '🌐' && roleName && (String(roleName).includes('框架') || String(roleName).toLowerCase().includes('framework'))) {
+        return 'layers';
+    }
+    if (LEGACY_EMOJI_TO_ROLE_ICON[raw]) {
+        return LEGACY_EMOJI_TO_ROLE_ICON[raw];
+    }
+    if (!raw && roleName && ROLE_NAME_DEFAULT_ICON[roleName]) {
+        return ROLE_NAME_DEFAULT_ICON[roleName];
+    }
+    return '';
+}
+
+function isDefaultSymbolRoleIcon(icon) {
+    const normalized = decodeRoleIconRaw(icon);
+    return !normalized || normalized === '🔵' || normalized === '👤' || normalized === 'user';
+}
+
+function renderRoleIconMarkup(icon, roleName) {
+    if (isDefaultSymbolRoleIcon(icon) && (!roleName || roleName === '默认')) {
         return DEFAULT_ROLE_ICON_SVG;
     }
-    return escapeHtml(String(icon).trim());
+    const resolvedKey = resolveRoleIconKey(icon, roleName);
+    if (resolvedKey && resolvedKey !== 'user' && ROLE_ICON_MAP[resolvedKey]) {
+        return ROLE_ICON_MAP[resolvedKey];
+    }
+    if (resolvedKey === 'user') {
+        return DEFAULT_ROLE_ICON_SVG;
+    }
+    const decoded = decodeRoleIconRaw(icon);
+    if (!decoded) {
+        return DEFAULT_ROLE_ICON_SVG;
+    }
+    return escapeHtml(decoded);
 }
 
 // 更新角色选择器显示
@@ -372,28 +479,19 @@ function updateRoleSelectorDisplay() {
     }
 
     if (selectedRole) {
-        let icon = selectedRole.icon || '';
-        // 如果 icon 是 Unicode 转义格式（\U0001F3C6），需要转换为 emoji
-        if (icon && typeof icon === 'string') {
-            const unicodeMatch = icon.match(/^"?\\U([0-9A-F]{8})"?$/i);
-            if (unicodeMatch) {
-                try {
-                    const codePoint = parseInt(unicodeMatch[1], 16);
-                    icon = String.fromCodePoint(codePoint);
-                } catch (e) {
-                    console.warn('转换 icon Unicode 转义失败:', icon, e);
-                    icon = '';
-                }
-            }
-        }
-        if (isDefaultSymbolRoleIcon(icon)) {
+        const icon = decodeRoleIconRaw(selectedRole.icon || '');
+        const isDefaultRole = selectedRole.name === '默认' || !selectedRole.name;
+        const markup = renderRoleIconMarkup(icon, selectedRole.name);
+        if (isDefaultRole && isDefaultSymbolRoleIcon(icon)) {
             roleSelectorIcon.innerHTML = DEFAULT_ROLE_ICON_SVG;
+            roleSelectorIcon.classList.add('is-svg-icon');
+        } else if (markup.indexOf('<svg') === 0) {
+            roleSelectorIcon.innerHTML = markup;
             roleSelectorIcon.classList.add('is-svg-icon');
         } else {
             roleSelectorIcon.textContent = icon;
             roleSelectorIcon.classList.remove('is-svg-icon');
         }
-        const isDefaultRole = selectedRole.name === '默认' || !selectedRole.name;
         const displayName = isDefaultRole && typeof window.t === 'function'
             ? window.t('chat.defaultRole') : (selectedRole.name || (typeof window.t === 'function' ? window.t('chat.defaultRole') : '默认'));
         // 非默认角色时避免被 i18n 的 data-i18n 覆盖成“默认”
@@ -406,6 +504,36 @@ function updateRoleSelectorDisplay() {
         roleSelectorIcon.classList.add('is-svg-icon');
         roleSelectorText.textContent = typeof window.t === 'function' ? window.t('chat.defaultRole') : '默认';
     }
+}
+
+function renderRoleIconPicker(selectedValue) {
+    const picker = document.getElementById('role-icon-picker');
+    if (!picker) return;
+    const activeKey = resolveRoleIconKey(selectedValue, '');
+    picker.innerHTML = ROLE_ICON_CATALOG.map(item => {
+        const isSelected = item.key === activeKey;
+        return '<button type="button" class="sl-role-icon-option' + (isSelected ? ' is-selected' : '') + '"' +
+            ' data-role-icon-key="' + escapeAttr(item.key) + '"' +
+            ' role="radio" aria-checked="' + (isSelected ? 'true' : 'false') + '"' +
+            ' title="' + escapeAttr(item.label + ' (' + item.key + ')') + '"' +
+            ' onclick="selectRoleIconPreset(' + escapeJsStringAttr(item.key) + ')">' +
+            item.svg +
+            '</button>';
+    }).join('');
+}
+
+function selectRoleIconPreset(key) {
+    const input = document.getElementById('role-icon');
+    if (input) {
+        input.value = key;
+    }
+    renderRoleIconPicker(key);
+}
+
+if (typeof window !== 'undefined') {
+    window.renderRoleIconMarkup = renderRoleIconMarkup;
+    window.selectRoleIconPreset = selectRoleIconPreset;
+    window.ROLE_ICON_CATALOG = ROLE_ICON_CATALOG;
 }
 
 // 渲染主内容区域角色选择列表
@@ -461,7 +589,7 @@ function renderRoleSelectionSidebar() {
                 roleItem.click();
             }
         };
-        const iconMarkup = renderRoleIconMarkup(getRoleIcon(role));
+        const iconMarkup = renderRoleIconMarkup(getRoleIcon(role), role.name);
         
         // 处理默认角色的描述
         const plainDesc = rolePlainDescription(role);
@@ -638,7 +766,7 @@ function renderRolesList() {
                 }
             }
         }
-        const roleIconMarkup = renderRoleIconMarkup(roleIcon);
+        const roleIconMarkup = renderRoleIconMarkup(roleIcon, role.name);
 
         // 获取工具列表显示
         let toolsDisplay = '';
@@ -1320,7 +1448,8 @@ async function showAddRoleModal() {
     document.getElementById('role-name').value = '';
     document.getElementById('role-name').disabled = false;
     document.getElementById('role-description').value = '';
-    document.getElementById('role-icon').value = '';
+    document.getElementById('role-icon').value = 'shield-check';
+    renderRoleIconPicker('shield-check');
     document.getElementById('role-user-prompt').value = '';
     document.getElementById('role-enabled').checked = true;
     if (typeof loadWorkflowOptionsForRoleModal === 'function') {
@@ -1404,18 +1533,12 @@ async function editRole(roleName) {
     document.getElementById('role-name').value = role.name;
     document.getElementById('role-name').disabled = true; // 编辑时不允许修改名称
     document.getElementById('role-description').value = role.description || '';
-    // 处理icon字段：如果是Unicode转义格式，转换为emoji；否则直接使用
-    let iconValue = role.icon || '';
-    if (iconValue && iconValue.startsWith('\\U')) {
-        // 转换Unicode转义格式（如 \U0001F3C6）为emoji
-        try {
-            const codePoint = parseInt(iconValue.substring(2), 16);
-            iconValue = String.fromCodePoint(codePoint);
-        } catch (e) {
-            // 如果转换失败，使用原值
-        }
-    }
-    document.getElementById('role-icon').value = iconValue;
+    const rawIcon = role.icon || '';
+    const presetKey = resolveRoleIconKey(rawIcon, role.name);
+    const iconValue = presetKey || decodeRoleIconRaw(rawIcon);
+    const roleIconInput = document.getElementById('role-icon');
+    roleIconInput.value = iconValue;
+    renderRoleIconPicker(iconValue);
     document.getElementById('role-user-prompt').value = role.user_prompt || '';
     document.getElementById('role-enabled').checked = role.enabled !== false;
     if (typeof loadWorkflowOptionsForRoleModal === 'function') {
@@ -1671,12 +1794,10 @@ async function saveRole() {
 
     const description = document.getElementById('role-description').value.trim();
     let icon = document.getElementById('role-icon').value.trim();
-    // 将emoji转换为Unicode转义格式以匹配YAML格式（如 \U0001F3C6）
-    if (icon) {
-        // 获取第一个字符的Unicode代码点（处理emoji可能是多个字符的情况）
+    // 语义化 Lucide key 保持原样；仅非 ASCII 字符转为 \U 逃逸以兼容旧 YAML 格式
+    if (icon && !ROLE_ICON_MAP[icon]) {
         const codePoint = icon.codePointAt(0);
         if (codePoint && codePoint > 0x7F) {
-            // 转换为8位十六进制格式（\U0001F3C6）
             icon = '\\U' + codePoint.toString(16).toUpperCase().padStart(8, '0');
         }
     }

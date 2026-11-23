@@ -589,3 +589,61 @@ test('阶段五：移动端图标走 Lucide 1.75 描边管线，无硬编码中�
     assert.equal(stroked, svgCount, `ICON 图标需全部使用 1.75 描边（${stroked}/${svgCount}）`);
     assert.doesNotMatch(block, /[\u4e00-\u9fff]/, 'ICON 图标表不应出现硬编码中文');
 });
+
+
+/* ------------------------------------------------------------------ */
+/* 10. 阶段六：角色统一 Lucide 图标、Favicon、精简顶栏、5组导航与离线包更新 */
+/* ------------------------------------------------------------------ */
+
+test('阶段六：内置角色 YAML 均使用统一 Lucide 语义图标标识', () => {
+    const rolesDir = path.join(path.dirname(WEB_DIR), 'roles');
+    const files = fs.readdirSync(rolesDir).filter((f) => f.endsWith('.yaml'));
+    assert.ok(files.length >= 13, '内置角色 YAML 数量应不少于 13 个');
+    for (const file of files) {
+        const body = fs.readFileSync(path.join(rolesDir, file), 'utf8');
+        const m = body.match(/^icon:\s*"?([^"\n]+)"?/m);
+        assert.ok(m && m[1], `${file} 缺少 icon 字段`);
+        assert.match(m[1].trim(), /^[a-z][a-z0-9-]+$/, `${file} icon 应为语义化 Lucide key，实际为 ${m[1]}`);
+    }
+});
+
+test('阶段六：roles.js 统一映射 SVG 图标并提供选择器 #role-icon-picker', () => {
+    assert.match(ROLES_SOURCE, /const ROLE_ICON_CATALOG\s*=/);
+    assert.match(ROLES_SOURCE, /const LEGACY_EMOJI_TO_ROLE_ICON\s*=/);
+    assert.match(ROLES_SOURCE, /function renderRoleIconPicker\(/);
+    assert.ok(TEMPLATE.includes('id="role-icon-picker"'), '模板应包含 #role-icon-picker');
+});
+
+test('阶段六：多尺寸 Favicon 资源就位且模板隐藏 API 文档 / GitHub 按钮', () => {
+    for (const asset of ['favicon.ico', 'favicon-32x32.png', 'apple-touch-icon.png', 'logo.png', 'si-lens-logo.svg']) {
+        const full = path.join(WEB_DIR, 'static', asset);
+        assert.ok(fs.existsSync(full), `缺少图标资源 static/${asset}`);
+        assert.ok(fs.statSync(full).size > 200, `图标资源 static/${asset} 体积异常`);
+    }
+    assert.match(TEMPLATE, /href="\/static\/si-lens-logo\.svg\?v=/);
+    assert.match(TEMPLATE, /href="\/static\/favicon-32x32\.png\?v=/);
+    assert.match(TEMPLATE, /href="\/static\/favicon\.ico\?v=/);
+    assert.match(TEMPLATE, /href="\/static\/apple-touch-icon\.png\?v=/);
+
+    assert.doesNotMatch(TEMPLATE, /class="openapi-doc-btn"/, '右上角 API 文档与 GitHub 按钮应已移除');
+    assert.doesNotMatch(MOBILE_UI, /buildSheetItem\('header\.(apiDocs|github)'/, '移动端更多面板应已移除 API 文档与 GitHub');
+});
+
+test('阶段六：左侧导航按工作流合理拆分为 5 个分组', () => {
+    const groups = ['workbench', 'assessment', 'operations', 'capabilities', 'administration'];
+    let prev = -1;
+    for (const g of groups) {
+        const idx = TEMPLATE.indexOf(`data-i18n="navGroups.${g}"`);
+        assert.ok(idx !== -1, `模板缺少导航分组 navGroups.${g}`);
+        assert.ok(idx > prev, `导航分组 navGroups.${g} 顺序异常`);
+        prev = idx;
+    }
+});
+
+test('阶段六：系统更新仅保留离线上传安装包能力', () => {
+    const updateJs = fs.readFileSync(path.join(JS_DIR, 'update.js'), 'utf8');
+    assert.ok(updateJs.includes('/api/system/update/package'), 'update.js 应通过 /api/system/update/package 上传包');
+    for (const legacyEndpoint of ['/api/system/update/check', '/api/system/update/source', '/api/system/update/rollback', '/api/system/update/adopt']) {
+        assert.equal(updateJs.includes(legacyEndpoint), false, `update.js 不应保留旧接口 ${legacyEndpoint}`);
+    }
+});

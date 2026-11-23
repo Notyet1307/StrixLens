@@ -761,12 +761,6 @@
 
         var body = el('div', 'm-sheet-body');
 
-        body.appendChild(buildSheetItem('header.apiDocs', 'API 文档', 'doc', function () {
-            if (!clickDesktopControl(/\/api-docs/)) window.location.href = '/api-docs';
-        }));
-        body.appendChild(buildSheetItem('header.github', 'GitHub', 'github', function () {
-            clickDesktopControl(/github\.com/i);
-        }));
         body.appendChild(buildSheetItem('mobile.switchTheme', '切换主题', 'theme', function () {
             if (typeof window.cycleThemePreference === 'function') {
                 window.cycleThemePreference();

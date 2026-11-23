@@ -35,6 +35,7 @@ const (
 	ChangeServiceChanged   = "SERVICE_CHANGED"
 	ChangeHighRiskExposure = "HIGH_RISK_EXPOSURE"
 	ChangeCertExpired      = "CERT_EXPIRED"
+	ChangeExposureAssessed = "EXPOSURE_ASSESSED"
 )
 
 // Convergence workflow statuses.
@@ -147,14 +148,15 @@ type EngineCapability struct {
 
 // ConnectorRuntimeConfig holds decrypted runtime parameters for a DRP provider.
 type ConnectorRuntimeConfig struct {
-	ID           string
-	Name         string
-	ChannelGroup string
-	ProviderType string
-	EndpointURL  string
-	APIKeySecret string
-	ScheduleCron string
-	IsEnabled    bool
+	EnabledSources []string
+	ID             string
+	Name           string
+	ChannelGroup   string
+	ProviderType   string
+	EndpointURL    string
+	APIKeySecret   string
+	ScheduleCron   string
+	IsEnabled      bool
 }
 
 // RetestOutcome records the real-time verification result of a convergence ticket.

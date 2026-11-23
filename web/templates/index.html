@@ -56,7 +56,7 @@
     <link rel="stylesheet" href="/static/css/design-system.css?v=20261115-extra-drawers">
     <link rel="stylesheet" href="/static/coss/coss-ui.css?v=20261123-coss-3">
     <link rel="stylesheet" href="/static/css/si-lens-polish.css?v=20261123-coss-4">
-    <link rel="stylesheet" href="/static/css/easm-drp.css?v=20261123-easm-drp-3">
+    <link rel="stylesheet" href="/static/css/easm-drp.css?v=20261123-easm-drp-4">
     <script src="/static/js/router.js?v=20261122-polish-1"></script>
 </head>
 <body>
@@ -2261,6 +2261,7 @@
                         <div class="page-header-actions easm-scan-bar">
                             <input id="easm-scan-domain" class="easm-scan-input" type="text" placeholder="输入目标域名或 IP（如 example.com）" autocomplete="off">
                             <button id="easm-trigger-scan-btn" class="btn-primary" data-require-permission="asset:write" type="button" onclick="triggerEASMIncrementalScan()">触发增量测绘</button>
+                            <button id="easm-assess-btn" class="btn-secondary" data-require-permission="asset:write" type="button" onclick="triggerEASMExposureAssess()">暴露面安全验证</button>
                             <button class="btn-secondary" type="button" onclick="loadEASMOverview()">刷新</button>
                             <button class="btn-secondary" type="button" onclick="switchPage('easm-convergence')">风险收敛工作台</button>
                         </div>
@@ -2486,7 +2487,8 @@
                                 <div class="drp-panel-head"><div><h3>企业资产特征词与监测规则</h3><p class="easm-panel-sub">配置域名、邮箱后缀、品牌词与敏感代码特征正则</p></div></div>
                                 <div class="drp-form-grid">
                                     <label class="drp-form-field"><span>规则名称</span><input id="drp-rule-name" type="text" placeholder="如：核心域名代码泄露监测"></label>
-                                    <label class="drp-form-field"><span>监测渠道组</span><select id="drp-rule-channel"><option value="code_repo">代码仓库</option><option value="cloud_drive">云盘监测</option><option value="doc_library">文库监测</option><option value="darkweb_cti">外部情报源</option><option value="stealer_cti">凭据预警</option><option value="platform_email">平台与邮箱</option></select></label>
+                                    <label class="drp-form-field"><span>监测渠道组</span><select id="drp-rule-channel" onchange="renderDRPSourceOptions()"><option value="code_repo">代码仓库</option><option value="cloud_drive">云盘监测</option><option value="doc_library">文库监测</option><option value="darkweb_cti">暗网论坛监控</option><option value="stealer_cti">失窃数据监控</option><option value="platform_email">互联网平台与邮箱</option></select></label>
+                                    <fieldset class="drp-form-field drp-form-field--wide"><legend>监测平台</legend><div id="drp-rule-sources"></div><small>云盘、文库、新媒体和应用市场走公开索引，只记录公开页面线索，不读取私有文件。暗网论坛和失窃数据只接受已授权的 OpenCTI 或 MISP，不会直接访问论坛。</small></fieldset>
                                     <label class="drp-form-field drp-form-field--wide"><span>监测关键词 / 域名 / 邮箱后缀（逗号分隔）</span><input id="drp-rule-keywords" type="text" placeholder="corp.example, @corp.example, 内部项目代号"></label>
                                     <label class="drp-form-field"><span>白名单排除词（逗号分隔）</span><input id="drp-rule-exclude" type="text" placeholder="test-repo, example-doc"></label>
                                     <label class="drp-form-field"><span>定时调度 Cron</span><input id="drp-rule-cron" type="text" value="0 */6 * * *"></label>
@@ -7454,7 +7456,7 @@
     <script src="/static/js/notifications.js"></script>
     <script src="/static/js/info-collect.js?v=20261115-extra-drawers"></script>
     <script src="/static/js/assets.js?v=20260717-7"></script>
-    <script src="/static/js/easm-drp.js?v=20261123-easm-drp-3"></script>
+    <script src="/static/js/easm-drp.js?v=20261123-easm-drp-4"></script>
     <script src="/static/js/agents.js"></script>
     <script src="/static/js/dashboard.js?v=20261011-token-settings-cache-only"></script>
     <script src="/static/js/chat-scroll.js?v=20260815-1-20261113-chat-scroll"></script>

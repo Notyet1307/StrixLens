@@ -39,6 +39,7 @@ func setupEASMDRPTestRouter(t *testing.T) (*gin.Engine, *database.DB, *EASMDRPHa
 		easm.POST("/assets", h.CreateEASMAsset)
 		easm.PATCH("/assets/:id", h.UpdateEASMAsset)
 		easm.POST("/scans/trigger", h.TriggerEASMScan)
+		easm.POST("/assess", h.AssessEASMAssets)
 		easm.GET("/convergence", h.ListEASMConvergence)
 		easm.PATCH("/convergence/:id", h.UpdateEASMConvergence)
 	}
@@ -166,7 +167,7 @@ func TestEASMFullLifecycleAPI(t *testing.T) {
 func TestDRPFullLifecycleMaskingDedupAndWhitelistAPI(t *testing.T) {
 	r, _, _ := setupEASMDRPTestRouter(t)
 
-	// 1. Verify 6 default connectors are initialized as 'unconfigured' (no fake healthy status)
+	// 1. Verify default connectors are initialized as 'unconfigured' (no fake healthy status)
 	wConn := doJSONRequest(t, r, http.MethodGet, "/api/v1/drp/connectors", nil)
 	if wConn.Code != http.StatusOK {
 		t.Fatalf("connectors status=%d", wConn.Code)
@@ -175,8 +176,8 @@ func TestDRPFullLifecycleMaskingDedupAndWhitelistAPI(t *testing.T) {
 		Connectors []database.DRPConnector `json:"connectors"`
 	}
 	_ = json.Unmarshal(wConn.Body.Bytes(), &connRes)
-	if len(connRes.Connectors) != 6 {
-		t.Fatalf("expected 6 default connectors, got %d", len(connRes.Connectors))
+	if len(connRes.Connectors) != 9 {
+		t.Fatalf("expected 9 default connectors, got %d", len(connRes.Connectors))
 	}
 	for _, c := range connRes.Connectors {
 		if c.HealthStatus != "unconfigured" {

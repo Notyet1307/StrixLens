@@ -7,7 +7,8 @@
         NEW_PORT: '新增暴露端口',
         SERVICE_CHANGED: '服务指纹漂移',
         HIGH_RISK_EXPOSURE: '高危暴露风险',
-        CERT_EXPIRED: 'TLS 证书异常'
+        CERT_EXPIRED: 'TLS 证书异常',
+        EXPOSURE_ASSESSED: '暴露面安全验证'
     };
 
     const EASM_STATUS_LABELS = {
@@ -23,9 +24,9 @@
         code_repo: { label: '代码仓库', desc: 'GitHub / Gitee / GitLab' },
         cloud_drive: { label: '云盘监测', desc: '≥9 类公开云盘分享' },
         doc_library: { label: '文库监测', desc: '≥6 类公开文库文档' },
-        darkweb_cti: { label: '外部情报源', desc: 'OpenCTI STIX 2.1' },
-        stealer_cti: { label: '凭据预警', desc: '合规 CTI 凭据泄露' },
-        platform_email: { label: '平台与邮箱', desc: '≥30 类平台与企业邮箱' }
+        darkweb_cti: { label: '暗网论坛', desc: '授权情报源映射茶马古道 / BreachedForums 等' },
+        stealer_cti: { label: '失窃数据', desc: '授权凭据情报，入库前强制脱敏' },
+        platform_email: { label: '平台与邮箱', desc: '新媒体、应用市场与企业邮箱' }
     };
 
     const DRP_TRIAGE_LABELS = {
@@ -55,7 +56,8 @@
         drpEventFilter: { channelGroup: 'all', triageStatus: 'all', severity: 'all', q: '' },
         activeDrpEvent: null,
         drpRules: [],
-        drpConnectors: []
+        drpConnectors: [],
+        drpSources: []
     };
 
     function esc(value) {
@@ -253,6 +255,40 @@
                 <td>${claimBtn}</td>
             </tr>`;
         }).join('');
+    }
+
+    async function triggerEASMExposureAssess() {
+        const input = document.getElementById('easm-scan-domain');
+        const targetDomain = (input?.value || '').trim();
+        const btn = document.getElementById('easm-assess-btn');
+        const originalText = btn ? btn.textContent : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '安全验证中...';
+        }
+        try {
+            const path = targetDomain ? '/api/v1/easm/scans/trigger' : '/api/v1/easm/assess';
+            const body = targetDomain ? { target_domain: targetDomain, assess: true } : {};
+            const res = await fetchJSON(path, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const engines = (res.engines_used || []).join(', ') || 'builtin';
+            let msg = `暴露面安全验证完成（${engines}）：复核 ${res.discovered_count || 0} 项资产，新建收敛工单 ${res.convergence_created || 0} 条`;
+            if (Array.isArray(res.warnings) && res.warnings.length) {
+                msg += `；提示：${res.warnings.join('；')}`;
+            }
+            toast(msg);
+            await loadEASMOverview();
+        } catch (err) {
+            toast('暴露面安全验证失败: ' + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
     }
 
     async function triggerEASMIncrementalScan() {
@@ -712,12 +748,59 @@
             ]);
             state.drpRules = rulesResp.rules || [];
             state.drpConnectors = connResp.connectors || [];
+            state.drpSources = connResp.sources || [];
+            renderDRPSourceOptions();
             renderDRPRules(state.drpRules);
             renderDRPConnectors(state.drpConnectors);
         } catch (err) {
             console.error('加载 DRP 策略与连接器配置失败:', err);
             toast('加载配置失败: ' + err.message);
         }
+    }
+
+    function renderDRPSourceOptions() {
+        const container = document.getElementById('drp-rule-sources');
+        if (!container) return;
+        const channel = document.getElementById('drp-rule-channel')?.value || 'code_repo';
+        const modes = {
+            api_or_gateway: 'API',
+            authorized_gateway: '授权网关',
+            local: '本地目录',
+            public_index: '公开索引',
+            licensed_intelligence: '授权情报',
+            hibp_or_gateway: '邮箱泄露'
+        };
+        const sources = state.drpSources.filter(s => s.channel_group === channel);
+        if (!sources.length) {
+            container.innerHTML = '<span class="muted">暂无可用平台，请检查数据源目录接口。</span>';
+            return;
+        }
+        container.innerHTML = `<div class="drp-source-toolbar">
+            <span id="drp-source-count">已选 ${sources.length} / ${sources.length}</span>
+            <button type="button" class="btn-link" onclick="setDRPSourceSelection(true)">全选</button>
+            <button type="button" class="btn-link" onclick="setDRPSourceSelection(false)">清空</button>
+        </div>
+        <div class="drp-source-grid">${sources.map(s => `<label class="drp-source-card">
+            <input type="checkbox" value="${esc(s.id)}" checked onchange="updateDRPSourceCount()">
+            <span class="drp-source-mark" aria-hidden="true"></span>
+            <span class="drp-source-copy">
+                <strong>${esc(s.name)}</strong>
+                <em>${esc(modes[s.access_mode] || s.access_mode)}</em>
+            </span>
+        </label>`).join('')}</div>`;
+    }
+
+    function setDRPSourceSelection(checked) {
+        document.querySelectorAll('#drp-rule-sources input[type="checkbox"]').forEach(el => {
+            el.checked = Boolean(checked);
+        });
+        updateDRPSourceCount();
+    }
+
+    function updateDRPSourceCount() {
+        const boxes = Array.from(document.querySelectorAll('#drp-rule-sources input[type="checkbox"]'));
+        const count = document.getElementById('drp-source-count');
+        if (count) count.textContent = `已选 ${boxes.filter(el => el.checked).length} / ${boxes.length}`;
     }
 
     function renderDRPRules(rules) {
@@ -752,6 +835,8 @@
 
         const keywords = keywordsRaw.split(/[,，\n]/).map(s => s.trim()).filter(Boolean);
         const excludeRules = excludeRaw.split(/[,，\n]/).map(s => s.trim()).filter(Boolean);
+        const enabledSources = Array.from(document.querySelectorAll('#drp-rule-sources input:checked')).map(el => el.value);
+        if (!enabledSources.length) { toast('请至少选择一个监测平台'); return; }
         if (!ruleName || !keywords.length) {
             toast('请填写规则名称与至少一个监测关键词');
             return;
@@ -763,7 +848,7 @@
                 body: JSON.stringify({
                     rule_name: ruleName,
                     channel_group: channelGroup,
-                    enabled_sources: [channelGroup],
+                    enabled_sources: enabledSources,
                     keywords,
                     exclude_rules: excludeRules,
                     schedule_cron: cron,
@@ -793,6 +878,9 @@
 
     const DRP_CONNECTOR_URL_PLACEHOLDERS = {
         gitleaks_trufflehog: 'https://api.github.com/search/code 或本地仓库路径',
+        gitlab_api: 'https://gitlab.com 或 https://git.example.com/api/v4',
+        gitee_api: 'https://gitee.com',
+        platform_public_index: 'https://cn.bing.com/search 或 SearXNG /search',
         opencti_stix: 'https://opencti.yourcorp.com/graphql',
         cti_credential_feed: 'https://cti-gateway.yourcorp.com/api/credentials',
         domain_breach_api: 'https://haveibeenpwned.com/api/v3',
@@ -880,6 +968,7 @@
     const api = {
         loadEASMOverview,
         triggerEASMIncrementalScan,
+        triggerEASMExposureAssess,
         claimShadowAsset,
         applyEASMAssetFilters,
         loadEASMConvergence,
@@ -898,6 +987,9 @@
         triggerDRPScan,
         loadDRPConfig,
         createDRPRuleFromForm,
+        renderDRPSourceOptions,
+        setDRPSourceSelection,
+        updateDRPSourceCount,
         deleteDRPRule,
         saveDRPConnector,
         testDRPConnector,

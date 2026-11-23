@@ -1122,6 +1122,7 @@ func setupRoutes(
 			easmV1.POST("/assets", easmDRPHandler.CreateEASMAsset)
 			easmV1.PATCH("/assets/:id", easmDRPHandler.UpdateEASMAsset)
 			easmV1.POST("/scans/trigger", easmDRPHandler.TriggerEASMScan)
+			easmV1.POST("/assess", easmDRPHandler.AssessEASMAssets)
 			easmV1.GET("/convergence", easmDRPHandler.ListEASMConvergence)
 			easmV1.PATCH("/convergence/:id", easmDRPHandler.UpdateEASMConvergence)
 		}

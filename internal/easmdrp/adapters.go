@@ -24,9 +24,9 @@ import (
 )
 
 var (
-	reHTMLTitle   = regexp.MustCompile(`(?is)<title[^>]*>(.*?)</title>`)
-	reWhitespace  = regexp.MustCompile(`\s+`)
-	defaultPorts  = []int{80, 443, 8080, 8443, 21, 22, 23, 445, 1433, 3306, 3389, 5432, 6379, 9200, 27017}
+	reHTMLTitle    = regexp.MustCompile(`(?is)<title[^>]*>(.*?)</title>`)
+	reWhitespace   = regexp.MustCompile(`\s+`)
+	defaultPorts   = []int{80, 443, 8080, 8443, 21, 22, 23, 445, 1433, 3306, 3389, 5432, 6379, 9200, 27017}
 	knownSvcByPort = map[int]string{
 		21: "ftp", 22: "ssh", 23: "telnet", 80: "http", 443: "https",
 		445: "smb", 1433: "mssql", 3306: "mysql", 3389: "rdp",

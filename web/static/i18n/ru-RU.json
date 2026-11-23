@@ -312,6 +312,7 @@
   },
   "navGroups": {
     "workbench": "Рабочая область",
+    "exposure": "Поверхность атаки",
     "operations": "Активные операции",
     "capabilities": "ИИ-возможности",
     "administration": "Контроль и управление",

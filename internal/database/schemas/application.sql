@@ -902,3 +902,102 @@ CREATE UNIQUE INDEX uq_workflow_package_imports_inspection_success ON workflow_p
 CREATE TABLE pi_session_roots (
     path TEXT PRIMARY KEY
 );
+
+-- ============================================================================
+-- EASM (Attack Surface Management) & DRP (Digital Risk & Leak Monitor)
+-- ============================================================================
+
+-- 1. 暴露面资产台账表（支撑 1.3.3.1_01 资产梳理与影子资产标记）
+CREATE TABLE easm_assets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_type TEXT NOT NULL,
+    identifier TEXT NOT NULL,
+    ip_address TEXT NOT NULL DEFAULT '',
+    port INTEGER NOT NULL DEFAULT 0,
+    service_name TEXT NOT NULL DEFAULT '',
+    fingerprint TEXT NOT NULL DEFAULT '{}',
+    is_shadow INTEGER NOT NULL DEFAULT 0,
+    owner_dept TEXT NOT NULL DEFAULT '',
+    risk_level TEXT NOT NULL DEFAULT 'low',
+    status TEXT NOT NULL DEFAULT 'active',
+    first_seen_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (asset_type, identifier)
+);
+
+-- 2. 暴露面变更与风险收敛工单表（支撑 1.3.3.1_03 动态监控与风险收敛）
+CREATE TABLE easm_risk_convergence (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_id INTEGER NOT NULL REFERENCES easm_assets(id) ON DELETE CASCADE,
+    change_type TEXT NOT NULL,
+    diff_detail TEXT NOT NULL DEFAULT '{}',
+    convergence_status TEXT NOT NULL DEFAULT 'open',
+    assignee TEXT NOT NULL DEFAULT '',
+    sla_deadline DATETIME,
+    retest_result TEXT NOT NULL DEFAULT '{}',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resolved_at DATETIME
+);
+
+-- 3. 数字风险与敏感泄露监测规则表（支撑 1.3.2.5 多渠道策略配置）
+CREATE TABLE drp_monitor_rules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    rule_name TEXT NOT NULL,
+    channel_group TEXT NOT NULL,
+    enabled_sources TEXT NOT NULL DEFAULT '[]',
+    keywords TEXT NOT NULL DEFAULT '[]',
+    exclude_rules TEXT NOT NULL DEFAULT '[]',
+    schedule_cron TEXT NOT NULL DEFAULT '0 */6 * * *',
+    is_enabled INTEGER NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. 敏感泄露告警事件表（归一化存储 1.3.2.5 全部 6 类监测结果）
+CREATE TABLE drp_leak_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    rule_id INTEGER REFERENCES drp_monitor_rules(id) ON DELETE SET NULL,
+    event_hash TEXT NOT NULL UNIQUE,
+    channel_group TEXT NOT NULL,
+    source_platform TEXT NOT NULL,
+    leak_type TEXT NOT NULL,
+    severity TEXT NOT NULL,
+    title TEXT NOT NULL,
+    source_ref TEXT NOT NULL DEFAULT '',
+    masked_snippet TEXT NOT NULL DEFAULT '',
+    affected_entity TEXT NOT NULL DEFAULT '',
+    triage_status TEXT NOT NULL DEFAULT 'new',
+    remediation_note TEXT NOT NULL DEFAULT '',
+    detected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 5. 外部引擎与 CTI 连接器配置及健康状态表
+CREATE TABLE drp_connectors (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    channel_group TEXT NOT NULL,
+    provider_type TEXT NOT NULL,
+    endpoint_url TEXT NOT NULL DEFAULT '',
+    api_key_masked TEXT NOT NULL DEFAULT '',
+    api_key_secret TEXT NOT NULL DEFAULT '',
+    schedule_cron TEXT NOT NULL DEFAULT '0 */6 * * *',
+    is_enabled INTEGER NOT NULL DEFAULT 1,
+    health_status TEXT NOT NULL DEFAULT 'healthy',
+    last_sync_at DATETIME,
+    last_error TEXT NOT NULL DEFAULT '',
+    synced_events_count INTEGER NOT NULL DEFAULT 0,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_easm_assets_shadow ON easm_assets(is_shadow);
+CREATE INDEX idx_easm_assets_risk ON easm_assets(risk_level);
+CREATE INDEX idx_easm_assets_status ON easm_assets(status);
+CREATE INDEX idx_easm_convergence_asset ON easm_risk_convergence(asset_id);
+CREATE INDEX idx_easm_convergence_status ON easm_risk_convergence(convergence_status);
+CREATE INDEX idx_easm_convergence_created ON easm_risk_convergence(created_at);
+CREATE INDEX idx_drp_rules_group ON drp_monitor_rules(channel_group);
+CREATE INDEX idx_drp_events_group ON drp_leak_events(channel_group);
+CREATE INDEX idx_drp_events_status ON drp_leak_events(triage_status);
+CREATE INDEX idx_drp_events_severity ON drp_leak_events(severity);
+CREATE INDEX idx_drp_events_detected ON drp_leak_events(detected_at);
+

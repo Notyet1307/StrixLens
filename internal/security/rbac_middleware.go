@@ -166,7 +166,7 @@ func permissionForRequest(method, fullPath string) string {
 		return crudPermission(method, "vulnerability")
 	case path == "/assets/batch-delete", path == "/assets/merge":
 		return "asset:delete"
-	case strings.HasPrefix(path, "/assets"):
+	case strings.HasPrefix(path, "/assets"), strings.HasPrefix(path, "/v1/easm"), strings.HasPrefix(path, "/v1/drp"):
 		return crudPermission(method, "asset")
 	case strings.HasPrefix(path, "/vulnerability-alerts"):
 		// This endpoint only changes the authenticated user's own preference.
